@@ -1,0 +1,2 @@
+-module(mfile, [Id, VersionNumber]).
+-compile(export_all).

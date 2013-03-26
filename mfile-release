@@ -1,0 +1,58 @@
+#!/bin/bash
+# 
+# mfile-release
+#
+# This is a script that makes a tar archive of the present version of mfile
+# and then increments the version number.
+
+# ensure we are in the mfile directory
+cd `dirname $0`
+
+# shut down the application
+./init.sh stop
+
+# get mfile version number
+VERNUM=`head -n 1 VERSION`
+
+# get release description
+echo "Changelog entry for this release:"
+read CHGLOGENTRY
+
+# update Changelog
+CMD="sed '1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY' Changelog"
+eval $CMD >Changelog.new
+mv Changelog.new Changelog
+
+# create tar archive of present release
+( cd .. && tar cf mfile-releases/mfile-$VERNUM.tar \
+	--exclude-from "mfile/EXCLUDE" \
+	mfile )
+
+# parse version number using trick from stackoverflow.com
+oIFS="$IFS"
+IFS=.
+set -- $VERNUM
+IFS="$oIFS"
+
+# increment version number
+REV=`expr $3 + 1`
+VERNUM="$1.$2.$REV"
+
+# overwrite mfile/VERSION with incremented version number 
+echo $VERNUM >VERSION
+
+# generate new mfile.app.src file with the incremented version number
+cat >src/mfile.app.src <<EOF
+{application, mfile, [
+        {description, "Minimalistic Web-based Filing System"},
+        {vsn, "$VERNUM"},
+        {modules, []},
+        {registered, []},
+        {applications, [kernel, stdlib, crypto, boss]},
+        {env, []}
+    ]}.
+EOF
+
+# recompile the app; necessary for the incremented version number to
+# make it into ebin/mfile.app and thereby into the app itself
+./rebar compile

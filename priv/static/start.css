@@ -1,0 +1,65 @@
+body {
+   background-color:#d0e4fe;
+   font-family: "Courier New",
+		 Courier,
+		 monospace;
+   font-size:   16px;
+   width:800px;
+}
+
+.mfileheader {
+   font-size: 	24px;
+   border-top: solid;
+   border-bottom: solid;
+   border-left: solid;
+   height:26px;
+   width:100px;
+   float:left;
+}
+
+.mfileversion {
+   border-top: solid;
+   border-bottom: solid;
+   border-right: solid;
+   height:26px;
+   width:180px;
+   line-height:26px;
+   float:left;
+}
+
+.mfiletopmesg {
+   border-top: solid;
+   border-bottom: solid;
+   border-right: solid;
+   height:26px;
+   line-height:26px;
+}
+
+.mfilebody {
+   padding:10px;
+   border-bottom: solid;
+   border-left: solid;
+   border-right: solid;
+   height:300px;
+}
+
+.mfileinput {
+   padding:3px;
+   border-bottom: solid;
+   border-left: solid;
+   border-right: solid;
+   height:100px;
+}
+
+textarea {
+   font-family:    "Courier New",
+		Courier,
+		monospace;
+   font-size: 	20px;
+   border-style:	none;
+   background-color:black;
+   color: #d0e4fe;
+   font-weight: bold;
+   padding-left: 2px;
+   resize: none;
+}
