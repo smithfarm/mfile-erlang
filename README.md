@@ -13,3 +13,6 @@ ISO-8859-2 to UTF-8.
 
 Wiki:
 https://github.com/SUSE/hackweek/wiki/mfile-%28Ancient,-dirt-simple-DB-app-gets-new-lease-on-life%29
+
+Blog entry:
+http://smithfarm-thebrain.blogspot.cz/2013/03/mfile-now-on-github.html
