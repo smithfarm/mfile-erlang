@@ -10,3 +10,6 @@ web framework so it runs in a browser (the original application ran in
 a terminal using the ncurses library). The database backend
 (PostgreSQL) will not change, but the data will be re-encoded from
 ISO-8859-2 to UTF-8.
+
+Wiki:
+https://github.com/SUSE/hackweek/wiki/mfile-%28Ancient,-dirt-simple-DB-app-gets-new-lease-on-life%29
