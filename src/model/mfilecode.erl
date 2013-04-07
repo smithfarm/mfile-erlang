@@ -1,0 +1,2 @@
+-module(mfilecode, [Id, CodePtr::integer(), CodeStr::string()]).
+-compile(export_all).

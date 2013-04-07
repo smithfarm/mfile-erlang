@@ -37,9 +37,9 @@ start('GET', []) ->
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
    Keyw = Req:post_param("mfileKeyw"),
-   Desc = Req:post_param("mfileDesc"),
-   MfileRec = mfile:new(id, calendar:now_to_datetime(erlang:now()), 0, 0, Keyw, Desc),
-   {ok,{mfile,Id,CrTime,CPtr,Sern,Keyw,Desc}} = MfileRec:save(),
+   FileDesc = Req:post_param("mfileDesc"),
+   MfileRec = mfile:new(id, calendar:now_to_datetime(erlang:now()), 0, 0, Keyw, FileDesc),
+   {ok,{mfile,Id,CrTime,CPtr,Sern,Keyw,FileDesc}} = MfileRec:save(),
    {{IYear,IMon,IDay},{_,_,_}} = CrTime,
    DStr = list_to_binary( [ integer_to_list(IYear), "-", 
                             integer_to_month(IMon), "-", 
@@ -49,7 +49,7 @@ insert('POST', []) ->
             {mfileCPtr, CPtr},
 	    {mfileSern, Sern},
    	    {mfileKeyw, Keyw}, 
-	    {mfileDesc, Desc} ]}.
+	    {mfileDesc, FileDesc} ]}.
 
 % search record (called asynchronously using AJAX)
 search('POST', []) ->

@@ -1,2 +1,2 @@
--module(mfile, [Id, CreatedAt::datetime(), CPtr::integer(), Sern::integer(), Keyw::string(), Desc::string()]).
+-module(mfile, [Id, CreatedAt::datetime(), CPtr::integer(), Sern::integer(), Keyw::string(), FileDesc::string()]).
 -compile(export_all).
