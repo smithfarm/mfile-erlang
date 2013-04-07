@@ -1,6 +1,6 @@
 {application, mfile, [
         {description, "Minimalistic Web-based Filing System"},
-        {vsn, "0.1.6"},
+        {vsn, "0.1.7"},
         {modules, []},
         {registered, []},
         {applications, [kernel, stdlib, crypto, boss]},

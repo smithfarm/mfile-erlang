@@ -11,7 +11,7 @@
 <script src="static/start.js"></script>
 
 <div class="mfileheader">
-<strong>&nbsp;MFILE</strong>
+<strong>MFILE</strong>
 </div>
 
 <div class="mfileversion">
@@ -19,28 +19,33 @@ Version: {{ mfilevernum }}
 </div>
 
 <div class="mfiletopmesg">
-&nbsp;Press TAB to start.  
+Press TAB to start; browse away to quit.
 </div>
 
-<div class="mfileid">
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID No.: <textarea id="id" name="id" rows=1 cols="8" maxlength=8 style="float:right; height: 22px;"></textarea>
+<div class="mfileid" style="float:right">
+ID No. <textarea id="id" name="id" rows=1 cols="8" maxlength=8 style="height: 22px;"></textarea>
 </div>
 
-<div class="mfilebody">
-{% block mfilebody %}
-<div id="insertform">&nbsp;Key words (max. 120 characters; words wrap)
-   &nbsp;<textarea id="keywords" name="keywords" rows=3 cols="62" maxlength=120 style="height: 68px; width: 772px; overflow: hidden;"></textarea>
-   &nbsp;Description/other notes (max. 320 characters):
-   &nbsp;<textarea id="description" name="description" rows=6 cols="62" maxlength=320 style="height: 138px; width: 772px; overflow: hidden;"></textarea>
-   </div>
-{% endblock %}
+<div class="mfilecode">
+File code and serial number<br>
+<textarea id="code" name="code" rows=1 cols=8 maxlength=8 style="height: 22px"></textarea> - <textarea id="sernum" name="sernum" rows=1 cols=8 maxlength=8 style="height: 22px"></textarea>
 </div>
 
-<div class="mfilecmd">
-&nbsp;I=Insert S=Search&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Command key: <textarea id="cmd" name="cmd" rows=1 cols=1 maxlength=1 style="float:right; height:22px;"></textarea>
+<div class="mfilekeyw">
+Key words (max. 120 characters; words wrap)
+<textarea id="keywords" name="keywords" rows=3 cols="62" maxlength=120 style="height: 68px; width: 772px; overflow: hidden;"></textarea>
 </div>
 
-<div class="mfileinput">
+<div class="mfiledesc">
+Description/other notes (max. 320 characters):
+<textarea id="description" name="description" rows=6 cols="62" maxlength=320 style="height: 138px; width: 772px; overflow: hidden;"></textarea>
+</div>
+
+<div class="helpmesg" id="helpmesg">
+ 
+</div>
+
+<div class="mfilebotmesg">
 {% block mfileinput %}
 <p id="mesg1" />
 <p id="mesg2" />

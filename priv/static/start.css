@@ -8,7 +8,8 @@ body {
 }
 
 .mfileheader {
-   font-size: 	24px;
+   padding-left: 10px;
+   font-size: 24px;
    border-top: solid;
    border-bottom: solid;
    border-left: solid;
@@ -28,45 +29,63 @@ body {
 }
 
 .mfiletopmesg {
+   padding-left: 10px;
    border-top: solid;
    border-bottom: solid;
-   border-right: solid;
    height:26px;
+   width:491px;
    line-height:26px;
+   float:left;
 }
 
-.mfilebody {
+.mfileid {
+   border-right: solid;
+   padding-top: 5px;
+   padding-right: 10px;
+   padding-bottom: 0px;
+   line-height: 30px;
+}
+
+.mfilecode {
+   padding-left: 10px;
+   padding-top: 40px;
+   border-left: solid;
+   border-right: solid;
+   line-height: 1;
+   height:50px;
+   float:bottom;
+}
+
+.mfilekeyw {
    padding-left: 10px;
    border-left: solid;
    border-right: solid;
    line-height: 1;
-   height:250px;
+   height:95px;
 }
 
-.mfileid {
+.mfiledesc {
+   padding-left: 10px;
    border-left: solid;
    border-right: solid;
-   padding-top: 5px;
-   padding-right: 10px;
-   padding-bottom: 0px;
-   line-height: 30px;
+   line-height: 1;
+   height:160px;
 }
 
-.mfilecmd {
+.helpmesg {
+   padding-left: 10px;
+   line-height: 30px;
    border-left: solid;
    border-right: solid;
-   border-bottom: solid;
-   padding-top: 5px;
-   padding-right: 10px;
-   padding-bottom: 0px;
-   line-height: 30px;
+   height: 30px
 }
-   
-.mfileinput {
+
+.mfilebotmesg {
    padding:3px;
    border-bottom: solid;
    border-left: solid;
    border-right: solid;
+   border-top: solid;
    height:100px;
 }
 
