@@ -12,7 +12,8 @@ getMfileVerNum() ->
 
 initializeForm() ->
    MfileVerNum = getMfileVerNum(),
-   [{mfilevernum, MfileVerNum}, {mfilegtmver, "No GT.M nowadays"}].
+   {ok,_,[{DBS}]} = boss_db:execute("SELECT version();"),
+   [{mfilevernum, MfileVerNum}, {mfiledbstatus, binary_to_list(DBS)}].
 
 integer_to_month(MonInt) ->
    case MonInt of

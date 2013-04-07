@@ -1,3 +1,4 @@
+2013-04-07 Version 0.1.10 Added PostgreSQL version string at bottom of window
 2013-04-07 Version 0.1.9 Completed migration from mock (in-memory) DB adapter to PostgreSQL
 2013-04-07 Version 0.1.8 Changed record ID handling, added CreatedAt, prepared for migration to PostgreSQL backend
 2013-04-07 Version 0.1.7 Refined form navigation, added file code and serial number fields

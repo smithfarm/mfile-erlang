@@ -28,8 +28,8 @@ var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
 	$("#sernum").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
-        $("#mesg1").empty();
-        $("#mesg1").append("New record ID '"+result.mfileId+"' added to database.")
+        $("#mfilestatus").empty();
+        $("#mfilestatus").append("New record ID '"+result.mfileId+"' added to database.")
       }
     });
   }
@@ -49,8 +49,8 @@ var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
 	$("#sernum").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
-        $("#mesg1").empty();
-        $("#mesg1").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
+        $("#mfilestatus").empty();
+        $("#mfilestatus").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
       }
     });
   }
@@ -207,7 +207,7 @@ function mfileProcessEsc() {
     $("#sernum").val('');
     $("#keywords").val('');
     $("#description").val('');
-    $("#mesg1").empty();
+    $("#mfilestatus").empty();
 }
 
 function isNumberKey(evt) {

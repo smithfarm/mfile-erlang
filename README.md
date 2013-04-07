@@ -11,6 +11,20 @@ a terminal using the ncurses library). The database backend
 (PostgreSQL) will not change, but the data will be re-encoded from
 ISO-8859-2 to UTF-8.
 
+Helpful commands
+----------------
+1. Check if PostgreSQL server is running:
+
+   # systemctl status postgresql.service
+   # netstat -na | grep 5432
+   # ps ax | grep postgres
+   # pgrep -l | grep postgres
+
+   If all of these look OK, then the server is _probably_ running.
+
+Reading list
+------------
+
 Hackweek page:
 https://github.com/SUSE/hackweek/wiki/mfile-%28Ancient,-dirt-simple-DB-app-gets-new-lease-on-life%29
 
