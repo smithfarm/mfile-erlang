@@ -1,3 +1,4 @@
+2013-04-07 Version 0.1.8 Changed record ID handling, added CreatedAt, prepared for migration to PostgreSQL backend
 2013-04-07 Version 0.1.7 Refined form navigation, added file code and serial number fields
 2013-04-07 Version 0.1.6 Added missing files to repo
 2013-04-07 Version 0.1.5 mfile-release tweak

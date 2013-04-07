@@ -1,14 +1,16 @@
 // Define object to hold our records
-var MfileObj = function(theId, theCode, theSern, theKeyw, theDesc) {
+var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
 
-  this.mfileData = { "mfileId": theId,
-                     "mfileCode": theCode,
+  this.mfileData = { "mfileId"  : theId,
+  		     "mfileDate": theDate,
+  		     "mfileCode": theCode,
 		     "mfileSern": theSern,
   		     "mfileKeyw": theKeyw, 
                      "mfileDesc": theDesc 
   };
 
   this.mfileId = theId;
+  this.mfileDate = theDate;
 
   this.mfileInsert = function() {
     console.log("About to insert the following record:");
@@ -20,17 +22,20 @@ var MfileObj = function(theId, theCode, theSern, theKeyw, theDesc) {
       data: this.mfileData,
       success: function(result) { 
         console.log(result);
-        $("#id").val(result.mfileId);
-        $("#mesg1").empty();
+        $("#id").empty();
+	$("#id").append("Record ID: "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
+	$("#code").val(result.mfileCode);
+	$("#sernum").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
-        $("#mesg1").append("New record no. "+result.mfileId+" added to database.")
+        $("#mesg1").empty();
+        $("#mesg1").append("New record ID '"+result.mfileId+"' added to database.")
       }
     });
   }
 
   this.mfileSearch = function() {
-    console.log("About to search for record #"+this.mfileId);
+    console.log("Attempting to fetch record #"+this.mfileId);
     $.ajax({
       url: "search",
       type: "POST",
@@ -38,11 +43,14 @@ var MfileObj = function(theId, theCode, theSern, theKeyw, theDesc) {
       data: this.mfileData,
       success: function(result) { 
         console.log(result);
-        $("#id").val(result.mfileId);
-        $("#mesg1").empty();
+        $("#id").empty();
+	$("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
+	$("#code").val(result.mfileCode);
+	$("#sernum").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
-        $("#mesg1").append("Found record no. "+result.mfileId+".")
+        $("#mesg1").empty();
+        $("#mesg1").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
       }
     });
   }
@@ -168,7 +176,8 @@ function logKeyPress(evt) {
 function mfileProcessInsert() {
     console.log("INSERT FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
-      document.getElementById("id").value,
+      "",
+      "",
       document.getElementById("code").value,
       document.getElementById("sernum").value,
       document.getElementById("keywords").value,
@@ -180,7 +189,8 @@ function mfileProcessInsert() {
 function mfileProcessSearch() {
     console.log("SEARCH FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
-      document.getElementById("id").value,
+      "",
+      "",
       document.getElementById("code").value,
       document.getElementById("sernum").value,
       document.getElementById("keywords").value,
@@ -191,8 +201,9 @@ function mfileProcessSearch() {
 
 // Reset the form, losing all data that might be in it
 function mfileProcessEsc() {
-    $("#id").val('');
+    $("#id").empty();
     $("#code").val('');
+    $("#code").focus();
     $("#sernum").val('');
     $("#keywords").val('');
     $("#description").val('');
