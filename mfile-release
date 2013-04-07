@@ -28,6 +28,10 @@ mv Changelog.new Changelog
 	--exclude-from "mfile/EXCLUDE" \
 	mfile )
 
+# git
+git commit -a -m "$CHGLOGENTRY"
+git push -u origin master
+
 # parse version number using trick from stackoverflow.com
 oIFS="$IFS"
 IFS=.
