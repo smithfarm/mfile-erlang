@@ -3,49 +3,41 @@
 
 
 getMfileVerNum() -> 
-		{ok, VerNum} = application:get_key(mfile, vsn),
-		VerNum.
-
-
-startEGTM() -> 
-		 startEGTM ( [ X || {X,Y,Z} <- 
-				application:loaded_applications(), 
-				X == egtm ] ).
-startEGTM([]) -> 
-		 egtm:start(),
-		 started;
-startEGTM([egtm]) -> 
-		 notstarted;
-startEGTM(_) ->
-		 error.
+		case application:get_key(mfile, vsn) of
+			{ok, Result} -> Result;
+			undefined -> Result = "Undefined"
+		end,
+		Result.
 
 
 initializeForm() ->
    MfileVerNum = getMfileVerNum(),
-   EGTMstartStatus = startEGTM(),
-   GtmVerNum = egtm:zversion(),
-   [{mfilevernum, MfileVerNum}, {mfilegtmver, GtmVerNum}].
+   [{mfilevernum, MfileVerNum}, {mfilegtmver, "No GT.M nowadays"}].
 
+
+stripId(ModelId) ->
+   re:replace(ModelId, "mfile-", "", [{return,list}]).
 
 % GET /
 start('GET', []) ->
    {ok, initializeForm() }.
 
-% assign an ID number
-mfileAssignID() ->
-   [LastIDstr] = egtm:order("^ZMFILE", [], backward),
-   case LastIDstr of
-      []  -> 1;
-      Str -> {X2,_} = string:to_integer(Str), X2 + 1
-   end.
-
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
-   MFID = mfileAssignID(),
-   MFDATA = string:concat(string:concat(Req:post_param("mfileKeyw"), "|"),
-            Req:post_param("mfileDesc")),
-   egtm:set("^ZMFILE", [MFID], MFDATA),
-   {json, [ {mfileID, MFID}, {mfileData, MFDATA} ]}.
+   Keyw = Req:post_param("mfileKeyw"),
+   Desc = Req:post_param("mfileDesc"),
+   MfileRec = mfile:new(id, Keyw, Desc),
+   {ok,{_,ModelId,_,_}} = MfileRec:save(),
+   {json, [ {mfileId, stripId(ModelId)}, {mfileKeyw, Keyw}, {mfileDesc, Desc} ]}.
+
+% search record (called asynchronously using AJAX)
+search('POST', []) ->
+   BareId = Req:post_param("mfileId"),
+   SearchId = lists:append(["mfile-", BareId]),
+   case boss_db:find(mfile, [{id, 'equals', SearchId}]) of
+   	[{mfile,V1,V2,V3}] -> {json, [ {mfileId, stripId(V1)}, {mfileKeyw, V2}, {mfileDesc, V3} ]};
+	[] -> {json, []}
+   end.
 
 % 404 handler
 lost('GET', []) ->

@@ -24,7 +24,7 @@ eval $CMD >Changelog.new
 mv Changelog.new Changelog
 
 # create tar archive of present release
-( cd .. && tar cf mfile-releases/mfile-$VERNUM.tar \
+( mkdir -p ../mfile-releases && cd .. && tar cf mfile-releases/mfile-$VERNUM.tar \
 	--exclude-from "mfile/EXCLUDE" \
 	mfile )
 

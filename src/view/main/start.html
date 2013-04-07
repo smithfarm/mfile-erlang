@@ -22,15 +22,22 @@ Version: {{ mfilevernum }}
 &nbsp;Press TAB to start.  
 </div>
 
+<div class="mfileid">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ID No.: <textarea id="id" name="id" rows=1 cols="8" maxlength=8 style="float:right; height: 22px;"></textarea>
+</div>
+
 <div class="mfilebody">
 {% block mfilebody %}
-   <div id="insertform">
-   &nbsp;Key words (max. 120 characters; words wrap)
-   &nbsp;<textarea id="keywords" name="keywords" rows=3 cols="62" maxlength=120></textarea>
-   &nbsp;Description/other notes (max. 240 characters):
-   &nbsp;<textarea id="description" name="description" rows=5 cols="62" maxlength=240></textarea>
+<div id="insertform">&nbsp;Key words (max. 120 characters; words wrap)
+   &nbsp;<textarea id="keywords" name="keywords" rows=3 cols="62" maxlength=120 style="height: 68px; width: 772px; overflow: hidden;"></textarea>
+   &nbsp;Description/other notes (max. 320 characters):
+   &nbsp;<textarea id="description" name="description" rows=6 cols="62" maxlength=320 style="height: 138px; width: 772px; overflow: hidden;"></textarea>
    </div>
 {% endblock %}
+</div>
+
+<div class="mfilecmd">
+&nbsp;I=Insert S=Search&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Command key: <textarea id="cmd" name="cmd" rows=1 cols=1 maxlength=1 style="float:right; height:22px;"></textarea>
 </div>
 
 <div class="mfileinput">
@@ -39,9 +46,6 @@ Version: {{ mfilevernum }}
 <p id="mesg2" />
 {% endblock %}
 </div>
-
-{{ mfilegtmver }}
-
 </body>
 </html>
 

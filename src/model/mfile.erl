@@ -1,2 +1,2 @@
--module(mfile, [Id, VersionNumber]).
+-module(mfile, [Id, Keyw, Desc]).
 -compile(export_all).

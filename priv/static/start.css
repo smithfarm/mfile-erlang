@@ -36,13 +36,32 @@ body {
 }
 
 .mfilebody {
-   padding:10px;
-   border-bottom: solid;
+   padding-left: 10px;
    border-left: solid;
    border-right: solid;
-   height:300px;
+   line-height: 1;
+   height:250px;
 }
 
+.mfileid {
+   border-left: solid;
+   border-right: solid;
+   padding-top: 5px;
+   padding-right: 10px;
+   padding-bottom: 0px;
+   line-height: 30px;
+}
+
+.mfilecmd {
+   border-left: solid;
+   border-right: solid;
+   border-bottom: solid;
+   padding-top: 5px;
+   padding-right: 10px;
+   padding-bottom: 0px;
+   line-height: 30px;
+}
+   
 .mfileinput {
    padding:3px;
    border-bottom: solid;

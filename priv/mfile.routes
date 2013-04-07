@@ -19,6 +19,9 @@
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.
 
+% Search
+{"/search", [{controller, "main"}, {action, "search"}]}.
+
 % 404 File Not Found handler
 {404, [{controller, "main"}, {action, "lost"}]}.
 
