@@ -124,7 +124,7 @@ var MfilecodeObj = function( theId,
 	   $("#codeid").empty();
            $("#mfileresult").empty();
            $("#mfileresult").append("FAILED: '"+result.mfilecodeDesc+"'")
-	 }
+	}
       }
     });
   }
@@ -137,11 +137,24 @@ var MfilecodeObj = function( theId,
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
-        console.log(result);
-	$("#code").val(result.mfilecodeCode);
-	$("#codeid").val(result.mfilecodeId);
-        $("#mfileresult").empty();
-        $("#mfileresult").append("Found '"+result.mfilecodeId+"' == '"+result.mfilecodeCode+"'");
+        if (result.mfilecodeDesc == "success")
+	{ 
+	   console.log("SUCCESS");
+           console.log(result);
+	   $("#code").val(result.mfilecodeCode);
+	   $("#codeid").val(result.mfilecodeId);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("Found '"+result.mfilecodeId+"' == '"+result.mfilecodeCode+"'");
+	}
+	else
+	{
+	   console.log("FAILURE")
+	   console.log(result);
+	   $("#code").empty();
+	   $("#codeid").empty();
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.mfilecodeDesc+"'")
+	}
       }
     });
   }
@@ -185,6 +198,13 @@ $(document).ready(function() {
   // Handle function keys in Code field
   $("#code").keydown(function(event) {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
+    if (event.which == 9 && event.shiftKey)
+    {
+       event.preventDefault();
+       console.log("SHIFT-TAB PRESSED");
+       $("#code").focus();
+       return true;
+    } 
     handleEsc(event);
     handleInsCode(event);
     handleF3Code(event);
@@ -194,7 +214,7 @@ $(document).ready(function() {
   $("#sern").keydown(function(event) {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
     handleEsc(event);
-    handleF3Sern(event);
+    // handleF3Sern(event);
   });
 
   // Handle function keys in Keywords field
@@ -233,6 +253,8 @@ $(document).ready(function() {
     if (!isLetterKey(event))
     {
        console.log("ILLEGAL -- NOT A LETTER");
+       $("#mfileresult").empty();
+       $("#mfileresult").append("* * * LETTERS ONLY, PLEASE * * *");
        return false;
     }
   });
@@ -270,7 +292,7 @@ function logKeyPress(evt) {
 // was a number key pressed?
 function isNumberKey(evt) {
     var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57))
+    if (charCode > 31 && charCode != 46 && (charCode < 48 || charCode > 57))
     {
        return false;
     }
@@ -280,7 +302,7 @@ function isNumberKey(evt) {
 // was a letter key pressed?
 function isLetterKey(evt) {
     var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122))
+    if (charCode < 31 || charCode == 46 || (charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122))
     {
        return true;
     }

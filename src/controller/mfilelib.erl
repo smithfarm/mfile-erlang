@@ -1,6 +1,13 @@
 -module(mfilelib).
 -compile(export_all).
 
+uppercase_it(E) ->
+   case lists:member(E, lists:seq(97,122)) of
+      true -> E - 32;
+      false -> E
+   end.
+
+
 integer_to_month(MonInt) ->
    case MonInt of
       1 -> "JAN";

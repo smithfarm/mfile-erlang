@@ -1,11 +1,15 @@
+20130408: include a "result string" in the JSON sent back by the server
 20130408: find out why "lost" URL handler doesn't work
-20130407: add ChicagoBoss websites to reading list, emphasis on code
-20130407: go through open tabs and add those of interest to reading list/blog
 20130407: test logging with lager https://github.com/basho/lager
 20130407: investigate what SQL commands I used in the original mfile to run searches
-20130407: prevent user from Shift-TABbing up from #code
 20130407: finish and test mfilecode insert/search functionality
-20130407: implement insertcode and searchcode functions in main.erl
-20130328: look into https://github.com/wg/epgsql (Erlang - PostgreSQL)
-20130326: upgrade to latest version of Chicago Boss
-20130326: migrate from egtm to postgresql
+20130407: implement verifycode function in main.erl
+
+DONE
+*20130407: implement insertcode function in main.erl
+*20130407: prevent user from Shift-TABbing up from #code
+*20130407: add ChicagoBoss websites to reading list, emphasis on code
+*20130407: go through open tabs and add those of interest to reading list/blog
+*20130328: look into https://github.com/wg/epgsql (Erlang - PostgreSQL)
+*20130326: upgrade to latest version of Chicago Boss
+*20130326: migrate from egtm to postgresql

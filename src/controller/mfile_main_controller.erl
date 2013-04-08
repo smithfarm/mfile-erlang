@@ -43,7 +43,7 @@ insert('POST', []) ->
 gen_insertcode_JSON(GicJCode) ->
    MfilecodeRec = mfilecode:new( id,
                                  calendar:now_to_datetime(erlang:now()),
-				 GicJCode,
+				 lists:map(fun mfilelib:uppercase_it/1, GicJCode),
 				 "success"
                                ),
    {ok,{mfilecode,Id,CodeTmpTime,Code,CodeDesc}} = MfilecodeRec:save(),
@@ -86,12 +86,25 @@ fetch('POST', []) ->
 	[] -> {json, []}
    end.
 
+fetch_code(C) ->
+   CodeToFetch = lists:map(fun mfilelib:uppercase_it/1, C),
+   case boss_db:find(mfilecode, [{code_str, 'equals', CodeToFetch}]) of
+        [{mfilecode,V1,_,V3,V4}] -> {json, [ {mfilecodeId,  V1},
+	                                      {mfilecodeDate, ""},
+					      {mfilecodeCode, V3},
+					      {mfilecodeDesc, V4} ]};
+	[] -> {json, [ {mfilecodeId,  ""},
+                       {mfilecodeDate, ""},
+		       {mfilecodeCode, ""},
+		       {mfilecodeDesc, lists:append(["Code ", CodeToFetch, " not found"]) } ] }
+   end.
+
 % fetch code (called asynchronously using AJAX)
-%fetchcode('POST, []) ->
-%   true.
-%XXXXXXXXXXXX ..... **********
-
-% 404 handler
+fetchcode('POST', []) ->
+   fetch_code(Req:post_param("mfilecodeCode")).
+   
+% error handler
 lost('GET', []) ->
+   {ok, initializeForm() };
+lost('POST', []) ->
    {ok, initializeForm() }.
-
