@@ -1,19 +1,42 @@
-// Define object to hold our records
-var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
+//
+// start.js  (jQuery code for mfile)
+//
 
-  this.mfileData = { "mfileId"  : theId,
-  		     "mfileDate": theDate,
-  		     "mfileCode": theCode,
-		     "mfileSern": theSern,
-  		     "mfileKeyw": theKeyw, 
-                     "mfileDesc": theDesc 
+    // Table of contents:
+    //
+    // *OBJ object definitions
+    // *LIS event listeners
+    // *KEY helper functions for processing keys
+    // *DBA database interaction functions
+
+
+// *OBJ mfile object definitions
+var MfileObj = function(theId, 
+                        theDate, 
+			theCodeId,
+			theCode, 
+			theSern, 
+			theKeyw, 
+			theDesc ) {
+
+  this.mfileData = { "mfileId"    : theId,
+  		     "mfileDate"  : theDate,
+		     "mfileCodeId": theCodeId,
+  		     "mfileCode"  : theCode,
+		     "mfileSern"  : theSern,
+  		     "mfileKeyw"  : theKeyw, 
+                     "mfileDesc"  : theDesc 
   };
 
   this.mfileId = theId;
   this.mfileDate = theDate;
+  this.mfileCodeId = theCodeId;
+  this.mfileCode = theCode;
 
+  // Insert an mfile record into the database
+  // - interfaces with "insert" URL handler in main.erl
   this.mfileInsert = function() {
-    console.log("About to insert the following record:");
+    console.log("Attempting to insert mfile record:");
     console.log(this.mfileData);
     $.ajax({
       url: "insert",
@@ -25,6 +48,7 @@ var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
         $("#id").empty();
 	$("#id").append("Record ID: "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
 	$("#code").val(result.mfileCode);
+	$("#codeid").val(result.mfileCodeId);
 	$("#sernum").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
@@ -34,10 +58,12 @@ var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
     });
   }
 
-  this.mfileSearch = function() {
-    console.log("Attempting to fetch record #"+this.mfileId);
+  // Fetch mfile record by its Code + CodeID 
+  // - interfaces with "fetch" URL handler in main.erl
+  this.mfileFetch = function() {
+    console.log("Attempting to fetch file '"+this.mfileCode+"-"+this.mfileSern+"'");
     $.ajax({
-      url: "search",
+      url: "fetch",
       type: "POST",
       dataType: "json",
       data: this.mfileData,
@@ -46,6 +72,7 @@ var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
         $("#id").empty();
 	$("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
 	$("#code").val(result.mfileCode);
+	$("#codeid").val(result.mfileCodeId);
 	$("#sernum").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
@@ -56,7 +83,53 @@ var MfileObj = function(theId, theDate, theCode, theSern, theKeyw, theDesc) {
   }
 }
 
-// When the document finishes loading, add event listeners
+// mfilecode object
+var MfilecodeObj = function(theId, theCode) {
+
+  this.mfilecodeData = { "mfilecodeId"  : theId,
+                         "mfilecodeCStr": theCode
+  };
+
+  this.mfilecodeId = theId;
+  this.mfilecodeCStr = theCode;
+
+  this.mfilecodeInsert = function() {
+    console.log("About to insert the following mfilecode record:");
+    console.log(this.mfilecodeData);
+    $.ajax({
+      url: "insertcode",
+      type: "POST",
+      dataType: "json",
+      data: this.mfilecodeData,
+      success: function(result) { 
+        console.log(result);
+	$("#code").val(result.mfilecodeCStr);
+	$("#codeid").val(result.mfilecodeId);
+        $("#mfilestatus").empty();
+        $("#mfilestatus").append("New code ID '"+result.mfilecodeId+"' added to database.")
+      }
+    });
+  }
+
+  this.mfilecodeSearch = function() {
+    console.log("Attempting to fetch code "+this.mfilecodeCStr);
+    $.ajax({
+      url: "searchcode",
+      type: "POST",
+      dataType: "json",
+      data: this.mfilecodeData,
+      success: function(result) { 
+        console.log(result);
+	$("#code").val(result.mfilecodeCStr);
+	$("#codeid").val(result.mfilecodeId);
+        $("#mfilestatus").empty();
+        $("#mfilestatus").append("Found '"+result.mfilecodeId+"' == '"+result.mfilecodeCStr+"'");
+      }
+    });
+  }
+}
+
+// *LIS* When the document finishes loading, add event listeners
 $(document).ready(function() {
 
   // Display/erase help message for ID field
@@ -89,6 +162,15 @@ $(document).ready(function() {
     handleEsc(event);
     handleF3(event);
   });
+
+  // Handle function keys in Code field
+  $("#code").keydown(function(event) {
+    console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
+    handleEsc(event);
+    handleInsCode(event);
+    handleF3Code(event);
+  });
+
   // Handle function keys in Keywords field
   $("#keywords").keydown(function(event) {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
@@ -96,6 +178,7 @@ $(document).ready(function() {
     handleIns(event);
     handleF3(event);
   });
+
   // Handle function keys in Description field
   $("#description").keydown(function(event) {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
@@ -137,8 +220,28 @@ $(document).ready(function() {
   $("#description").keypress(function(event) {
     logKeyPress(event);
   });
-});
 
+}); // END $(document).ready
+
+
+// *HEL* helper functions for processing keys
+
+// log keypresses
+function logKeyPress(evt) {
+   console.log("WHICH: "+evt.which+", KEYCODE: "+evt.keyCode);
+}
+
+// was a number key pressed?
+function isNumberKey(evt) {
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
+    {
+       return false;
+    }
+    return true;
+}
+
+// handle ESC keypress
 function handleEsc(evt) {
     if (evt.keyCode == 27) // ESC
     {
@@ -149,6 +252,7 @@ function handleEsc(evt) {
     }
 }
 
+// handle Ins keypress (INSERT key), except in Code field
 function handleIns(evt) {
     if (evt.keyCode == 45) // Ins
     {
@@ -159,6 +263,18 @@ function handleIns(evt) {
     }
 }
 
+// handle Ins keypress (INSERT key) in Code field
+function handleInsCode(evt) {
+    if (evt.keyCode == 45) // Ins
+    {
+      evt.preventDefault();
+      console.log("INSERT KEY PRESSED");
+      mfilecodeProcessInsert();
+      return true;
+    }
+}
+
+// handle F3 keypress ("look up"/"search"), except in Code field
 function handleF3(evt) {
     if (evt.keyCode == 114) // F3
     {
@@ -169,9 +285,20 @@ function handleF3(evt) {
     }
 }
 
-function logKeyPress(evt) {
-   console.log("WHICH: "+evt.which+", KEYCODE: "+evt.keyCode);
+// handle F3 keypress ("look up"/"search") in Code field
+function handleF3Code(evt) {
+    if (evt.keyCode == 114) // F3
+    {
+      evt.preventDefault();
+      console.log("F3 PRESSED");
+      mfilecodeProcessSearch();
+      return true;
+    }
 }
+
+// *DBA* database interaction functions
+// These functions gather form data and send it to the server
+// when the user issues a command.
 
 function mfileProcessInsert() {
     console.log("INSERT FUNCTION ACTIVATED");
@@ -186,18 +313,23 @@ function mfileProcessInsert() {
     currentRec.mfileInsert();
 }
 
-function mfileProcessSearch() {
-    console.log("SEARCH FUNCTION ACTIVATED");
-    var currentRec = new MfileObj(
+function mfilecodeProcessInsert() {
+    console.log("CODE INSERT FUNCTION ACTIVATED");
+    var currentRec = new MfilecodeObj(
       "",
-      "",
-      document.getElementById("code").value,
-      document.getElementById("sernum").value,
-      document.getElementById("keywords").value,
-      document.getElementById("description").value
+      document.getElementById("code").value
     );
-    currentRec.mfileSearch();
-  }
+    currentRec.mfilecodeInsert();
+}
+
+function mfilecodeProcessSearch() {
+    console.log("CODE SEARCH FUNCTION ACTIVATED");
+    var currentRec = new MfilecodeObj(
+      "",
+      document.getElementById("code").value
+    );
+    currentRec.mfilecodeSearch();
+}
 
 // Reset the form, losing all data that might be in it
 function mfileProcessEsc() {
@@ -210,11 +342,3 @@ function mfileProcessEsc() {
     $("#mfilestatus").empty();
 }
 
-function isNumberKey(evt) {
-    var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
-    {
-       return false;
-    }
-    return true;
-}

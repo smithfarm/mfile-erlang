@@ -19,8 +19,14 @@
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.
 
-% Search
-{"/search", [{controller, "main"}, {action, "search"}]}.
+% Insert code
+{"/insertcode", [{controller, "main"}, {action, "insertcode"}]}.
+
+% Fetch
+{"/fetch", [{controller, "main"}, {action, "fetch"}]}.
+
+% Fetch code
+{"/fetchcode", [{controller, "main"}, {action, "fetchcode"}]}.
 
 % 404 File Not Found handler
 {404, [{controller, "main"}, {action, "lost"}]}.

@@ -52,8 +52,12 @@ insert('POST', []) ->
    	    {mfileKeyw, Keyw}, 
 	    {mfileDesc, FileDesc} ]}.
 
-% search record (called asynchronously using AJAX)
-search('POST', []) ->
+% insert code (called asynchronously using AJAX)
+insertcode('POST', [])->
+XXXXXXXXXXXX ..... **********
+
+% fetch record (called asynchronously using AJAX)
+fetch('POST', []) ->
    BareId = Req:post_param("mfileId"),
    SearchId = lists:append(["mfile-", BareId]),
    case boss_db:find(mfile, [{id, 'equals', SearchId}]) of
@@ -65,6 +69,10 @@ search('POST', []) ->
                                                 {mfileDesc, V6} ]};
 	[] -> {json, []}
    end.
+
+% fetch code (called asynchronously using AJAX)
+fetchcode('POST, []) ->
+XXXXXXXXXXXX ..... **********
 
 % 404 handler
 lost('GET', []) ->
