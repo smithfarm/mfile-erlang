@@ -49,11 +49,11 @@ var MfileObj = function(theId,
 	$("#id").append("Record ID: "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
 	$("#code").val(result.mfileCode);
 	$("#codeid").val(result.mfileCodeId);
-	$("#sernum").val(result.mfileSern);
+	$("#sern").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
-        $("#mfilestatus").empty();
-        $("#mfilestatus").append("New record ID '"+result.mfileId+"' added to database.")
+        $("#mfileresult").empty();
+        $("#mfileresult").append("New record ID '"+result.mfileId+"' added to database.")
       }
     });
   }
@@ -73,25 +73,30 @@ var MfileObj = function(theId,
 	$("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
 	$("#code").val(result.mfileCode);
 	$("#codeid").val(result.mfileCodeId);
-	$("#sernum").val(result.mfileSern);
+	$("#sern").val(result.mfileSern);
         $("#keywords").val(result.mfileKeyw);
         $("#description").val(result.mfileDesc);
-        $("#mfilestatus").empty();
-        $("#mfilestatus").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
+        $("#mfileresult").empty();
+        $("#mfileresult").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
       }
     });
   }
 }
 
 // mfilecode object
-var MfilecodeObj = function(theId, theCode) {
+var MfilecodeObj = function( theId, 
+                             theDate,
+			     theCode,
+			     theDesc ) {
 
   this.mfilecodeData = { "mfilecodeId"  : theId,
-                         "mfilecodeCStr": theCode
+                         "mfilecodeDate": theDate,
+                         "mfilecodeCode": theCode,
+			 "mfilecodeDesc": theDesc
   };
 
   this.mfilecodeId = theId;
-  this.mfilecodeCStr = theCode;
+  this.mfilecodeCode = theCode;
 
   this.mfilecodeInsert = function() {
     console.log("About to insert the following mfilecode record:");
@@ -102,28 +107,41 @@ var MfilecodeObj = function(theId, theCode) {
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
-        console.log(result);
-	$("#code").val(result.mfilecodeCStr);
-	$("#codeid").val(result.mfilecodeId);
-        $("#mfilestatus").empty();
-        $("#mfilestatus").append("New code ID '"+result.mfilecodeId+"' added to database.")
+        if (result.mfilecodeDesc == "success")
+        { 
+	   console.log("SUCCESS")
+	   console.log(result);
+  	   $("#code").val(result.mfilecodeCode);
+	   $("#codeid").val(result.mfilecodeId);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("New code ID '"+result.mfilecodeId+"' added to database.")
+	}
+	else
+	{
+	   console.log("FAILURE")
+	   console.log(result);
+	   $("#code").empty();
+	   $("#codeid").empty();
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.mfilecodeDesc+"'")
+	 }
       }
     });
   }
 
-  this.mfilecodeSearch = function() {
-    console.log("Attempting to fetch code "+this.mfilecodeCStr);
+  this.mfilecodeFetch = function() {
+    console.log("Attempting to fetch code "+this.mfilecodeCode);
     $.ajax({
-      url: "searchcode",
+      url: "fetchcode",
       type: "POST",
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
         console.log(result);
-	$("#code").val(result.mfilecodeCStr);
+	$("#code").val(result.mfilecodeCode);
 	$("#codeid").val(result.mfilecodeId);
-        $("#mfilestatus").empty();
-        $("#mfilestatus").append("Found '"+result.mfilecodeId+"' == '"+result.mfilecodeCStr+"'");
+        $("#mfileresult").empty();
+        $("#mfileresult").append("Found '"+result.mfilecodeId+"' == '"+result.mfilecodeCode+"'");
       }
     });
   }
@@ -132,11 +150,19 @@ var MfilecodeObj = function(theId, theCode) {
 // *LIS* When the document finishes loading, add event listeners
 $(document).ready(function() {
 
-  // Display/erase help message for ID field
-  $("#id").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, F3=Fetch';
+  // Display/erase help message for Code field
+  $("#code").focus(function(event) {
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write Code, F3=Fetch Code';
   });
-  $("#id").blur(function(event) {
+  $("#code").blur(function(event) {
+    document.getElementById('helpmesg').innerHTML='';
+  });
+
+  // Display/erase help message for Serial Number (Sern) field
+  $("#sern").focus(function(event) {
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, F3=Fetch File';
+  });
+  $("#sern").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
   });
 
@@ -156,19 +182,19 @@ $(document).ready(function() {
     document.getElementById('helpmesg').innerHTML='';
   });
 
-  // Handle function keys in ID field
-  $("#id").keydown(function(event) {
-    console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
-    handleEsc(event);
-    handleF3(event);
-  });
-
   // Handle function keys in Code field
   $("#code").keydown(function(event) {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
     handleEsc(event);
     handleInsCode(event);
     handleF3Code(event);
+  });
+
+  // Handle function keys in Serial Number (sern) field
+  $("#sern").keydown(function(event) {
+    console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
+    handleEsc(event);
+    handleF3Sern(event);
   });
 
   // Handle function keys in Keywords field
@@ -201,8 +227,18 @@ $(document).ready(function() {
     } 
   });
 
-  // Handle keypresses in ID field
-  $("#id").keypress(function(event) {
+  // Handle keypresses in Code field
+  $("#code").keypress(function(event) {
+    logKeyPress(event);
+    if (!isLetterKey(event))
+    {
+       console.log("ILLEGAL -- NOT A LETTER");
+       return false;
+    }
+  });
+
+  // Handle keypresses in Serial Number (sern) field
+  $("#sern").keypress(function(event) {
     logKeyPress(event);
     if (!isNumberKey(event))
     {
@@ -234,11 +270,21 @@ function logKeyPress(evt) {
 // was a number key pressed?
 function isNumberKey(evt) {
     var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
+    if (charCode > 31 && (charCode < 48 || charCode > 57))
     {
        return false;
     }
     return true;
+}
+
+// was a letter key pressed?
+function isLetterKey(evt) {
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if ((charCode >= 65 && charCode <= 90) || (charCode >= 97 && charCode <= 122))
+    {
+       return true;
+    }
+    return false;
 }
 
 // handle ESC keypress
@@ -263,17 +309,6 @@ function handleIns(evt) {
     }
 }
 
-// handle Ins keypress (INSERT key) in Code field
-function handleInsCode(evt) {
-    if (evt.keyCode == 45) // Ins
-    {
-      evt.preventDefault();
-      console.log("INSERT KEY PRESSED");
-      mfilecodeProcessInsert();
-      return true;
-    }
-}
-
 // handle F3 keypress ("look up"/"search"), except in Code field
 function handleF3(evt) {
     if (evt.keyCode == 114) // F3
@@ -285,13 +320,24 @@ function handleF3(evt) {
     }
 }
 
-// handle F3 keypress ("look up"/"search") in Code field
+// handle Ins keypress (INSERT key) in Code field
+function handleInsCode(evt) {
+    if (evt.keyCode == 45) // Ins
+    {
+      evt.preventDefault();
+      console.log("INSERT KEY PRESSED");
+      return mfilecodeProcessInsert();
+    }
+    return false;
+}
+
+// handle F3 keypress ("Fetch Code") in Code field
 function handleF3Code(evt) {
     if (evt.keyCode == 114) // F3
     {
       evt.preventDefault();
       console.log("F3 PRESSED");
-      mfilecodeProcessSearch();
+      mfilecodeProcessFetch();
       return true;
     }
 }
@@ -314,21 +360,23 @@ function mfileProcessInsert() {
 }
 
 function mfilecodeProcessInsert() {
-    console.log("CODE INSERT FUNCTION ACTIVATED");
-    var currentRec = new MfilecodeObj(
-      "",
-      document.getElementById("code").value
-    );
+    console.log("FILE CODE INSERT FUNCTION ACTIVATED");
+    var currentRec = new MfilecodeObj( "",
+                                       "",
+                                       document.getElementById("code").value,
+                                       ""
+                                     );
     currentRec.mfilecodeInsert();
 }
 
-function mfilecodeProcessSearch() {
-    console.log("CODE SEARCH FUNCTION ACTIVATED");
-    var currentRec = new MfilecodeObj(
-      "",
-      document.getElementById("code").value
-    );
-    currentRec.mfilecodeSearch();
+function mfilecodeProcessFetch() {
+    console.log("FILE CODE FETCH FUNCTION ACTIVATED");
+    var currentRec = new MfilecodeObj( "",
+                                       "",
+                                       document.getElementById("code").value,
+                                       ""
+                                     );
+    currentRec.mfilecodeFetch();
 }
 
 // Reset the form, losing all data that might be in it
@@ -336,9 +384,9 @@ function mfileProcessEsc() {
     $("#id").empty();
     $("#code").val('');
     $("#code").focus();
-    $("#sernum").val('');
+    $("#sern").val('');
     $("#keywords").val('');
     $("#description").val('');
-    $("#mfilestatus").empty();
+    $("#mfileresult").empty();
 }
 

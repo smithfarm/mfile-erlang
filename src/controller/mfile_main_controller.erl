@@ -15,47 +15,62 @@ initializeForm() ->
    {ok,_,[{DBS}]} = boss_db:execute("SELECT version();"),
    [{mfilevernum, MfileVerNum}, {mfiledbstatus, binary_to_list(DBS)}].
 
-integer_to_month(MonInt) ->
-   case MonInt of
-      1 -> "JAN";
-      2 -> "FEB";
-      3 -> "MAR";
-      4 -> "APR";
-      5 -> "MAY";
-      6 -> "JUN";
-      7 -> "JUL";
-      8 -> "AUG";
-      9 -> "SEP";
-      10 -> "OCT";
-      11 -> "NOV";
-      12 -> "DEC"
-   end.
-
 % GET /
 start('GET', []) ->
    {ok, initializeForm() }.
 
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
-   Keyw = Req:post_param("mfileKeyw"),
-   FileDesc = Req:post_param("mfileDesc"),
-   MfileRec = mfile:new(id, calendar:now_to_datetime(erlang:now()), 0, 0, Keyw, FileDesc),
-   {ok,{mfile,Id,CrTime,CPtr,Sern,Keyw,FileDesc}} = MfileRec:save(),
-   {{IYear,IMon,IDay},{_,_,_}} = CrTime,
-   DStr = list_to_binary( [ integer_to_list(IYear), "-", 
-                            integer_to_month(IMon), "-", 
-			    integer_to_list(IDay) ] ),
+   MfileRec = mfile:new( id, 
+                         calendar:now_to_datetime(erlang:now()), 
+			 0, 
+			 0, 
+			 Req:post_param("mfileKeyw"), 
+			 Req:post_param("mfileDesc") 
+                       ),
+   {ok,{mfile,Id,TmpTime,CPtr,Sern,Keyw,FileDesc}} = MfileRec:save(),
+   % The DB model sends back a timestamp in the format {{Y, M, D}, {H, M, S}} 
+   % Now convert this into a binary of the format <<"YYYY-MMM-DD">> for display on-screen
+   DateStr = mfilelib:timestamp_to_binary_date_only(TmpTime),
    {json, [ {mfileId,   Id}, 
-   	    {mfileDate, DStr},
+   	    {mfileDate, DateStr},
             {mfileCPtr, CPtr},
 	    {mfileSern, Sern},
    	    {mfileKeyw, Keyw}, 
 	    {mfileDesc, FileDesc} ]}.
 
+% insertcode helper function - sends Code entered by the user to DB
+gen_insertcode_JSON(GicJCode) ->
+   MfilecodeRec = mfilecode:new( id,
+                                 calendar:now_to_datetime(erlang:now()),
+				 GicJCode,
+				 "success"
+                               ),
+   {ok,{mfilecode,Id,CodeTmpTime,Code,CodeDesc}} = MfilecodeRec:save(),
+   % The DB model sends back a timestamp in the format {{Y, M, D}, {H, M, S}} 
+   % Now convert this into a binary of the format <<"YYYY-MMM-DD">> for display on-screen
+   CodeDateStr = mfilelib:timestamp_to_binary_date_only(CodeTmpTime),
+   {json, [ {mfilecodeId,   Id},
+            {mfilecodeDate, CodeDateStr},
+	    {mfilecodeCode, Code},
+	    {mfilecodeDesc, CodeDesc} ] }.
+
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
-   true.
-%XXXXXXXXXXXX ..... **********
+   % get the Code entered by the user
+   IcCode = Req:post_param("mfilecodeCode"),
+   % validate it and return JSON accordingly
+   case mfilelib:validate_mfilecode(IcCode) of
+   	true -> gen_insertcode_JSON(IcCode);
+	false -> {json, [ {mfilecodeId, 0}, 
+	                  {mfilecodeDate, ""}, 
+		          {mfilecodeCode, ""}, 
+	                  {mfilecodeDesc, "Upper and lower case ASCII letters only."} ] };
+	{error, IcErr} -> { json, [ {mfilecodeId, 0},
+                                    {mfilecodeDate, ""}, 
+                                    {mfilecodeCode, ""}, 
+                                    {mfilecodeDesc, IcErr} ] }
+   end.
 
 % fetch record (called asynchronously using AJAX)
 fetch('POST', []) ->
@@ -72,8 +87,8 @@ fetch('POST', []) ->
    end.
 
 % fetch code (called asynchronously using AJAX)
-fetchcode('POST, []) ->
-   true.
+%fetchcode('POST, []) ->
+%   true.
 %XXXXXXXXXXXX ..... **********
 
 % 404 handler

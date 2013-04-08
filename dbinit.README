@@ -1,5 +1,0 @@
-1. Become root
-2. su postgres
-3. sh dbinit.sh
-4. Become smithfarm
-5. psql mymfile1 <dbinit.sh

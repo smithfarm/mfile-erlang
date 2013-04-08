@@ -1,5 +1,5 @@
-grant all privileges on database mymfiles1 to public;
-grant all privileges on database mymfiles1 to smithfarm;
+grant all privileges on database mfiledb to public;
+grant all privileges on database mfiledb to smithfarm;
 
 create table mfiles (
   id serial NOT NULL,
@@ -13,7 +13,9 @@ create table mfiles (
 
 create table mfilecodes (
   id serial NOT NULL,
+  created_at timestamp NOT NULL,
   code_str varchar(8) NOT NULL,
+  code_desc varchar(120),
   primary key (id)
 );
 

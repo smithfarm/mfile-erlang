@@ -1,11 +1,14 @@
 #!/bin/bash
 #
 # run as user 'postgres'
-declare MFILEDB="mymfiles1"
+declare MFILEDB="mfiledb"
 declare OWNER="smithfarm"
-echo $MFILEDB
+declare PGCMD="/usr/bin/sudo su postgres -c"
 
-dropdb $MFILEDB
-dropuser $OWNER
-createuser -W $OWNER
-createdb $MFILEDB -O $OWNER
+echo "Initializing database '$MFILEDB' with owner '$OWNER'"
+
+$PGCMD "dropdb $MFILEDB"
+$PGCMD "dropuser $OWNER"
+$PGCMD "createuser -W $OWNER"
+$PGCMD "createdb $MFILEDB -O $OWNER"
+psql $MFILEDB <dbinit.sql
