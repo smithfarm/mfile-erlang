@@ -54,7 +54,8 @@ insert('POST', []) ->
 
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
-XXXXXXXXXXXX ..... **********
+   true.
+%XXXXXXXXXXXX ..... **********
 
 % fetch record (called asynchronously using AJAX)
 fetch('POST', []) ->
@@ -72,7 +73,8 @@ fetch('POST', []) ->
 
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST, []) ->
-XXXXXXXXXXXX ..... **********
+   true.
+%XXXXXXXXXXXX ..... **********
 
 % 404 handler
 lost('GET', []) ->

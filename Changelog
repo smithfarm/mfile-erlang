@@ -1,3 +1,4 @@
+2013-04-08 Version 0.2.1 Correct minor glitch.
 2013-04-08 Version 0.2.0 Cleanup, renamed "search" functions to "fetch" to better describe what they do
 2013-04-07 Version 0.2.0 Bumped version to reflect progress made over this weekend.
 2013-04-07 Version 0.1.10 Added PostgreSQL version string at bottom of window
