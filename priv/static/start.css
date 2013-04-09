@@ -81,7 +81,7 @@ body {
 }
 
 .mfileresult {
-   padding:3px;
+   padding:10px;
    border-bottom: solid;
    border-left: solid;
    border-right: solid;
@@ -91,9 +91,10 @@ body {
 }
 
 .dbstatus {
+   font-size:   12px;
    padding:3px;
-   line-height: 22px;
-   height:22px;
+   line-height: 1;
+   height:18px;
 }
 
 textarea {

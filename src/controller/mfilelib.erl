@@ -1,6 +1,26 @@
 -module(mfilelib).
 -compile(export_all).
 
+
+% given a code string, convert it to all upper-case and look up its vitals
+% returns {ok, {CODE_ID}, {CODE_DATE}, {CODE_STR}, {CODE_DESC}} | undefined
+fetch_code_id(CStr) ->
+   case boss_db:find(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, CStr)}]) of
+      [{mfilecode,CId,CTime,CStr,CDesc}] -> { ok, {CId},
+                                                  {mfilelib:timestamp_to_binary_date_only(CTime)},
+					 	  {CStr},
+					 	  {CDesc} };
+      []                                 -> undefined
+   end.
+
+getMfileVerNum() -> 
+   case application:get_key(mfile, vsn) of
+      {ok, Result} -> Result;
+      undefined    -> Result = "Undefined"
+   end,
+   Result.
+
+
 uppercase_it(E) ->
    case lists:member(E, lists:seq(97,122)) of
       true -> E - 32;

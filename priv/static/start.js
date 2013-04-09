@@ -17,7 +17,8 @@ var MfileObj = function(theId,
 			theCode, 
 			theSern, 
 			theKeyw, 
-			theDesc ) {
+			theDesc,
+			theQueryResult ) {
 
   this.mfileData = { "mfileId"    : theId,
   		     "mfileDate"  : theDate,
@@ -25,13 +26,15 @@ var MfileObj = function(theId,
   		     "mfileCode"  : theCode,
 		     "mfileSern"  : theSern,
   		     "mfileKeyw"  : theKeyw, 
-                     "mfileDesc"  : theDesc 
+                     "mfileDesc"  : theDesc,
+		     "mfileQueryResult" : theQueryResult
   };
 
   this.mfileId = theId;
   this.mfileDate = theDate;
   this.mfileCodeId = theCodeId;
   this.mfileCode = theCode;
+  this.mfileQueryResult = theQueryResult;
 
   // Insert an mfile record into the database
   // - interfaces with "insert" URL handler in main.erl
@@ -45,20 +48,30 @@ var MfileObj = function(theId,
       data: this.mfileData,
       success: function(result) { 
         console.log(result);
-        $("#id").empty();
-	$("#id").append("Record ID: "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
-	$("#code").val(result.mfileCode);
-	$("#codeid").val(result.mfileCodeId);
-	$("#sern").val(result.mfileSern);
-        $("#keywords").val(result.mfileKeyw);
-        $("#description").val(result.mfileDesc);
-        $("#mfileresult").empty();
-        $("#mfileresult").append("New record ID '"+result.mfileId+"' added to database.")
+        if (result.mfileQueryResult == "success")
+        { 
+	   console.log("SUCCESS")
+           $("#id").empty();
+	   $("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
+	   $("#code").val(result.mfileCode);
+	   $("#codeid").val(result.mfileCodeId);
+	   $("#sern").val(result.mfileSern);
+           $("#keywords").val(result.mfileKeyw);
+           $("#description").val(result.mfileDesc);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("Inserted record ID "+result.mfileId)
+	}
+	else
+	{
+	   console.log("FAILURE")
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.mfileQueryResult+"'")
+	}
       }
     });
   }
 
-  // Fetch mfile record by its Code + CodeID 
+  // Fetch mfile record by its Code + Serial Number (Sern)
   // - interfaces with "fetch" URL handler in main.erl
   this.mfileFetch = function() {
     console.log("Attempting to fetch file '"+this.mfileCode+"-"+this.mfileSern+"'");
@@ -69,15 +82,25 @@ var MfileObj = function(theId,
       data: this.mfileData,
       success: function(result) { 
         console.log(result);
-        $("#id").empty();
-	$("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
-	$("#code").val(result.mfileCode);
-	$("#codeid").val(result.mfileCodeId);
-	$("#sern").val(result.mfileSern);
-        $("#keywords").val(result.mfileKeyw);
-        $("#description").val(result.mfileDesc);
-        $("#mfileresult").empty();
-        $("#mfileresult").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
+        if (result.mfileQueryResult == "success")
+        { 
+	   console.log("SUCCESS")
+           $("#id").empty();
+	   $("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
+	   $("#code").val(result.mfileCode);
+	   $("#codeid").val(result.mfileCodeId);
+	   $("#sern").val(result.mfileSern);
+           $("#keywords").val(result.mfileKeyw);
+           $("#description").val(result.mfileDesc);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
+	}
+	else
+	{
+	   console.log("FAILURE")
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.mfileQueryResult+"'")
+	}
       }
     });
   }
@@ -114,7 +137,7 @@ var MfilecodeObj = function( theId,
   	   $("#code").val(result.mfilecodeCode);
 	   $("#codeid").val(result.mfilecodeId);
            $("#mfileresult").empty();
-           $("#mfileresult").append("New code ID '"+result.mfilecodeId+"' added to database.")
+           $("#mfileresult").append("New code '"+result.mfilecodeCode+"' added to database.")
 	}
 	else
 	{
@@ -165,7 +188,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Code field
   $("#code").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write Code, F3=Fetch Code';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write Code, F3=Validate Code';
   });
   $("#code").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
@@ -214,7 +237,7 @@ $(document).ready(function() {
   $("#sern").keydown(function(event) {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
     handleEsc(event);
-    // handleF3Sern(event);
+    handleF3Sern(event);
   });
 
   // Handle function keys in Keywords field
@@ -326,8 +349,17 @@ function handleIns(evt) {
     {
       evt.preventDefault();
       console.log("INSERT KEY PRESSED");
-      mfileProcessInsert();
-      return true;
+      return mfileProcessInsert();
+    }
+}
+
+// handle F3 keypress ("fetch") in Serial Number field
+function handleF3Sern(evt) {
+    if (evt.keyCode == 114) // F3
+    {
+      evt.preventDefault();
+      console.log("F3 PRESSED");
+      return mfileProcessFetch();
     }
 }
 
@@ -337,8 +369,7 @@ function handleF3(evt) {
     {
       evt.preventDefault();
       console.log("F3 PRESSED");
-      mfileProcessSearch();
-      return true;
+      return mfileProcessSearch();
     }
 }
 
@@ -373,10 +404,12 @@ function mfileProcessInsert() {
     var currentRec = new MfileObj(
       "",
       "",
+      "",
       document.getElementById("code").value,
-      document.getElementById("sernum").value,
+      document.getElementById("sern").value,
       document.getElementById("keywords").value,
-      document.getElementById("description").value
+      document.getElementById("description").value,
+      ""
     );
     currentRec.mfileInsert();
 }
@@ -390,6 +423,22 @@ function mfilecodeProcessInsert() {
                                      );
     currentRec.mfilecodeInsert();
 }
+
+function mfileProcessFetch() {
+    console.log("FETCH FUNCTION ACTIVATED");
+    var currentRec = new MfileObj(
+      "",
+      "",
+      "",
+      document.getElementById("code").value,
+      document.getElementById("sern").value,
+      "",
+      "",
+      ""
+    );
+    currentRec.mfileFetch();
+}
+
 
 function mfilecodeProcessFetch() {
     console.log("FILE CODE FETCH FUNCTION ACTIVATED");

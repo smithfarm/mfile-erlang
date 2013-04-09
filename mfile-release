@@ -8,8 +8,8 @@
 # ensure we are in the mfile directory
 cd `dirname $0`
 
-# shut down the application
-./init.sh stop
+# shut down the application (use only w/production server)
+#./init.sh stop
 
 # get mfile version number
 VERNUM=`head -n 1 VERSION`

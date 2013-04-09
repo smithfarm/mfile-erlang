@@ -1,3 +1,6 @@
+2013-04-09 Version 0.2.4 Code cleanup, begin implementing query result tuple in JSON, new screenshot
+2013-04-08 Version 0.2.4 Test new script update.sh
+2013-04-08 Version 0.2.4 Fixed lost.html so it displays INTERNAL ERROR in results line
 2013-04-08 Version 0.2.3 Fetch file code now works, in a manner of speaking
 2013-04-08 Version 0.2.2 Insert Code functionality now works in a basic form
 2013-04-08 Version 0.2.1 Correct minor glitch.
