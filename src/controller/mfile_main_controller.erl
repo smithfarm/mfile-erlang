@@ -30,14 +30,14 @@ insert('POST', []) ->
    % The DB model sends back a timestamp in the format {{Y, M, D}, {H, M, S}} 
    % Now convert this into a binary of the format <<"YYYY-MMM-DD">> for display on-screen
    DateStr = mfilelib:timestamp_to_binary_date_only(TmpTime),
-   {json, { queryResult, "success" },
-          [ {mfileId,   Id}, 
-   	    {mfileDate, DateStr},
-           {mfileCodeId, CId},
-           {mfileCode, ""},
-	    {mfileSern, Sern},
-   	    {mfileKeyw, Keyw}, 
-	    {mfileDesc, FileDesc} ] }.
+   {json, [ {queryResult, "success"},
+            {mfileId,     Id}, 
+   	    {mfileDate,   DateStr},
+            {mfileCodeId, CId},
+            {mfileCode,   ""},
+	    {mfileSern,   Sern},
+   	    {mfileKeyw,   Keyw}, 
+	    {mfileDesc,   FileDesc} ] }.
 
 % insertcode helper function - sends Code entered by the user to DB
 gen_insertcode_JSON(GicJCode) ->
@@ -50,8 +50,8 @@ gen_insertcode_JSON(GicJCode) ->
    % The DB model sends back a timestamp in the format {{Y, M, D}, {H, M, S}} 
    % Now convert this into a binary of the format <<"YYYY-MMM-DD">> for display on-screen
    CodeDateStr = mfilelib:timestamp_to_binary_date_only(CodeTmpTime),
-   {json, { queryResult, "success" },
-          [ {mfilecodeId,   Id},
+   {json, [ {queryResult,  "success"},
+            {mfilecodeId,   Id},
             {mfilecodeDate, CodeDateStr},
 	    {mfilecodeCode, Code},
 	    {mfilecodeDesc, CodeDesc} ] }.
@@ -78,16 +78,16 @@ fetch('POST', []) ->
    Json = if
        (I /= 0) and (S /= 0) -> 
            case boss_db:find(mfile, [{code_id, 'equals', I}, {sern, 'equals', S}]) of
-           	[{mfile,V1,V2,V3,V4,V5,V6}] -> {json, {queryResult, "success"},
-		                                      [ {mfileId,   V1}, 
+           	[{mfile,V1,V2,V3,V4,V5,V6}] -> {json, [ {queryResult, "success"},
+		                                        {mfileId,   V1}, 
                                                         {mfileDate, V2},
                                                         {mfileCode, V3},
                                                         {mfileSern, V4},
                                                         {mfileKeyw, V5}, 
-                                                        {mfileDesc, V6} ]};
-        	[] -> {json, { queryResult, lists:append(["Code '", C, "' not found"]) }, [] }
+                                                        {mfileDesc, V6} ] };
+        	[] -> {json, [ {queryResult, lists:append(["Code '", C, "' not found"]) }, [] ] }
            end;
-       not ((I /= 0) and (S /= 0)) -> {json, { queryResult, R }, [] }
+       not ((I /= 0) and (S /= 0)) -> {json, [ { queryResult, R }, [] ] }
    end,
    lager:info("sending back JSON: ~p", [Json]),
    Json.
@@ -95,12 +95,14 @@ fetch('POST', []) ->
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST', []) ->
    X = Req:post_param("mfilecodeCode"),
-   {QR, V1, V2, V3, V4} = mfilelib:fetch_code(X),
-   {json, {queryResult, QR},
-          {mfilecodeId, V1},
-          {mfilecodeDate, V2},
-          {mfilecodeCode, V3},
-          {mfilecodeDesc, V4} }.
+   Result = mfilelib:fetch_code(X),
+   lager:info("fetch_code returned ~p", [Result]),
+   {QR, V1, V2, V3, V4} = Result,
+   {json, [ {queryResult, QR},
+            {mfilecodeId, V1},
+            {mfilecodeDate, V2},
+            {mfilecodeCode, V3},
+            {mfilecodeDesc, V4} ] }.
    
 % error handler
 lost('GET', []) ->

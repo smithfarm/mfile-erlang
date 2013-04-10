@@ -119,8 +119,7 @@ var MfilecodeObj = function(
 			     theDesc
 			     ) {
 
-  this.mfilecodeData = { 
-		         "queryResult" : theQueryResult,
+  this.mfilecodeData = { "queryResult" : theQueryResult,
 			 "mfilecodeId"  : theId,
                          "mfilecodeDate": theDate,
                          "mfilecodeCode": theCode,
@@ -129,6 +128,7 @@ var MfilecodeObj = function(
 
   this.mfilecodeId = theId;
   this.mfilecodeCode = theCode;
+  this.queryResult = theQueryResult;
 
   this.mfilecodeInsert = function() {
     console.log("About to insert the following mfilecode record:");
@@ -139,7 +139,7 @@ var MfilecodeObj = function(
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
-        if (result.mfilecodeDesc == "success")
+        if (result.queryResult == "success")
         { 
 	   console.log("SUCCESS")
 	   console.log(result);
@@ -155,7 +155,7 @@ var MfilecodeObj = function(
 	   $("#code").empty();
 	   $("#codeid").empty();
            $("#mfileresult").empty();
-           $("#mfileresult").append("FAILED: '"+result.mfilecodeDesc+"'")
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
 	}
       }
     });
@@ -169,7 +169,7 @@ var MfilecodeObj = function(
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
-        if (result.mfilecodeDesc == "success")
+        if (result.queryResult == "success")
 	{ 
 	   console.log("SUCCESS");
            console.log(result);
@@ -185,7 +185,7 @@ var MfilecodeObj = function(
 	   $("#code").empty();
 	   $("#codeid").empty();
            $("#mfileresult").empty();
-           $("#mfileresult").append("FAILED: '"+result.mfilecodeDesc+"'")
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
 	}
       }
     });
