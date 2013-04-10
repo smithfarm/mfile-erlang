@@ -30,6 +30,7 @@ mv Changelog.new Changelog
 
 # git
 git commit -a -m "$CHGLOGENTRY"
+pwd
 git push -u origin master
 
 # parse version number using trick from stackoverflow.com
