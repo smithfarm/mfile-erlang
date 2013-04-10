@@ -1,3 +1,4 @@
+2013-04-10 Version 0.2.5 Started implementing unit tests for functions in mfilelib.erl
 2013-04-09 Version 0.2.4 Code cleanup, begin implementing query result tuple in JSON, new screenshot
 2013-04-08 Version 0.2.4 Test new script update.sh
 2013-04-08 Version 0.2.4 Fixed lost.html so it displays INTERNAL ERROR in results line

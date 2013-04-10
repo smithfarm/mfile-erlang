@@ -1,12 +1,12 @@
-20130408: change all JSON coming back from main.erl to format {json, {queryResult, "STRING"}, [...]}
+20130409: write unit tests for all functions in mfilelib.erl
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
 20130408: include (and process) query result string in JSON sent back by server 
 20130408: add fetch record by code+serial number
 20130408: fix mfile insert so it validates code and automatically increments serial number
-20130407: test logging with lager https://github.com/basho/lager
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130407: test logging with lager https://github.com/basho/lager
 *20130408: find out why "lost" URL handler doesn't work
 *20130407: implement verifycode function in main.erl
 *20130407: implement insertcode function in main.erl

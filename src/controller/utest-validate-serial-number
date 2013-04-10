@@ -1,0 +1,14 @@
+% for use with utest.erl
+{
+        fun mfilelib:validate_serial_number/1,
+        [ 
+	   { 123, {{result, "success"}, {sern, 123}} }, 
+	   { "123", {{result, "success"}, {sern, 123}} }, 
+	   { <<"123">>, {{result, "success"}, {sern, 123}} }, 
+           { a, {{result, "Invalid serial number"}, {sern, 0}} },
+           { -1, {{result, "Invalid serial number"}, {sern, 0}} },
+           { 0, {{result, "Invalid serial number"}, {sern, 0}} },
+           { 3.145, {{result, "Invalid serial number"}, {sern, 0}} }
+	   { [], {{result, "Invalid serial number"}, {sern, 0}} }
+	]
+}.

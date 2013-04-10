@@ -1,5 +1,6 @@
 -module(mfile_main_controller, [Req]).
 -compile(export_all).
+-compile([{parse_transform, lager_transform}]).
 
 
 initializeForm() ->
@@ -12,6 +13,7 @@ initializeForm() ->
 
 % GET /
 start('GET', []) ->
+   lager:start(),
    {ok, initializeForm() }.
 
 % insert record (called asynchronously using AJAX)
@@ -62,32 +64,43 @@ insertcode('POST', [])->
 	{error, IcErr} -> { json, { queryResult, IcErr }, [] }
    end.
 
-% fetch record (called asynchronously using AJAX)
+% fetch record by Code and Serial Number (called asynchronously using AJAX)
 fetch('POST', []) ->
-   BareId = Req:post_param("mfileId"),
-   SearchId = lists:append(["mfile-", BareId]),
-   case boss_db:find(mfile, [{id, 'equals', SearchId}]) of
-   	[{mfile,V1,V2,V3,V4,V5,V6}] -> {json, [ {mfileId,   V1}, 
-                                                {mfileDate, V2},
-                                                {mfileCode, V3},
-                                                {mfileSern, V4},
-                                                {mfileKeyw, V5}, 
-                                                {mfileDesc, V6} ]};
-	[] -> {json, []}
-   end.
+   Cf = Req:post_param("mfileCode"),  % get Code string from form
+   Sf = Req:post_param("mfileSern"),  % get Serial Number from form
+
+   Result = mfilelib:validate_codestr_and_sern(Cf, Sf),
+   lager:info("validate_codestr_and_sern returned ~p", [Result]),
+   { {result, R}, {codeid, I}, 
+     {codestr, C}, {sern, S} } = Result,
+   % if the Code exists in the database, I will be something other than 0
+   Json = if
+       (I /= 0) and (S /= 0) -> 
+           case boss_db:find(mfile, [{code_id, 'equals', I}, {sern, 'equals', S}]) of
+           	[{mfile,V1,V2,V3,V4,V5,V6}] -> {json, {queryResult, "success"},
+		                                      [ {mfileId,   V1}, 
+                                                        {mfileDate, V2},
+                                                        {mfileCode, V3},
+                                                        {mfileSern, V4},
+                                                        {mfileKeyw, V5}, 
+                                                        {mfileDesc, V6} ]};
+        	[] -> {json, { queryResult, lists:append(["Code '", C, "' not found"]) }, [] }
+           end;
+
+       not ((I /= 0) and (S /= 0)) -> {json, { queryResult, R }, [] }
+   end,
+   lager:info("sending back JSON: ~p", [Json]),
+   Json.
 
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST', []) ->
-   CodeToFetch = Req:post_param("mfilecodeCode"),
-   Result = mfilelib:fetch_code_id(CodeToFetch),
-   case Result of
-        {ok, {V1, V2, V3, V4} } -> {json, { queryResult, "success" },
-	                                  [ {mfilecodeId,  V1},
-	                                    {mfilecodeDate, V2},
-				            {mfilecodeCode, V3},
-				            {mfilecodeDesc, V4} ] };
-	undefined -> {json, { queryResult, lists:append(["Code '", CodeToFetch, "' not found"]) }, [] }
-   end.
+   X = Req:post_param("mfilecodeCode"),
+   {QR, V1, V2, V3, V4} = mfilelib:fetch_code(X),
+   {json, {queryResult, QR},
+          {mfilecodeId, V1},
+          {mfilecodeDate, V2},
+          {mfilecodeCode, V3},
+          {mfilecodeDesc, V4} }.
    
 % error handler
 lost('GET', []) ->

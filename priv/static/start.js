@@ -11,29 +11,33 @@
 
 
 // *OBJ mfile object definitions
-var MfileObj = function(theId, 
+var MfileObj = function(
+			theQueryResult,
+                        theId, 
                         theDate, 
 			theCodeId,
 			theCode, 
 			theSern, 
 			theKeyw, 
-			theDesc,
-			theQueryResult ) {
+			theDesc
+			) {
 
-  this.mfileData = { "mfileId"    : theId,
-  		     "mfileDate"  : theDate,
-		     "mfileCodeId": theCodeId,
-  		     "mfileCode"  : theCode,
-		     "mfileSern"  : theSern,
-  		     "mfileKeyw"  : theKeyw, 
-                     "mfileDesc"  : theDesc,
-		     "mfileQueryResult" : theQueryResult
+  this.mfileData = { 
+		       "queryResult" : theQueryResult,
+                       "mfileId"    : theId,
+  		       "mfileDate"  : theDate,
+		       "mfileCodeId": theCodeId,
+  		       "mfileCode"  : theCode,
+		       "mfileSern"  : theSern,
+  		       "mfileKeyw"  : theKeyw, 
+                       "mfileDesc"  : theDesc
   };
 
   this.mfileId = theId;
   this.mfileDate = theDate;
   this.mfileCodeId = theCodeId;
   this.mfileCode = theCode;
+  this.mfileSern = theSern;
   this.mfileQueryResult = theQueryResult;
 
   // Insert an mfile record into the database
@@ -107,15 +111,20 @@ var MfileObj = function(theId,
 }
 
 // mfilecode object
-var MfilecodeObj = function( theId, 
+var MfilecodeObj = function( 
+			     theQueryResult,
+                             theId, 
                              theDate,
 			     theCode,
-			     theDesc ) {
+			     theDesc
+			     ) {
 
-  this.mfilecodeData = { "mfilecodeId"  : theId,
+  this.mfilecodeData = { 
+		         "queryResult" : theQueryResult,
+			 "mfilecodeId"  : theId,
                          "mfilecodeDate": theDate,
                          "mfilecodeCode": theCode,
-			 "mfilecodeDesc": theDesc
+			 "mfilecodeDesc": theDesc 
   };
 
   this.mfilecodeId = theId;
@@ -402,39 +411,32 @@ function handleF3Code(evt) {
 function mfileProcessInsert() {
     console.log("INSERT FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
-      "",
-      "",
-      "",
+      "", "", "", "",
       document.getElementById("code").value,
       document.getElementById("sern").value,
       document.getElementById("keywords").value,
       document.getElementById("description").value,
-      ""
     );
     currentRec.mfileInsert();
 }
 
 function mfilecodeProcessInsert() {
     console.log("FILE CODE INSERT FUNCTION ACTIVATED");
-    var currentRec = new MfilecodeObj( "",
-                                       "",
-                                       document.getElementById("code").value,
-                                       ""
-                                     );
+    var currentRec = new MfilecodeObj( 
+      "", "", "", 
+      document.getElementById("code").value,
+      ""
+    );
     currentRec.mfilecodeInsert();
 }
 
 function mfileProcessFetch() {
     console.log("FETCH FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
-      "",
-      "",
-      "",
+      "", "", "", "",
       document.getElementById("code").value,
       document.getElementById("sern").value,
-      "",
-      "",
-      ""
+      "", ""
     );
     currentRec.mfileFetch();
 }
@@ -442,11 +444,11 @@ function mfileProcessFetch() {
 
 function mfilecodeProcessFetch() {
     console.log("FILE CODE FETCH FUNCTION ACTIVATED");
-    var currentRec = new MfilecodeObj( "",
-                                       "",
-                                       document.getElementById("code").value,
-                                       ""
-                                     );
+    var currentRec = new MfilecodeObj( 
+      "", "", "",
+      document.getElementById("code").value,
+      ""
+    );
     currentRec.mfilecodeFetch();
 }
 
