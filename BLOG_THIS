@@ -1,0 +1,7 @@
+MESSAGE:
+{error_logger,{{2013,4,10},{21,15,12}},"Protocol: ~p: register error: ~p~n",["inet_tcp",{{badmatch,{error,duplicate_name}},[{inet_tcp_dist,listen,1,[{file,"inet_tcp_dist.erl"},{line,70}]},{net_kernel,start_protos,4,[{file,"net_kernel.erl"},{line,1314}]},{net_kernel,start_protos,3,[{file,"net_kernel.erl"},{line,1307}]},{net_kernel,init_node,2,[{file,"net_kernel.erl"},{line,1197}]},{net_kernel,init,1,[{file,"net_kernel.erl"},{line,357}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,304}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,227}]}]}]
+MEANING:
+This message appears when, for example, you have one "./init-dev.sh" instance running and you attempt to start another one.
+
+
+

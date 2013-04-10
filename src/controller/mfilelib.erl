@@ -9,13 +9,13 @@
 validate_serial_number(Sf) ->
    % convert "it" (whatever it is) into a list
    Sl = if
+            is_list(Sf)    -> Sf;
             is_binary(Sf)  -> binary_to_list(Sf);
             is_integer(Sf) -> integer_to_list(Sf);
-            is_list(Sf)    -> Sf;
 	    true           -> somethingElse
         end,
 
-   % check if it's an integer
+   % check if it's a natural number
    S = case catch list_to_integer(Sl) of
           Sn when ((is_number(Sn)) and (Sn > 0)) -> R = "success",
                                                     Sn; 
@@ -58,6 +58,7 @@ fetch_code(C) ->
 					      "" }
    end.
 
+
 getMfileVerNum() -> 
    case application:get_key(mfile, vsn) of
       {ok, Result} -> Result;
@@ -89,18 +90,57 @@ integer_to_month(MonInt) ->
       12 -> "DEC"
    end.
 
+
 timestamp_to_binary_date_only(Timest) ->
    {{Y, M, D},{_,_,_}} = Timest,
    list_to_binary( [ integer_to_list(Y), "-", 
                      integer_to_month(M), "-", 
                      integer_to_list(D) ] ).
 
-is_an_ASCII_letter(X) ->
-    %io:format("is_a_letter: received element ~p.~n", [X]),
-    UpperAndLowerCaseLetters = lists:append(lists:seq(65,90), lists:seq(97,122)),
-    lists:member(X, UpperAndLowerCaseLetters).
 
-validate_mfilecode(Arg) when is_list(Arg) ->
-    lists:all(fun mfilelib:is_an_ASCII_letter/1, Arg);
-validate_mfilecode(_) ->
-    {error, "Argument must be a list."}.
+is_an_ASCII_letter(X) ->
+    Uppers = lists:seq(65,90),
+    Lowers = lists:seq(97,122),
+    lists:member(X, Uppers) or lists:member(X, Lowers).
+
+
+%
+% to be fit for insertion into the database, an mfilecode must satisfy several conditions:
+% 1. must be a list
+% 2. must have more than zero members
+% 3. must have less than nine members
+% 4. must consist of upper and lower case ASCII characters only
+% 5. must not already exist in codes table of database
+%
+mfilecode_ok_for_insert(Arg, 5) -> 
+   case fetch_code(Arg) of
+      {"success", _, _, _, _} -> "Code already exists in the database";
+      _ -> yes
+   end;
+mfilecode_ok_for_insert(Arg, 4) -> 
+   case lists:all(fun mfilelib:is_an_ASCII_letter/1, Arg) of 
+      true -> mfilecode_ok_for_insert(Arg, 5);
+      _ -> "Upper and lower case ASCII characters only"
+   end;
+mfilecode_ok_for_insert(Arg, 3) -> 
+   if
+      length(Arg) < 9 -> mfilecode_ok_for_insert(Arg, 4);
+      true -> "Code string too long (max. 8 characters)"
+   end;
+mfilecode_ok_for_insert(Arg, 2) -> 
+   if
+      length(Arg) > 0 -> mfilecode_ok_for_insert(Arg, 3);
+      true -> "Code string is empty"
+   end;
+mfilecode_ok_for_insert(Arg, 1) -> 
+   if
+      is_list(Arg) -> mfilecode_ok_for_insert(Arg, 2);
+      true -> "Not a list"
+   end.
+
+mfilecode_ok_for_insert(Arg) ->
+   Result = mfilecode_ok_for_insert(Arg, 1),
+   case Result of
+      yes -> yes;
+      ErrorMessage -> ErrorMessage
+   end.

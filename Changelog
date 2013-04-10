@@ -1,3 +1,4 @@
+2013-04-10 Version 0.2.9 Fixed regression in mfilecode insert/fetch, this functionality now nearing production level
 2013-04-10 Version 0.2.8 Development now back on track; updated TODO; need to run further tests on fetch code, insert code
 2013-04-10 Version 0.2.7 Fixed bug -- ChicagoBoss was very upset that I had my unit tests in the src/controller directory
 2013-04-10 Version 0.2.6 More testing mfile-release

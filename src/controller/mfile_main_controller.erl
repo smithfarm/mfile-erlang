@@ -59,10 +59,13 @@ gen_insertcode_JSON(GicJCode) ->
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
    C = Req:post_param("mfilecodeCode"), 
-   case mfilelib:validate_mfilecode(C) of
-   	true           -> gen_insertcode_JSON(C);
-	false          -> { json, { queryResult, "Upper and lower case ASCII letters only." }, [] };
-	{error, IcErr} -> { json, { queryResult, IcErr }, [] }
+   case mfilelib:mfilecode_ok_for_insert(C) of
+   	yes         -> gen_insertcode_JSON(C);
+	ErrorString -> { json, [ { queryResult,   ErrorString }, 
+	                         { mfilecodeID,   0 }, 
+				 { mfilecodeDate, ""}, 
+				 { mfilecodeCode, ""},
+				 { mfilecodeDesc, ""} ] }
    end.
 
 % fetch record by Code and Serial Number (called asynchronously using AJAX)

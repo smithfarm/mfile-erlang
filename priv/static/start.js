@@ -139,6 +139,7 @@ var MfilecodeObj = function(
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
+        console.log("Query result is: '"+result.queryResult+"'");
         if (result.queryResult == "success")
         { 
 	   console.log("SUCCESS")
@@ -282,6 +283,10 @@ $(document).ready(function() {
   // Handle keypresses in Code field
   $("#code").keypress(function(event) {
     logKeyPress(event);
+    if (event.keyCode == 37) return true;  // Left arrow key is OK
+    if (event.keyCode == 39) return true;  // Right arrow key is OK
+    if (event.keyCode == 45) return true;  // Insert key is OK
+    if (event.keyCode == 114) return true; // F3 key is OK
     if (!isLetterKey(event))
     {
        console.log("ILLEGAL -- NOT A LETTER");
@@ -294,6 +299,8 @@ $(document).ready(function() {
   // Handle keypresses in Serial Number (sern) field
   $("#sern").keypress(function(event) {
     logKeyPress(event);
+    if (event.keyCode == 45) return true;  // Insert key is OK
+    if (event.keyCode == 114) return true; // F3 key is OK
     if (!isNumberKey(event))
     {
        console.log("ILLEGAL -- NOT A NUMBER");
