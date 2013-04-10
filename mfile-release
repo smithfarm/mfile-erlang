@@ -30,7 +30,6 @@ mv Changelog.new Changelog
 
 # git
 git commit -a -m "$CHGLOGENTRY"
-pwd
 git push -u origin master
 
 # parse version number using trick from stackoverflow.com
@@ -42,6 +41,7 @@ IFS="$oIFS"
 # increment version number
 REV=`expr $3 + 1`
 VERNUM="$1.$2.$REV"
+git tag ver-$VERNUM
 
 # overwrite mfile/VERSION with incremented version number 
 echo $VERNUM >VERSION

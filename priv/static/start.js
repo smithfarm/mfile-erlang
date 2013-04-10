@@ -415,7 +415,7 @@ function mfileProcessInsert() {
       document.getElementById("code").value,
       document.getElementById("sern").value,
       document.getElementById("keywords").value,
-      document.getElementById("description").value,
+      document.getElementById("description").value
     );
     currentRec.mfileInsert();
 }
