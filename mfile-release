@@ -6,7 +6,7 @@
 # and then increments the version number.
 
 # ensure we are in the mfile directory
-cd `dirname $0`
+cd /home/smithfarm/src/mfile
 
 # shut down the application (use only w/production server)
 #./init.sh stop
