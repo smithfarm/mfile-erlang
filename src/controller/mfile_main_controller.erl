@@ -13,7 +13,7 @@ initializeForm() ->
 
 % GET /
 start('GET', []) ->
-   lager:start(),
+   %lager:start(),
    {ok, initializeForm() }.
 
 % insert record (called asynchronously using AJAX)
@@ -70,7 +70,7 @@ fetch('POST', []) ->
    Sf = Req:post_param("mfileSern"),  % get Serial Number from form
 
    Result = mfilelib:validate_codestr_and_sern(Cf, Sf),
-   lager:info("validate_codestr_and_sern returned ~p", [Result]),
+   %lager:info("validate_codestr_and_sern returned ~p", [Result]),
    { {result, R}, {codeid, I}, 
      {codestr, C}, {sern, S} } = Result,
    % if the Code exists in the database, I will be something other than 0
@@ -89,7 +89,7 @@ fetch('POST', []) ->
 
        not ((I /= 0) and (S /= 0)) -> {json, { queryResult, R }, [] }
    end,
-   lager:info("sending back JSON: ~p", [Json]),
+   %lager:info("sending back JSON: ~p", [Json]),
    Json.
 
 % fetch code (called asynchronously using AJAX)
