@@ -25,12 +25,10 @@ validate_serial_number(Sf) ->
    {{result, R}, {sern, S}}.
 
 validate_codestr(Cf) ->
+   lager:info("Entering mfilelib:validate_codestr/1"),
    I = case fetch_code(Cf) of
-          {"success", T, _, C, _} -> R = "success",
-	                             T;
-          _                       -> R = lists:append(["Code '", Cf, "' not found"]),
-	                             C = "",
-	                             0
+          {R, T, _, C, _} when R =:= "success" -> T;
+          {R, T, _, C, _}                      -> T
        end,
    {{result, R}, {codeid, I}, {codestr, C}}.
 
@@ -53,17 +51,20 @@ mfilecodeId_strip([$m,$f,$i,$l,$e,$c,$o,$d,$e,$-|T]) ->
 % given a code string, convert it to all upper-case and look up its vitals
 % returns {QUERY_RESULT_STRING, CODE_ID, CREATED_AT, CODE_STR, CODE_DESC}
 fetch_code(C) ->
-   case boss_db:find(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, C)}]) of
-      [{mfilecode,CId,CTime,CStr,CDesc}] -> { "success", 
-                                              mfilecodeId_strip(CId),
-                                              mfilelib:timestamp_to_binary_date_only(CTime),
-					      CStr,
-					      CDesc };
-      []                                 -> { lists:append(["Code '", C, "' not found"]),
-                                              0,
-                                              "",
-					      "",
-					      "" }
+   % use find_first just to be on the safe side
+   R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, C)}]),
+   lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
+   case R of
+      {mfilecode,CId,CTime,CStr,CDesc} -> { "success", 
+                                            mfilecodeId_strip(CId),
+                                            mfilelib:timestamp_to_binary_date_only(CTime),
+					    CStr,
+					    CDesc };
+      undefined                        -> { lists:append(["Code ", C, " not found"]),
+                                            0, [], [], [] };
+      _                                -> { "internal error",
+                                            0, [], [], [] }
+
    end.
 
 

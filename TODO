@@ -1,5 +1,4 @@
-20130411: change "mfile insert" so uses the given "mfilecode sequence" to increment the serial number
-20130411: change "mfilecode insert" so it creates a sequence for each new mfilecode
+20130411: when you fetch an mfile and then fetch a different mfilecode, it leaves the mfile ID and date on-screen, which is confusing
 20130409: write unit tests for all functions in mfilelib.erl
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
 20130407: investigate what SQL commands I used in the original mfile to run searches

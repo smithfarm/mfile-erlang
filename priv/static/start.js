@@ -97,7 +97,7 @@ var MfileObj = function(
            $("#keywords").val(result.mfileKeyw);
            $("#description").val(result.mfileDesc);
            $("#mfileresult").empty();
-           $("#mfileresult").append("Found record no. "+result.mfileId+" last modified on "+result.mfileDate)
+           $("#mfileresult").append("Found record "+result.mfileCode+"-"+result.mfileSern)
 	}
 	else
 	{

@@ -4,7 +4,7 @@
 VERNUM=`head -n 1 VERSION`
 
 # get release description
-echo "Changelog entry for this update (ALL SINGLE-QUOTES MUST BE DOUBLED UP!!!!):"
+echo "Changelog entry for this update:"
 read CHGLOGENTRY
 
 # update Changelog
