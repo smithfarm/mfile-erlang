@@ -1,6 +1,88 @@
 -module(mfilelib).
 -compile(export_all).
 
+
+%
+% get mfile version number and DB backend version info
+%
+initializeForm() ->
+   X = mfilelib:getMfileVerNum(),  
+   % get PostgreSQL version number
+   { ok, _, [ {DBS} ] } = boss_db:execute("SELECT version();"),
+   % prep for sending to template (view/start.html)
+   [{mfilevernum, X}, {mfiledbstatus, binary_to_list(DBS)}].
+
+% insertcode helper function - sends Code entered by the user to DB
+mfilecode_insert_JSON(CStr) when is_list(CStr) ->
+   MfilecodeRec = mfilecode:new( id,
+                                 calendar:now_to_datetime(erlang:now()),
+				 lists:map(fun mfilelib:uppercase_it/1, CStr),
+				 [] ),
+   case MfilecodeRec:save() of
+      {ok,{mfilecode, Id, T, Code, CodeDesc}} -> 
+          {json, [ {queryResult,  "success"},
+                   {mfilecodeId,   Id},
+                   {mfilecodeDate, mfilelib:timestamp_to_binary_date_only(T)},
+	           {mfilecodeCode, Code},
+	           {mfilecodeDesc, CodeDesc} ] };
+      {error, _} -> 
+          mfilecode_error_JSON("Internal error (see log for details)")
+   end.
+
+% generate an "error" mfilecode JSON tuple with result string R
+mfilecode_error_JSON(R) when is_list(R) ->
+   {json, [ {queryResult,   R},
+            {mfilecodeId,   0}, 
+            {mfilecodeDate, []},
+            {mfilecodeCode, []},
+	    {mfilecodeDesc, []} ] }.
+
+% attempt to insert mfile record and produce JSON output
+mfile_insert_JSON(I, C, K, D) ->
+   MfileRec = boss_record:new( mfile, [ {id, id},
+                                        {created_at, calendar:now_to_datetime(erlang:now())}, 
+					{code_id, I},
+					{sern, (mfilelib:find_last_sern(I)+1)},  % not atomic, unfortunately!
+			                {keyw, K}, 
+			                {file_desc, D} ] 
+                              ),
+   lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
+   case MfileRec:save() of
+      {ok,{mfile, Id, T, CId, Sern, Keyw, FileDesc}} ->
+	  {json, [ {queryResult, "success"},
+                   {mfileId,     Id}, 
+                   {mfileDate,   mfilelib:timestamp_to_binary_date_only(T)},
+                   {mfileCodeId, CId},
+                   {mfileCode,   C},
+                   {mfileSern,   Sern},
+                   {mfileKeyw,   Keyw}, 
+                   {mfileDesc,   FileDesc} ] };
+      {error, _} -> 
+          mfile_error_JSON("Internal error (see log for details)")
+   end.
+
+% generate an "error" mfile JSON tuple with result string R
+mfile_error_JSON(R) when is_list(R) ->
+   {json, [ {queryResult, R},
+            {mfileId,     0}, 
+            {mfileDate,   []},
+            {mfileCodeId, 0},
+            {mfileCode,   []},
+            {mfileSern,   0},
+            {mfileKeyw,   []}, 
+            {mfileDesc,   []} ] }.
+
+%
+% Find the current last serial number for a given CodeId
+%
+find_last_sern(CId) ->
+   R = boss_db:find_last(mfile, [{code_id, 'equals', CId}]),
+   lager:info("boss_db:find_last(mfile) returned: ~p", [R]),
+   case R of
+      {mfile,_,_,_,S,_,_} -> S;
+      undefined ->           0
+   end.
+
 % 
 % Function to validate serial number entered by user into the form:
 % test if it's a number and, if it is, convert it into an integer

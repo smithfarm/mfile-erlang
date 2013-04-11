@@ -1,3 +1,4 @@
+2013-04-11 Version 0.3.3 Lots of clean-up, moved all extraneous material out of the main controller module into mfilelibs.erl
 2013-04-11 Version 0.3.2 Some refinements to the code
 2013-04-11 Version 0.3.1 Updated screenshot
 2013-04-11 Version 0.3.0 Updated TODO
