@@ -1,7 +1,42 @@
 MESSAGE:
 {error_logger,{{2013,4,10},{21,15,12}},"Protocol: ~p: register error: ~p~n",["inet_tcp",{{badmatch,{error,duplicate_name}},[{inet_tcp_dist,listen,1,[{file,"inet_tcp_dist.erl"},{line,70}]},{net_kernel,start_protos,4,[{file,"net_kernel.erl"},{line,1314}]},{net_kernel,start_protos,3,[{file,"net_kernel.erl"},{line,1307}]},{net_kernel,init_node,2,[{file,"net_kernel.erl"},{line,1197}]},{net_kernel,init,1,[{file,"net_kernel.erl"},{line,357}]},{gen_server,init_it,6,[{file,"gen_server.erl"},{line,304}]},{proc_lib,init_p_do_apply,3,[{file,"proc_lib.erl"},{line,227}]}]}]
-MEANING:
-This message appears when, for example, you have one "./init-dev.sh" instance running and you attempt to start another one.
+POSSIBLE MEANING:
+You have one "./init-dev.sh" instance running and you attempt to start another one.
 
 
+MESSAGE:
+10:05:21.859 [error] gen_server boss_web terminated with reason: no match of right hand value [] in boss_files:'-module_list1/3-fun-2-'/4 line 244
+10:05:21.933 [error] CRASH REPORT Process boss_web with 0 neighbours exited with reason: no match of right hand value [] in boss_files:'-module_list1/3-fun-2-'/4 line 244 in gen_server:terminate/6 line 747
+10:05:22.008 [error] Supervisor boss_sup had child boss_web_controller started with boss_web_controller:start_link([{ip,"0.0.0.0"},{port,8001}]) at <0.461.0> exit with reason no match of right hand value [] in boss_files:'-module_list1/3-fun-2-'/4 line 244 in context child_terminated
+10:05:22.074 [error] gen_server boss_service_sup terminated with reason: no match of right hand value [] in boss_files:'-module_list1/3-fun-2-'/4 line 244
+(possibly repeated on and on, seemingly endlessly)
+POSSIBLE MEANING:
+You have created a rogue subdirectory in ../src/controller (this is strictly *verboten*)
+These messages appear when you start the server with a rogue directory present.
 
+
+MESSAGE:
+ERROR: pre_compile failed while processing /home/smithfarm/src/mfile: {'EXIT',{function_clause,[{boss_files,compiler_adapter_for_extension,
+                                      [[]],
+                                      [{file,"src/boss/boss_files.erl"},
+                                       {line,177}]},
+                          {boss_load,maybe_compile,4,
+                                     [{file,"src/boss/boss_load.erl"},
+                                      {line,158}]},
+(etc.)
+POSSIBLE MEANING:
+You have created a rogue subdirectory in ../src/controller (this is strictly *verboten*)
+These messages appear when you do "./rebar compile" with a rogue directory present.
+
+
+LESSON -- LOGGING:
+To use lager (https://github.com/basho/lager) in your ChicagoBoss app, you
+don't have do anything special: you don't have to put anything in the
+boss.config file, nor do you need a -compile([{parse_transform,
+lager_transform}]). line, nor do you have to do lager:start(). All of this is
+done for you in the ChicagoBoss code. The lager configuration is located in
+skel/boss.config under the ChicagoBoss directory. By default, the "info" and
+"error" handlers are enabled. The log messages appear in the Erlang shell
+(console) when you start the server using init-dev.sh, and they are also
+written to the console.log and error.log files in the log directory of your
+app.

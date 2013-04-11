@@ -1,6 +1,5 @@
 -module(mfile_main_controller, [Req]).
 -compile(export_all).
--compile([{parse_transform, lager_transform}]).
 
 
 initializeForm() ->
@@ -13,7 +12,7 @@ initializeForm() ->
 
 % GET /
 start('GET', []) ->
-   lager:start(),
+   % lager:start(),
    lager:info("Firing up mfile web UI"),
    {ok, initializeForm() }.
 

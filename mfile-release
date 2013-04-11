@@ -15,7 +15,7 @@ cd /home/smithfarm/src/mfile
 VERNUM=`head -n 1 VERSION`
 
 # get release description
-echo "Changelog entry for this release:"
+echo "Changelog entry for this release (ALL SINGLE-QUOTES MUST BE DOUBLED UP!!!!):"
 read CHGLOGENTRY
 
 # update Changelog

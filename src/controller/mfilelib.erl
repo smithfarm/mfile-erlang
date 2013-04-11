@@ -99,8 +99,8 @@ timestamp_to_binary_date_only(Timest) ->
 
 
 is_an_ASCII_letter(X) ->
-    Uppers = lists:seq(65,90),
-    Lowers = lists:seq(97,122),
+    Uppers = lists:seq($A, $Z),
+    Lowers = lists:seq($a, $z),
     lists:member(X, Uppers) or lists:member(X, Lowers).
 
 

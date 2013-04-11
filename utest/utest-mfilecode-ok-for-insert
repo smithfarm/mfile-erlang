@@ -1,0 +1,12 @@
+%use with utest.erl
+{
+        fun mfilelib:mfilecode_ok_for_insert/1,
+        [
+           { abc, "Not a list" },
+           { [], "Code string is empty" },
+           { "NineChars", "Code string too long (max. 8 characters)" },
+           { "123", "Upper and lower case ASCII characters only" }, 
+           { "hippo", "Code already exists in the database" },
+	   { "GOOD", yes }
+        ]
+}.
