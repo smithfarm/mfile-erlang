@@ -19,8 +19,8 @@ echo "Changelog entry for this release (ALL SINGLE-QUOTES MUST BE DOUBLED UP!!!!
 read CHGLOGENTRY
 
 # update Changelog
-CMD="sed '1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY' Changelog"
-eval $CMD >Changelog.new
+CMD="sed -e \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" -e \"s/'/''/g\" Changelog >Changelog.new"
+eval $CMD
 mv Changelog.new Changelog
 
 # create tar archive of present release
