@@ -1,3 +1,6 @@
+2013-04-11 Version 0.3.0 Updated screenshot
+2013-04-11 Version 0.3.0 Updated TODO
+2013-04-11 Version 0.3.0 Bumped up to next minor version
 2013-04-11 Version 0.2.12 Debugging proceeding apace, insert and fetch done for both mfilecode (file codes) and mfile (files) - that means you can now insert files and then fetch them by their serial number
 2013-04-11 Version 0.2.11 Corrected yet another glitch in mfile-release
 2013-04-11 Version 0.2.10 Changelog entry for this version lost due to mfile-release glitch

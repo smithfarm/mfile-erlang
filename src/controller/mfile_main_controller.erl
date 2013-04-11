@@ -32,7 +32,7 @@ insert('POST', []) ->
       R =:= "success" -> MfileRec = boss_record:new( mfile, [ {id, id},
                                                               {created_at, calendar:now_to_datetime(erlang:now())}, 
 							      {code_id, I},
-							      {sern, (find_last_sern(I)+1)},
+							      {sern, (find_last_sern(I)+1)},  % not atomic, unfortunately!
 			                                      {keyw, Req:post_param("mfileKeyw")}, 
 			                                      {file_desc, Req:post_param("mfileDesc")} ] 
                                                    ),

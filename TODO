@@ -1,9 +1,11 @@
+20130411: change "mfile insert" so uses the given "mfilecode sequence" to increment the serial number
+20130411: change "mfilecode insert" so it creates a sequence for each new mfilecode
 20130409: write unit tests for all functions in mfilelib.erl
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
-20130408: fix mfile insert so it validates code, makes sure it doesn't already exist, and automatically increments serial number
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130408: fix mfile insert so it validates code, makes sure it doesn't already exist, and automatically increments serial number
 *20130408: add fetch record by code+serial number
 *20130408: find out why "lost" URL handler doesn't work
 *20130408: include (and process) query result string in JSON sent back by server 
