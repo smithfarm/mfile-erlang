@@ -42,12 +42,20 @@ validate_codestr_and_sern(Cf, Sf) ->
                          {Rc, I, C, S}
    end.
 
+%
+% the Boss DB model returns the Code ID in the format "mfilecode-" ++ SOME_INTEGER, 
+% (e.g. "mfilecode-1"), but to be useful to us we need to strip off the "mfilecode-"
+% part and leave just the integer
+%
+mfilecodeId_strip([$m,$f,$i,$l,$e,$c,$o,$d,$e,$-|T]) ->  
+   list_to_integer(T).  % isn't Erlang amazing?
+
 % given a code string, convert it to all upper-case and look up its vitals
 % returns {QUERY_RESULT_STRING, CODE_ID, CREATED_AT, CODE_STR, CODE_DESC}
 fetch_code(C) ->
    case boss_db:find(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, C)}]) of
       [{mfilecode,CId,CTime,CStr,CDesc}] -> { "success", 
-                                              CId,
+                                              mfilecodeId_strip(CId),
                                               mfilelib:timestamp_to_binary_date_only(CTime),
 					      CStr,
 					      CDesc };

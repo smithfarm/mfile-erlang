@@ -14,7 +14,7 @@ create table mfiles (
 create table mfilecodes (
   id serial NOT NULL,
   created_at timestamp NOT NULL,
-  code_str varchar(8) NOT NULL,
+  code_str varchar(8) NOT NULL UNIQUE,
   code_desc varchar(120),
   primary key (id)
 );

@@ -38,7 +38,7 @@ var MfileObj = function(
   this.mfileCodeId = theCodeId;
   this.mfileCode = theCode;
   this.mfileSern = theSern;
-  this.mfileQueryResult = theQueryResult;
+  this.queryResult = theQueryResult;
 
   // Insert an mfile record into the database
   // - interfaces with "insert" URL handler in main.erl
@@ -52,7 +52,7 @@ var MfileObj = function(
       data: this.mfileData,
       success: function(result) { 
         console.log(result);
-        if (result.mfileQueryResult == "success")
+        if (result.queryResult == "success")
         { 
 	   console.log("SUCCESS")
            $("#id").empty();
@@ -69,7 +69,7 @@ var MfileObj = function(
 	{
 	   console.log("FAILURE")
            $("#mfileresult").empty();
-           $("#mfileresult").append("FAILED: '"+result.mfileQueryResult+"'")
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
 	}
       }
     });
@@ -86,7 +86,7 @@ var MfileObj = function(
       data: this.mfileData,
       success: function(result) { 
         console.log(result);
-        if (result.mfileQueryResult == "success")
+        if (result.queryResult == "success")
         { 
 	   console.log("SUCCESS")
            $("#id").empty();
@@ -103,7 +103,7 @@ var MfileObj = function(
 	{
 	   console.log("FAILURE")
            $("#mfileresult").empty();
-           $("#mfileresult").append("FAILED: '"+result.mfileQueryResult+"'")
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
 	}
       }
     });
@@ -177,7 +177,7 @@ var MfilecodeObj = function(
 	   $("#code").val(result.mfilecodeCode);
 	   $("#codeid").val(result.mfilecodeId);
            $("#mfileresult").empty();
-           $("#mfileresult").append("Found '"+result.mfilecodeId+"' == '"+result.mfilecodeCode+"'");
+           $("#mfileresult").append("Found code '"+result.mfilecodeCode+"' (ID No. "+result.mfilecodeId+")");
 	}
 	else
 	{
