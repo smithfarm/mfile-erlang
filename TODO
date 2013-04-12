@@ -1,3 +1,4 @@
+20130412: make it use records internally (#icode, #ifile) 
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
 20130411: when you fetch an mfile and then fetch a different mfilecode, it leaves the mfile ID and date on-screen, which is confusing
 20130409: write unit tests for all functions in mfilelib.erl

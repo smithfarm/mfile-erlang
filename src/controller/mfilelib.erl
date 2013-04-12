@@ -1,5 +1,6 @@
 -module(mfilelib).
 -compile(export_all).
+-include("mfile.hrl").
 
 
 %
@@ -11,66 +12,6 @@ initializeForm() ->
    { ok, _, [ {DBS} ] } = boss_db:execute("SELECT version();"),
    % prep for sending to template (view/start.html)
    [{mfilevernum, X}, {mfiledbstatus, binary_to_list(DBS)}].
-
-% insertcode helper function - sends Code entered by the user to DB
-mfilecode_insert_JSON(CStr) when is_list(CStr) ->
-   MfilecodeRec = mfilecode:new( id,
-                                 calendar:now_to_datetime(erlang:now()),
-				 lists:map(fun mfilelib:uppercase_it/1, CStr),
-				 [] ),
-   case MfilecodeRec:save() of
-      {ok,{mfilecode, Id, T, Code, CodeDesc}} -> 
-          {json, [ {queryResult,  "success"},
-                   {mfilecodeId,   Id},
-                   {mfilecodeDate, mfilelib:timestamp_to_binary_date_only(T)},
-	           {mfilecodeCode, Code},
-	           {mfilecodeDesc, CodeDesc} ] };
-      {error, _} -> 
-          mfilecode_error_JSON("Internal error (see log for details)")
-   end.
-
-% generate an "error" mfilecode JSON tuple with result string R
-mfilecode_error_JSON(R) when is_list(R) ->
-   {json, [ {queryResult,   R},
-            {mfilecodeId,   0}, 
-            {mfilecodeDate, []},
-            {mfilecodeCode, []},
-	    {mfilecodeDesc, []} ] }.
-
-% attempt to insert mfile record and produce JSON output
-mfile_insert_JSON(I, C, K, D) ->
-   MfileRec = boss_record:new( mfile, [ {id, id},
-                                        {created_at, calendar:now_to_datetime(erlang:now())}, 
-					{code_id, I},
-					{sern, (mfilelib:find_last_sern(I)+1)},  % not atomic, unfortunately!
-			                {keyw, K}, 
-			                {file_desc, D} ] 
-                              ),
-   lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
-   case MfileRec:save() of
-      {ok,{mfile, Id, T, CId, Sern, Keyw, FileDesc}} ->
-	  {json, [ {queryResult, "success"},
-                   {mfileId,     Id}, 
-                   {mfileDate,   mfilelib:timestamp_to_binary_date_only(T)},
-                   {mfileCodeId, CId},
-                   {mfileCode,   C},
-                   {mfileSern,   Sern},
-                   {mfileKeyw,   Keyw}, 
-                   {mfileDesc,   FileDesc} ] };
-      {error, _} -> 
-          mfile_error_JSON("Internal error (see log for details)")
-   end.
-
-% generate an "error" mfile JSON tuple with result string R
-mfile_error_JSON(R) when is_list(R) ->
-   {json, [ {queryResult, R},
-            {mfileId,     0}, 
-            {mfileDate,   []},
-            {mfileCodeId, 0},
-            {mfileCode,   []},
-            {mfileSern,   0},
-            {mfileKeyw,   []}, 
-            {mfileDesc,   []} ] }.
 
 %
 % Find the current last serial number for a given CodeId
@@ -98,57 +39,26 @@ validate_serial_number(Sf) ->
         end,
 
    % check if it's a natural number
-   S = case catch list_to_integer(Sl) of
-          Sn when ((is_number(Sn)) and (Sn > 0)) -> R = "success",
-                                                    Sn; 
-          _ -> R = "Invalid serial number",
-               0   
-       end,
-   {{result, R}, {sern, S}}.
+   case catch list_to_integer(Sl) of
+      Sn when ((is_number(Sn)) and (Sn > 0)) -> Sn;
+      _ -> 0   
+   end.
 
 validate_codestr(Cf) ->
    lager:info("Entering mfilelib:validate_codestr/1"),
-   I = case fetch_code(Cf) of
-          {R, T, _, C, _} when R =:= "success" -> T;
-          {R, T, _, C, _}                      -> T
-       end,
-   {{result, R}, {codeid, I}, {codestr, C}}.
+   icode_fetch(#icode{cstr=Cf}).
 
-validate_codestr_and_sern(Cf, Sf) ->
-   {Rs, S} = validate_serial_number(Sf),
-   if
-      S =:= {sern, 0} -> {Rs, {codeid, 0}, {codestr, Cf}, S};  % invalid serial number
-      S =/= {sern, 0} -> {Rc, I, C} = validate_codestr(Cf),
-                         {Rc, I, C, S}
-   end.
-
-%
-% the Boss DB model returns the Code ID in the format "mfilecode-" ++ SOME_INTEGER, 
-% (e.g. "mfilecode-1"), but to be useful to us we need to strip off the "mfilecode-"
-% part and leave just the integer
-%
-mfilecodeId_strip([$m,$f,$i,$l,$e,$c,$o,$d,$e,$-|T]) ->  
-   list_to_integer(T).  % isn't Erlang amazing?
-
-% given a code string, convert it to all upper-case and look up its vitals
-% returns {QUERY_RESULT_STRING, CODE_ID, CREATED_AT, CODE_STR, CODE_DESC}
-fetch_code(C) ->
-   % use find_first just to be on the safe side
-   R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, C)}]),
-   lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
-   case R of
-      {mfilecode,CId,CTime,CStr,CDesc} -> { "success", 
-                                            mfilecodeId_strip(CId),
-                                            mfilelib:timestamp_to_binary_date_only(CTime),
-					    CStr,
-					    CDesc };
-      undefined                        -> { lists:append(["Code ", C, " not found"]),
-                                            0, [], [], [] };
-      _                                -> { "internal error",
-                                            0, [], [], [] }
-
-   end.
-
+validate_codestr_and_sern(I) when is_record(I, ifile) ->
+   case validate_serial_number(I#ifile.sern) of
+      0 -> Result = #ifile{result = "Invalid serial number",
+                           sern   = 0};
+      Sn -> T = validate_codestr(I#ifile.cstr),
+            Result = #ifile{result = T#icode.result,
+	                    cstr   = T#icode.cstr,
+		 	    cid    = T#icode.id,
+			    sern   = Sn}
+   end,
+   Result.
 
 getMfileVerNum() -> 
    case application:get_key(mfile, vsn) of
@@ -195,43 +105,164 @@ is_an_ASCII_letter(X) ->
     lists:member(X, Uppers) or lists:member(X, Lowers).
 
 
-%
-% to be fit for insertion into the database, an mfilecode must satisfy several conditions:
-% 1. must be a list
-% 2. must have more than zero members
-% 3. must have less than nine members
-% 4. must consist of upper and lower case ASCII characters only
-% 5. must not already exist in codes table of database
-%
-mfilecode_ok_for_insert(Arg, 5) -> 
-   case fetch_code(Arg) of
-      {"success", _, _, _, _} -> "Code already exists in the database";
+%% cstr_ok_for_insert
+%% to be fit for insertion into the database, an mfilecode must satisfy several conditions:
+%% 1. must be a list
+%% 2. must have more than zero members
+%% 3. must have less than nine members
+%% 4. must consist of upper and lower case ASCII characters only
+%% 5. must not already exist in codes table of database
+%%
+cstr_ok_for_insert(Arg, 5) -> 
+   I = icode_fetch(#icode{cstr = Arg}),
+   case I#icode.result of
+      "success" -> "Code already exists in the database";
       _ -> yes
    end;
-mfilecode_ok_for_insert(Arg, 4) -> 
+cstr_ok_for_insert(Arg, 4) -> 
    case lists:all(fun mfilelib:is_an_ASCII_letter/1, Arg) of 
-      true -> mfilecode_ok_for_insert(Arg, 5);
+      true -> cstr_ok_for_insert(Arg, 5);
       _ -> "Upper and lower case ASCII characters only"
    end;
-mfilecode_ok_for_insert(Arg, 3) -> 
+cstr_ok_for_insert(Arg, 3) -> 
    if
-      length(Arg) < 9 -> mfilecode_ok_for_insert(Arg, 4);
+      length(Arg) < 9 -> cstr_ok_for_insert(Arg, 4);
       true -> "Code string too long (max. 8 characters)"
    end;
-mfilecode_ok_for_insert(Arg, 2) -> 
+cstr_ok_for_insert(Arg, 2) -> 
    if
-      length(Arg) > 0 -> mfilecode_ok_for_insert(Arg, 3);
+      length(Arg) > 0 -> cstr_ok_for_insert(Arg, 3);
       true -> "Code string is empty"
    end;
-mfilecode_ok_for_insert(Arg, 1) -> 
+cstr_ok_for_insert(Arg, 1) -> 
    if
-      is_list(Arg) -> mfilecode_ok_for_insert(Arg, 2);
+      is_list(Arg) -> cstr_ok_for_insert(Arg, 2);
       true -> "Not a list"
    end.
 
-mfilecode_ok_for_insert(Arg) ->
-   Result = mfilecode_ok_for_insert(Arg, 1),
+cstr_ok_for_insert(Arg) ->
+   Result = cstr_ok_for_insert(Arg, 1),
    case Result of
-      yes -> yes;
+      yes -> "yes";
       ErrorMessage -> ErrorMessage
    end.
+
+%% icode_JSON
+icode_JSON(I) when is_record(I, icode) ->
+   {json, [ {queryResult,   I#icode.result},
+            {mfilecodeId,   I#icode.id},
+            {mfilecodeDate, I#icode.dstr},
+	    {mfilecodeCode, I#icode.cstr},
+	    {mfilecodeDesc, I#icode.desc} ] }.
+
+%% icode_insert
+icode_insert(I) when is_record(I, icode) ->
+   MfilecodeRec = mfilecode:new( id,
+                                 calendar:now_to_datetime(erlang:now()),
+				 lists:map(fun mfilelib:uppercase_it/1, I#icode.cstr),
+				 [] ),
+   case MfilecodeRec:save() of
+      {ok,{mfilecode, Id, T, Code, CodeDesc}} ->
+         #icode{result = "success", 
+	        id = Id, 
+		dstr = mfilelib:timestamp_to_binary_date_only(T),
+		cstr = Code};
+      {error, _} -> 
+         #icode{result = "Internal error on insert (see log for details)"}
+   end.
+
+%% ifile_insert
+%% attempt to insert mfile record and produce JSON output
+ifile_insert(I) when is_record(I, ifile) ->
+   MfileRec = boss_record:new( mfile, [ {id, id},
+                                        {created_at, calendar:now_to_datetime(erlang:now())}, 
+					{code_id, I#ifile.cid},
+					{sern, (find_last_sern(I#ifile.cid)+1)},  % not atomic, unfortunately!
+			                {keyw, I#ifile.keyw}, 
+			                {file_desc, I#ifile.desc} ] 
+                              ),
+   lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
+   case MfileRec:save() of
+      {ok,{mfile, Id, T, CId, Sern, Keyw, FileDesc}} ->
+	  #ifile{ result = "success",
+                  id =     Id, 
+                  dstr =   mfilelib:timestamp_to_binary_date_only(T),
+		  cid =    CId,
+                  cstr =   I#ifile.cstr,
+                  sern =   Sern,
+                  keyw =   Keyw, 
+                  desc =   FileDesc };
+      {error, _} -> 
+          #ifile{result = "Internal error on insert (see log for details)"}
+   end.
+
+
+%% mfilecodeID_strip
+%% 
+%% the Boss DB model returns the Code ID in the format "mfilecode-" ++ SOME_INTEGER, 
+%% (e.g. "mfilecode-1"), but to be useful to us we need to strip off the "mfilecode-"
+%% part and leave just the integer
+%%
+mfilecodeId_strip([$m,$f,$i,$l,$e,$c,$o,$d,$e,$-|T]) ->  
+   list_to_integer(T).  % isn't Erlang amazing?
+
+%% icode_fetch
+icode_fetch(I) when is_record(I, icode) ->
+   % use find_first just to be on the safe side
+   R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, I#icode.cstr)}]),
+   lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
+   case R of
+      {mfilecode,CId,CTime,CStr,CDesc} -> 
+         #icode{ result = "success", 
+                 id     = mfilecodeId_strip(CId),
+                 dstr   = mfilelib:timestamp_to_binary_date_only(CTime),
+		 cstr   = CStr,
+		 desc   = CDesc };
+      undefined -> 
+         #icode{ result = lists:append(["Code ", I#icode.cstr, " not found"]) };
+      _  ->              
+         #icode{ result = "Internal error on fetch (see log for details)" }
+   end.
+
+%% ifile_fetch
+ifile_fetch(I) when is_record(I, ifile) ->
+   IFile = validate_codestr_and_sern(I),
+   lager:info("validate_codestr_and_sern returned ~p", [IFile]),
+   case IFile#ifile.result of
+      "success" -> 
+           % there shouldn't be more than one, but we use find_first anyway
+	   lager:info("Calling boss_db:find_first(mfile) with ~p", [IFile]),
+	   R = boss_db:find_first(mfile, [{code_id, 'equals', IFile#ifile.cid}, {sern, 'equals', IFile#ifile.sern}]),
+	   lager:info("boss_db:find_first(mfile) returned: ~p", [R]),
+           case R of
+           	{mfile,V1,V2,_,V4,V5,V6} -> 
+		   #ifile{ result = "success",
+		           id     = V1,
+		           dstr   = mfilelib:timestamp_to_binary_date_only(V2),
+                           cid    = IFile#ifile.cid,
+		   	   cstr   = IFile#ifile.cstr,
+                           sern   = V4,
+                           keyw   = V5, 
+                           desc   = V6};
+        	undefined -> 
+                   UndefRes = lists:append(["File ", IFile#ifile.cstr, "-", integer_to_list(IFile#ifile.sern), " not found"]),
+		   lager:info("Returning error ~p", [UndefRes]),
+		   #ifile{ result = UndefRes };
+        	_ -> 
+		   #ifile{ result = "Internal error on fetch (see log for details)" }
+           end;
+       _ ->
+          IFile
+   end.
+
+%% ifile_JSON
+ifile_JSON(I) when is_record(I, ifile) ->
+   {json, [ {queryResult, I#ifile.result},
+            {mfileId,     I#ifile.id},
+            {mfileDate,   I#ifile.dstr},
+	    {mfileCodeId, I#ifile.cid},
+            {mfileCode,   I#ifile.cstr},
+            {mfileSern,   I#ifile.sern},
+            {mfileKeyw,   I#ifile.keyw},
+	    {mfileDesc,   I#ifile.desc} ] }.
+  
