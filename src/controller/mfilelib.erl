@@ -161,24 +161,32 @@ icode_insert(I) when is_record(I, icode) ->
    end.
 
 %% icode_delete
-icode_delete(I) when is_record(I, icode) ->
+icode_ok_to_delete(I) when is_record(I, icode) ->
    ICode = icode_fetch(I),
    case ICode#icode.id of
       0 -> 
-         #icode{result = ICode#icode.result};
+         {no, ICode};
       _ ->
          case icode_has_files(ICode) of
 	    true -> 
-	       #icode{result = lists:append(["Code ", ICode#icode.cstr, " has files; can't delete it"])};
+	       {no, #icode{result = lists:append(["Code ", ICode#icode.cstr, " has files; can't delete it"])}};
 	    false ->
-               CId = lists:append("mfilecode-", integer_to_list(ICode#icode.id)),
-      	       lager:info("About to delete the code with ID ~p", [CId]),
-               case boss_db:delete(CId) of
-	          ok -> 
-	             #icode{result = "success", cstr = ICode#icode.cstr};
-	          {error, DelErrMesg} ->
-	             #icode{result = DelErrMesg}
-	       end
+	       {yes, ICode}
+	 end
+   end.
+
+icode_delete(I) when is_record(I, icode) ->
+   case icode_ok_to_delete(I) of
+      {no, ICode} ->
+         ICode;
+      {yes, ICode} ->
+         CId = lists:append("mfilecode-", integer_to_list(ICode#icode.id)),
+         lager:info("About to delete the code with ID ~p", [CId]),
+         case boss_db:delete(CId) of
+            ok -> 
+               #icode{result = "success", cstr = ICode#icode.cstr};
+            {error, DelErrMesg} ->
+               #icode{result = DelErrMesg}
 	 end
    end.
 
