@@ -13,7 +13,7 @@ insert('POST', []) ->
    CStr = Req:post_param("mfileCode"),
    ICode = mfilelib:validate_codestr(CStr),
    case ICode#icode.result of 
-      "success" -> I = #ifile{cid = ICode#icode.id,
+      "success" -> I = #ifile{cid  = ICode#icode.id,
                               cstr = ICode#icode.cstr,
 			      keyw = Req:post_param("mfileKeyw"), 
 			      desc = Req:post_param("mfileDesc")},
@@ -32,17 +32,11 @@ fetch('POST', []) ->
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
    CStr = Req:post_param("mfilecodeCode"), 
-   R = mfilelib:cstr_ok_for_insert(CStr),
-   case R of
-   	"yes" -> I     = #icode{cstr = CStr},
-	         ICode = mfilelib:icode_insert(I);
-	_     -> ICode = #icode{result = R}
-   end,
-   mfilelib:icode_JSON(ICode).
+   I = mfilelib:icode_insert(#icode{cstr = CStr}),
+   mfilelib:icode_JSON(I).
 
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST', []) ->
-   lager:info("Parameters passed to module: ~p", [Req]),
    CStr = Req:post_param("mfilecodeCode"),
    I = mfilelib:icode_fetch(#icode{cstr = CStr}),
    mfilelib:icode_JSON(I).

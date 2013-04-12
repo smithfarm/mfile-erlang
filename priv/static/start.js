@@ -90,7 +90,7 @@ var MfileObj = function(
         { 
 	   console.log("SUCCESS")
            $("#id").empty();
-	   $("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
+	   $("#id").append("ID No. "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
 	   $("#code").val(result.mfileCode);
 	   $("#codeid").val(result.mfileCodeId);
 	   $("#sern").val(result.mfileSern);
@@ -140,6 +140,7 @@ var MfilecodeObj = function(
       data: this.mfilecodeData,
       success: function(result) { 
         console.log("Query result is: '"+result.queryResult+"'");
+	$("#id").empty();
         if (result.queryResult == "success")
         { 
 	   console.log("SUCCESS")
@@ -170,6 +171,8 @@ var MfilecodeObj = function(
       dataType: "json",
       data: this.mfilecodeData,
       success: function(result) { 
+        console.log("Query result is: '"+result.queryResult+"'");
+	$("#id").empty();
         if (result.queryResult == "success")
 	{ 
 	   console.log("SUCCESS");
@@ -448,6 +451,11 @@ function mfileProcessFetch() {
     currentRec.mfileFetch();
 }
 
+function mfileProcessSearch() {
+    console.log("SEARCH FUNCTION ACTIVATED");
+    $("#mfileresult").empty();
+    $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
+}
 
 function mfilecodeProcessFetch() {
     console.log("FILE CODE FETCH FUNCTION ACTIVATED");

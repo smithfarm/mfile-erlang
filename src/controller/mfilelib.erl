@@ -105,7 +105,6 @@ is_an_ASCII_letter(X) ->
     lists:member(X, Uppers) or lists:member(X, Lowers).
 
 
-%% cstr_ok_for_insert
 %% to be fit for insertion into the database, an mfilecode must satisfy several conditions:
 %% 1. must be a list
 %% 2. must have more than zero members
@@ -113,38 +112,19 @@ is_an_ASCII_letter(X) ->
 %% 4. must consist of upper and lower case ASCII characters only
 %% 5. must not already exist in codes table of database
 %%
-cstr_ok_for_insert(Arg, 5) -> 
-   I = icode_fetch(#icode{cstr = Arg}),
+icode_exists(C) when is_integer(C) -> 
+   I = icode_fetch(#icode{id = lists:append("mfilecode-", integer_to_list(C))}),
+   lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
-      "success" -> "Code already exists in the database";
-      _ -> yes
+      "success" -> true;
+      _ -> false
    end;
-cstr_ok_for_insert(Arg, 4) -> 
-   case lists:all(fun mfilelib:is_an_ASCII_letter/1, Arg) of 
-      true -> cstr_ok_for_insert(Arg, 5);
-      _ -> "Upper and lower case ASCII characters only"
-   end;
-cstr_ok_for_insert(Arg, 3) -> 
-   if
-      length(Arg) < 9 -> cstr_ok_for_insert(Arg, 4);
-      true -> "Code string too long (max. 8 characters)"
-   end;
-cstr_ok_for_insert(Arg, 2) -> 
-   if
-      length(Arg) > 0 -> cstr_ok_for_insert(Arg, 3);
-      true -> "Code string is empty"
-   end;
-cstr_ok_for_insert(Arg, 1) -> 
-   if
-      is_list(Arg) -> cstr_ok_for_insert(Arg, 2);
-      true -> "Not a list"
-   end.
-
-cstr_ok_for_insert(Arg) ->
-   Result = cstr_ok_for_insert(Arg, 1),
-   case Result of
-      yes -> "yes";
-      ErrorMessage -> ErrorMessage
+icode_exists(C) when is_list(C) -> 
+   I = icode_fetch(#icode{cstr = C}),
+   lager:info("icode_fetch returned ~p", [I]),
+   case I#icode.result of
+      "success" -> true;
+      _ -> false
    end.
 
 %% icode_JSON
@@ -167,8 +147,8 @@ icode_insert(I) when is_record(I, icode) ->
 	        id = Id, 
 		dstr = mfilelib:timestamp_to_binary_date_only(T),
 		cstr = Code};
-      {error, _} -> 
-         #icode{result = "Internal error on insert (see log for details)"}
+      {error, [FirstErrMesg|_]} -> 
+         #icode{result = FirstErrMesg}
    end.
 
 %% ifile_insert
@@ -207,9 +187,17 @@ mfilecodeId_strip([$m,$f,$i,$l,$e,$c,$o,$d,$e,$-|T]) ->
    list_to_integer(T).  % isn't Erlang amazing?
 
 %% icode_fetch
+%%
+%% Fetch code by CId or CStr
 icode_fetch(I) when is_record(I, icode) ->
-   % use find_first just to be on the safe side
-   R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, I#icode.cstr)}]),
+   if
+      I#icode.id =:= 0 ->  % fetching by CStr
+         lager:info("Fetching code by CStr '~p'", [I#icode.cstr]),
+         R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, I#icode.cstr)}]);
+      true ->              % fetching by CId
+         lager:info("Fetching code by CId '~p'", [I#icode.id]),
+         R = boss_db:find_first(mfilecode, [{id, 'equals', lists:append("mfilecode-", integer_to_list(I#icode.id))}])
+   end,
    lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
    case R of
       {mfilecode,CId,CTime,CStr,CDesc} -> 

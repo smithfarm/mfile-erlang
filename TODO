@@ -1,11 +1,11 @@
-20130412: make it use records internally (#icode, #ifile) 
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
-20130411: when you fetch an mfile and then fetch a different mfilecode, it leaves the mfile ID and date on-screen, which is confusing
 20130409: write unit tests for all functions in mfilelib.erl
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130412: make it use records internally (#icode, #ifile) 
+*20130411: when you fetch an mfile and then fetch a different mfilecode, it leaves the mfile ID and date on-screen, which is confusing
 *20130411: go through erl files looking for WARNING: comments, take appropriate action
 *20130408: fix mfile insert so it validates code, makes sure it doesn't already exist, and automatically increments serial number
 *20130408: add fetch record by code+serial number
