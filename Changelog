@@ -1,3 +1,4 @@
+2013-04-12 Version 0.3.5 Implemented delete mfilecode functionality
 2013-04-12 Version 0.3.4 Started using ChicagoBoss DB Model to validate records before insert
 2013-04-12 Version 0.3.3 Rewrote the code to use Erlang records for the internal representations of files and file codes (#ifile, #icode)
 2013-04-11 Version 0.3.3 Lots of clean-up, moved all extraneous material out of the main controller module into mfilelibs.erl
