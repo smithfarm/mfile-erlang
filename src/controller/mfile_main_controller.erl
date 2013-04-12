@@ -10,15 +10,14 @@ start('GET', []) ->
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
    lager:info("Entering main insert function"),
-   CStr = Req:post_param("mfileCode"),
-   ICode = mfilelib:validate_codestr(CStr),
-   case ICode#icode.result of 
-      "success" -> I = #ifile{cid  = ICode#icode.id,
-                              cstr = ICode#icode.cstr,
+   C = mfilelib:icode_fetch(Req:post_param("mfileCode")),
+   case C#icode.result of 
+      "success" -> I = #ifile{cid  = C#icode.id,
+                              cstr = C#icode.cstr,
 			      keyw = Req:post_param("mfileKeyw"), 
 			      desc = Req:post_param("mfileDesc")},
                    IFile = mfilelib:ifile_insert(I);
-      _         -> IFile = #ifile{result = ICode#icode.result}
+      _         -> IFile = #ifile{result = C#icode.result}
    end,
    mfilelib:ifile_JSON(IFile).
 
@@ -29,6 +28,13 @@ fetch('POST', []) ->
    I = mfilelib:ifile_fetch(#ifile{cstr = CStr, sern = Sn}),
    mfilelib:ifile_JSON(I).
 
+% delete record by Code and Serial Number (called asynchronously using AJAX)
+delete('POST', []) ->
+   CStr = Req:post_param("mfileCode"),  % get Code string from form
+   Sn = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
+   I = mfilelib:ifile_delete(#ifile{cstr = CStr, sern = Sn}),
+   mfilelib:ifile_JSON(I).
+
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
    CStr = Req:post_param("mfilecodeCode"), 
@@ -37,14 +43,12 @@ insertcode('POST', [])->
 
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST', []) ->
-   CStr = Req:post_param("mfilecodeCode"),
-   I = mfilelib:icode_fetch(#icode{cstr = CStr}),
+   I = mfilelib:icode_fetch(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
    
 % delete code (called asynchronously using AJAX)
 deletecode('POST', []) ->
-   CStr = Req:post_param("mfilecodeCode"),
-   I = mfilelib:icode_delete(#icode{cstr = CStr}),
+   I = mfilelib:icode_delete(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
    
 % error handler (same for 'GET' and 'POST')

@@ -239,7 +239,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Serial Number (Sern) field
   $("#sern").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, F3=Fetch File';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, F3=Fetch File, Del=Delete File';
   });
   $("#sern").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
@@ -282,6 +282,7 @@ $(document).ready(function() {
     console.log("KEYDOWN. WHICH "+event.which+", KEYCODE "+event.keyCode);
     handleEsc(event);
     handleF3Sern(event);
+    handleDelSern(event);
   });
 
   // Handle function keys in Keywords field
@@ -314,14 +315,14 @@ $(document).ready(function() {
     } 
   });
 
+  
   // Handle keypresses in Code field
   $("#code").keypress(function(event) {
     logKeyPress(event);
-    if (event.keyCode == 37) return true;  // Left arrow key is OK
-    if (event.keyCode == 39) return true;  // Right arrow key is OK
-    if (event.keyCode == 45) return true;  // Insert key is OK
-    if (event.keyCode == 46) return true;  // Delete key is OK
-    if (event.keyCode == 114) return true; // F3 key is OK
+    if (isEditingKey(event))
+    {
+       return true;
+    }
     if (!isLetterKey(event))
     {
        console.log("ILLEGAL -- NOT A LETTER");
@@ -334,8 +335,10 @@ $(document).ready(function() {
   // Handle keypresses in Serial Number (sern) field
   $("#sern").keypress(function(event) {
     logKeyPress(event);
-    if (event.keyCode == 45) return true;  // Insert key is OK
-    if (event.keyCode == 114) return true; // F3 key is OK
+    if (isEditingKey(event))
+    {
+       return true;
+    }
     if (!isNumberKey(event))
     {
        console.log("ILLEGAL -- NOT A NUMBER");
@@ -355,8 +358,17 @@ $(document).ready(function() {
 
 }); // END $(document).ready
 
-
 // *HEL* helper functions for processing keys
+
+// allow editing keys
+function isEditingKey(evt) {
+   if (event.keyCode == 37) return true;  // Left arrow key is OK
+   if (event.keyCode == 39) return true;  // Right arrow key is OK
+   if (event.keyCode == 45) return true;  // Insert key is OK
+   if (event.keyCode == 46) return true;  // Delete key is OK
+   if (event.keyCode == 114) return true; // F3 key is OK
+   return false;
+}
 
 // log keypresses
 function logKeyPress(evt) {
@@ -445,6 +457,18 @@ function handleDelCode(evt) {
     }
     return false;
 }
+
+// handle Del keypress (DELETE key) in Serial Number field
+function handleDelSern(evt) {
+    if (evt.keyCode == 46) // Ins
+    {
+      evt.preventDefault();
+      console.log("DELETE KEY PRESSED");
+      return mfileProcessDelete();
+    }
+    return false;
+}
+
 // handle F3 keypress ("Fetch Code") in Code field
 function handleF3Code(evt) {
     if (evt.keyCode == 114) // F3
@@ -501,6 +525,19 @@ function mfileProcessFetch() {
       "", ""
     );
     currentRec.mfileFetch();
+}
+
+function mfileProcessDelete() {
+    console.log("FILE DELETE FUNCTION ACTIVATED");
+    $("#mfileresult").empty();
+    $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
+//    var currentRec = new MfileObj( 
+//      "", "", "", "",
+//      document.getElementById("code").value,
+//      document.getElementById("sern").value,
+//      "", ""
+//    );
+//    currentRec.mfileDelete();
 }
 
 function mfileProcessSearch() {

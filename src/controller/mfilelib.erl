@@ -39,20 +39,19 @@ validate_serial_number(Sf) ->
         end,
 
    % check if it's a natural number
-   case catch list_to_integer(Sl) of
-      Sn when ((is_number(Sn)) and (Sn > 0)) -> Sn;
-      _ -> 0   
+   try 
+      list_to_integer(Sl) 
+   of
+      Sn when (is_number(Sn)) and (Sn > 0) -> Sn
+   catch
+      _:_ -> 0   
    end.
-
-validate_codestr(Cf) ->
-   lager:info("Entering mfilelib:validate_codestr/1"),
-   icode_fetch(#icode{cstr=Cf}).
 
 validate_codestr_and_sern(I) when is_record(I, ifile) ->
    case validate_serial_number(I#ifile.sern) of
       0 -> Result = #ifile{result = "Invalid serial number",
                            sern   = 0};
-      Sn -> T = validate_codestr(I#ifile.cstr),
+      Sn -> T = icode_fetch(I#ifile.cstr),
             Result = #ifile{result = T#icode.result,
 	                    cstr   = T#icode.cstr,
 		 	    cid    = T#icode.id,
@@ -127,6 +126,14 @@ icode_exists(C) when is_list(C) ->
       _ -> false
    end.
 
+icode_get_id(C) when is_list(C) ->
+   I = icode_fetch(#icode{cstr = C}),
+   lager:info("icode_fetch returned ~p", [I]),
+   case I#icode.result of
+      "success" -> I#icode.id;
+      _ -> 0
+   end.
+
 icode_has_files(I) when is_record(I, icode) ->
    lager:info("Looking up files that have code ID: ~p", [I#icode.id]),
    Count = boss_db:count(mfile, [{code_id, 'equals', I#icode.id}]),
@@ -151,7 +158,7 @@ icode_insert(I) when is_record(I, icode) ->
 				 lists:map(fun mfilelib:uppercase_it/1, I#icode.cstr),
 				 [] ),
    case MfilecodeRec:save() of
-      {ok,{mfilecode, Id, T, Code, CodeDesc}} ->
+      {ok,{mfilecode, Id, T, Code, _}} ->
          #icode{result = "success", 
 	        id = Id, 
 		dstr = mfilelib:timestamp_to_binary_date_only(T),
@@ -160,33 +167,38 @@ icode_insert(I) when is_record(I, icode) ->
          #icode{result = FirstErrMesg}
    end.
 
-%% icode_delete
-icode_ok_to_delete(I) when is_record(I, icode) ->
-   ICode = icode_fetch(I),
-   case ICode#icode.id of
-      0 -> 
-         {no, ICode};
-      _ ->
-         case icode_has_files(ICode) of
-	    true -> 
-	       {no, #icode{result = lists:append(["Code ", ICode#icode.cstr, " has files; can't delete it"])}};
-	    false ->
-	       {yes, ICode}
+%% ifile_exists
+ifile_exists(I) when is_record(I, ifile) ->
+   {no, I}.
+
+icode_delete(CStr) when is_list(CStr) ->
+   lager:info("Entering icode_delete with argument: ~p", [CStr]),
+   case icode_get_id(CStr) of
+      0 ->
+         #icode{result = "No such code in the database"};
+      A when is_integer(A) ->
+         CId = lists:append("mfilecode-", integer_to_list(A)),
+         lager:info("About to delete the file code with ID ~p", [CId]),
+         case boss_db:delete(CId) of
+            ok -> 
+               #icode{result = "success"}; 
+            {error, DelErrMesg} ->
+               #icode{result = DelErrMesg}
 	 end
    end.
 
-icode_delete(I) when is_record(I, icode) ->
-   case icode_ok_to_delete(I) of
-      {no, ICode} ->
-         ICode;
-      {yes, ICode} ->
-         CId = lists:append("mfilecode-", integer_to_list(ICode#icode.id)),
-         lager:info("About to delete the code with ID ~p", [CId]),
-         case boss_db:delete(CId) of
+ifile_delete(I) when is_record(I, ifile) ->
+   case icode_exists(I#ifile.cstr) of
+      false ->
+         #ifile{result = "No such code in the database"};
+      true ->
+         FId = lists:append("mfile-", integer_to_list(I#ifile.id)),
+         lager:info("About to delete the file with ID ~p", [FId]),
+         case boss_db:delete(FId) of
             ok -> 
-               #icode{result = "success", cstr = ICode#icode.cstr};
+               #ifile{result = "success"};  % !!!!!........XXXXWWWWWXXXXX............
             {error, DelErrMesg} ->
-               #icode{result = DelErrMesg}
+               #ifile{result = DelErrMesg}
 	 end
    end.
 
@@ -222,23 +234,26 @@ ifile_insert(I) when is_record(I, ifile) ->
 %% (e.g. "mfilecode-1"), but to be useful to us we need to strip off the "mfilecode-"
 %% part and leave just the integer
 %%
-mfilecodeId_strip([$m,$f,$i,$l,$e,$c,$o,$d,$e,$-|T]) ->  
+%% Note the special-case use of the operator '++' on the left-hand side of the
+%% pattern-matching operator. This is a kind of short-hand for:
+%% [$m, $f, $i, $l, $e, $c, $o, $d, $e, $- | T]
+%%
+mfilecodeId_strip("mfilecode-"++T) ->  
    list_to_integer(T).  % isn't Erlang amazing?
 
 %% icode_fetch
 %%
 %% Fetch code by CId or CStr
-icode_fetch(I) when is_record(I, icode) ->
-   if
-      I#icode.id =:= 0 ->  % fetching by CStr
-         lager:info("Fetching code by CStr '~p'", [I#icode.cstr]),
-         R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, I#icode.cstr)}]);
-      true ->              % fetching by CId
-         lager:info("Fetching code by CId '~p'", [I#icode.id]),
-         R = boss_db:find_first(mfilecode, [{id, 'equals', lists:append("mfilecode-", integer_to_list(I#icode.id))}])
-   end,
+icode_fetch(CId) when is_number(CId) ->
+   R = boss_db:find_first(mfilecode, [{id, 'equals', lists:append("mfilecode-", integer_to_list(CId))}]),
    lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
-   case R of
+   icode_fetch(R);
+icode_fetch(CStr) when is_list(CStr) ->
+   R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, CStr)}]),
+   lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
+   icode_fetch(R);
+icode_fetch(BossRec) ->
+   case BossRec of
       {mfilecode,CId,CTime,CStr,CDesc} -> 
          #icode{ result = "success", 
                  id     = mfilecodeId_strip(CId),
@@ -246,8 +261,9 @@ icode_fetch(I) when is_record(I, icode) ->
 		 cstr   = CStr,
 		 desc   = CDesc };
       undefined -> 
-         #icode{ result = lists:append(["Code ", I#icode.cstr, " not found"]) };
-      _  ->              
+         #icode{ result = "Code not found" };
+      ErrorValue  ->              
+         lager:info("Error value rcvd in icode_fetch: ~p", [ErrorValue]),
          #icode{ result = "Internal error on fetch (see log for details)" }
    end.
 
@@ -281,6 +297,7 @@ ifile_fetch(I) when is_record(I, ifile) ->
        _ ->
           IFile
    end.
+
 
 %% ifile_JSON
 ifile_JSON(I) when is_record(I, ifile) ->

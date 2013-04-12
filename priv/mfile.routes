@@ -22,6 +22,9 @@
 % Fetch
 {"/fetch", [{controller, "main"}, {action, "fetch"}]}.
 
+% Delete
+{"/delete", [{controller, "main"}, {action, "delete"}]}.
+
 % Insert code
 {"/insertcode", [{controller, "main"}, {action, "insertcode"}]}.
 
