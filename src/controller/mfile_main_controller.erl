@@ -41,6 +41,12 @@ fetchcode('POST', []) ->
    I = mfilelib:icode_fetch(#icode{cstr = CStr}),
    mfilelib:icode_JSON(I).
    
+% delete code (called asynchronously using AJAX)
+deletecode('POST', []) ->
+   CStr = Req:post_param("mfilecodeCode"),
+   I = mfilelib:icode_delete(#icode{cstr = CStr}),
+   mfilelib:icode_JSON(I).
+   
 % error handler (same for 'GET' and 'POST')
 lost(_, []) ->
    {ok, mfilelib:initializeForm() }.

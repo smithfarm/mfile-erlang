@@ -127,6 +127,15 @@ icode_exists(C) when is_list(C) ->
       _ -> false
    end.
 
+icode_has_files(I) when is_record(I, icode) ->
+   lager:info("Looking up files that have code ID: ~p", [I#icode.id]),
+   Count = boss_db:count(mfile, [{code_id, 'equals', I#icode.id}]),
+   lager:info("Number of files found: ~p", [Count]),
+   case Count of
+      0 -> false;
+      _ -> true
+   end.
+
 %% icode_JSON
 icode_JSON(I) when is_record(I, icode) ->
    {json, [ {queryResult,   I#icode.result},
@@ -149,6 +158,28 @@ icode_insert(I) when is_record(I, icode) ->
 		cstr = Code};
       {error, [FirstErrMesg|_]} -> 
          #icode{result = FirstErrMesg}
+   end.
+
+%% icode_delete
+icode_delete(I) when is_record(I, icode) ->
+   ICode = icode_fetch(I),
+   case ICode#icode.id of
+      0 -> 
+         #icode{result = ICode#icode.result};
+      _ ->
+         case icode_has_files(ICode) of
+	    true -> 
+	       #icode{result = lists:append(["Code ", ICode#icode.cstr, " has files; can't delete it"])};
+	    false ->
+               CId = lists:append("mfilecode-", integer_to_list(ICode#icode.id)),
+      	       lager:info("About to delete the code with ID ~p", [CId]),
+               case boss_db:delete(CId) of
+	          ok -> 
+	             #icode{result = "success", cstr = ICode#icode.cstr};
+	          {error, DelErrMesg} ->
+	             #icode{result = DelErrMesg}
+	       end
+	 end
    end.
 
 %% ifile_insert

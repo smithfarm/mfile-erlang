@@ -180,7 +180,7 @@ var MfilecodeObj = function(
 	   $("#code").val(result.mfilecodeCode);
 	   $("#codeid").val(result.mfilecodeId);
            $("#mfileresult").empty();
-           $("#mfileresult").append("Found code '"+result.mfilecodeCode+"' (ID No. "+result.mfilecodeId+")");
+           $("#mfileresult").append("Found code '"+result.mfilecodeCode+"'");
 	}
 	else
 	{
@@ -194,6 +194,36 @@ var MfilecodeObj = function(
       }
     });
   }
+
+  this.mfilecodeDelete = function() {
+    console.log("Attempting to delete code "+this.mfilecodeCode);
+    $.ajax({
+      url: "deletecode",
+      type: "POST",
+      dataType: "json",
+      data: this.mfilecodeData,
+      success: function(result) { 
+        console.log("Query result is: '"+result.queryResult+"'");
+	$("#id").empty();
+        if (result.queryResult == "success")
+	{ 
+	   console.log("SUCCESS");
+           console.log(result);
+	   $("#code").empty();
+	   $("#codeid").empty();
+	   $("#mfileresult").empty();
+           $("#mfileresult").append("Deleted code '"+result.mfilecodeCode+"'");
+	}
+	else
+	{
+	   console.log("FAILURE")
+	   console.log(result);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
+	}
+      }
+    });
+  }
 }
 
 // *LIS* When the document finishes loading, add event listeners
@@ -201,7 +231,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Code field
   $("#code").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write Code, F3=Validate Code';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write Code, F3=Validate Code, Del=Delete Code';
   });
   $("#code").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
@@ -243,6 +273,7 @@ $(document).ready(function() {
     } 
     handleEsc(event);
     handleInsCode(event);
+    handleDelCode(event);
     handleF3Code(event);
   });
 
@@ -289,6 +320,7 @@ $(document).ready(function() {
     if (event.keyCode == 37) return true;  // Left arrow key is OK
     if (event.keyCode == 39) return true;  // Right arrow key is OK
     if (event.keyCode == 45) return true;  // Insert key is OK
+    if (event.keyCode == 46) return true;  // Delete key is OK
     if (event.keyCode == 114) return true; // F3 key is OK
     if (!isLetterKey(event))
     {
@@ -403,6 +435,16 @@ function handleInsCode(evt) {
     return false;
 }
 
+// handle Del keypress (DELETE key) in Code field
+function handleDelCode(evt) {
+    if (evt.keyCode == 46) // Ins
+    {
+      evt.preventDefault();
+      console.log("DELETE KEY PRESSED");
+      return mfilecodeProcessDelete();
+    }
+    return false;
+}
 // handle F3 keypress ("Fetch Code") in Code field
 function handleF3Code(evt) {
     if (evt.keyCode == 114) // F3
@@ -438,6 +480,16 @@ function mfilecodeProcessInsert() {
       ""
     );
     currentRec.mfilecodeInsert();
+}
+
+function mfilecodeProcessDelete() {
+    console.log("FILE CODE DELETE FUNCTION ACTIVATED");
+    var currentRec = new MfilecodeObj( 
+      "", "", "", 
+      document.getElementById("code").value,
+      ""
+    );
+    currentRec.mfilecodeDelete();
 }
 
 function mfileProcessFetch() {
