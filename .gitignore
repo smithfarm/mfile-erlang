@@ -1,1 +1,11 @@
 *.swp
+bubba
+main.erl
+mfile.erl
+mfile.routes
+mfilecode.erl
+mfilelib.erl
+start.css
+start.html
+start.js
+utest/test.erl

@@ -1,3 +1,4 @@
+20130412: stop using the Id field of the mfilecodes table to link from the mfiles table: use an internal "CodeId" field instead (this field will need to be added to the mfilecodes table)
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
 20130409: write unit tests for all functions in mfilelib.erl
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
