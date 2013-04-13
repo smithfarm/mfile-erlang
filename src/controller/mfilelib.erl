@@ -3,9 +3,8 @@
 -include("mfile.hrl").
 
 
-%
-% get mfile version number and DB backend version info
-%
+%% initializeForm/0 %% get mfile version number and DB backend version info
+%%
 initializeForm() ->
    X = mfilelib:getMfileVerNum(),  
    % get PostgreSQL version number
@@ -13,10 +12,13 @@ initializeForm() ->
    % prep for sending to template (view/start.html)
    [{mfilevernum, X}, {mfiledbstatus, binary_to_list(DBS)}].
 
-%
-% Find the current last serial number for a given CodeId
-%
-find_last_sern(CId) ->
+
+%% find_last_sern/1 %% takes an integer (CId)
+%%                  %% returns an integer (Sern)
+%%
+%% Finds the current last serial number for a given CodeId
+%%
+find_last_sern(CId) when is_integer(CId) ->
    R = boss_db:find_last(mfile, [{code_id, 'equals', CId}]),
    lager:info("boss_db:find_last(mfile) returned: ~p", [R]),
    case R of
@@ -46,15 +48,15 @@ validate_serial_number(Sf) ->
       _:_ -> 0   
    end.
 
-validate_codestr_and_sern(I) when is_record(I, ifile) ->
-   case validate_serial_number(I#ifile.sern) of
+validate_codestr_and_sern(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+   case validate_serial_number(Sern) of
       0 -> Result = #ifile{result = "Invalid serial number",
                            sern   = 0};
-      Sn -> T = icode_fetch(I#ifile.cstr),
-            Result = #ifile{result = T#icode.result,
-	                    cstr   = T#icode.cstr,
-		 	    cid    = T#icode.id,
-			    sern   = Sn}
+      Sern -> T = icode_fetch(CStr),
+              Result = #ifile{result = T#icode.result,
+	                      cstr   = T#icode.cstr,
+	    	 	      cid    = T#icode.id,
+			      sern   = Sern}
    end,
    Result.
 
@@ -182,15 +184,19 @@ icode_insert(CStr) when is_list (CStr) ->
    end.
 
 
-%% ifile_exists/1 %% takes an ifile record
+%% ifile_exists/2 %% takes a string (CStr) and an integer (Sern)
+%%                %% returns true or false
 %%
-%% * * * NOT IMPLEMENTED * * *
-%%
-ifile_exists(I) when is_record(I, ifile) ->
-   {no, I}.
+ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) -> 
+   I = ifile_fetch(#ifile{cstr = CStr, sern = Sern}),
+   case I#ifile.result of
+      "success" -> true;
+      _         -> false
+   end.
 
 
 %% icode_delete/1 %% takes a string (file code)
+%%                %% returns a populated icode record
 %%
 icode_delete(CStr) when is_list(CStr) ->
    lager:info("Entering icode_delete with argument: ~p", [CStr]),
@@ -216,6 +222,9 @@ icode_delete(CStr) when is_list(CStr) ->
 	 end
    end.
 
+%% ifile_delete/2 %% takes a string (CStr) and an integer (Sern)
+%%                %% returns a populated ifile record
+%%
 ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
    lager:info("Entering ifile_delete with arguments: ~p, ~p", [CStr, Sern]),
    case icode_exists(CStr) of
@@ -242,7 +251,7 @@ ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
 %%              %% inserts new file and returns completed populated ifile record
 %%              
 ifile_insert(I) when is_record(I, ifile) ->
-   MfileRec = boss_record:new( mfile, [ {id,         id},
+   MfileRec = boss_record:new( mfile, [ 
                                         {created_at, calendar:now_to_datetime(erlang:now())}, 
 					{code_id,    I#ifile.cid},
 					{sern,       find_last_sern(I#ifile.cid) + 1},  % not atomic, unfortunately!
@@ -250,9 +259,10 @@ ifile_insert(I) when is_record(I, ifile) ->
 			                {file_desc,  I#ifile.desc} 
 			              ] 
                              ),
-   %lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
-   case MfileRec:save() of
+   lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
+   case MfileRec:save() of   %% N.B.: Does not update id field!
       {ok, _} ->
+          lager:info("Inserted new file with vitals ~p", [MfileRec]),
 	  #ifile{ result = "success",
                   id =     MfileRec:id(), 
                   dstr =   mfilelib:timestamp_to_binary_date_only(MfileRec:created_at()),
@@ -280,16 +290,20 @@ ifile_insert(I) when is_record(I, ifile) ->
 mfilecodeId_strip("mfilecode-" ++ T) ->                     % isn't Erlang amazing?
    list_to_integer(T).  
 
-%%
 %% icode_fetch %% Fetch code by CId or CStr
-%%
-%% Returns an icode record
+%%             %% Returns an icode record
 %%
 icode_fetch(CId) when is_number(CId) ->
-   R = boss_db:find_first(mfilecode, [{id, 'equals', lists:append("mfilecode-", integer_to_list(CId))}]),
+   R = boss_db:find_first(mfilecode, [{id, 
+                                      'equals', 
+				      lists:append("mfilecode-", integer_to_list(CId))}
+				     ]),
    icode_fetch(R);
 icode_fetch(CStr) when is_list(CStr) ->
-   R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, CStr)}]),
+   R = boss_db:find_first(mfilecode, [{code_str, 
+                                       'equals', 
+				       lists:map(fun uppercase_it/1, CStr)}
+				     ]),
    icode_fetch(R);
 icode_fetch(BossRec) ->
    lager:info("icode_fetch(BossRec) called with argument: ~p", [BossRec]),
@@ -304,9 +318,11 @@ icode_fetch(BossRec) ->
 		 desc   = BossRec:code_desc() }
    end.
 
-%% ifile_fetch
+%% ifile_fetch/1 %% takes an ifile record populated with cstr and sern
+%%               %% returns a populated ifile record
+%%
 ifile_fetch(I) when is_record(I, ifile) ->
-   IFile = validate_codestr_and_sern(I),
+   IFile = validate_codestr_and_sern(I#ifile.cstr, I#ifile.sern),
    lager:info("validate_codestr_and_sern returned ~p", [IFile]),
    case IFile#ifile.result of
       "success" -> 
