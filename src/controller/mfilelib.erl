@@ -104,12 +104,9 @@ is_an_ASCII_letter(X) ->
     lists:member(X, Uppers) or lists:member(X, Lowers).
 
 
-%% to be fit for insertion into the database, an mfilecode must satisfy several conditions:
-%% 1. must be a list
-%% 2. must have more than zero members
-%% 3. must have less than nine members
-%% 4. must consist of upper and lower case ASCII characters only
-%% 5. must not already exist in codes table of database
+%%
+%% icode_exists %% takes a CId (integer) or CStr (list)
+%%              %% returns true or false
 %%
 icode_exists(C) when is_integer(C) -> 
    I = icode_fetch(C),

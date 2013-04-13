@@ -56,7 +56,7 @@ var MfileObj = function(
         { 
 	   console.log("SUCCESS")
            $("#id").empty();
-	   $("#id").append("ID No. "+result.mfileId+"  Date: "+result.mfileDate);
+	   $("#id").append("ID No. "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
 	   $("#code").val(result.mfileCode);
 	   $("#codeid").val(result.mfileCodeId);
 	   $("#sern").val(result.mfileSern);
