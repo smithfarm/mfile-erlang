@@ -112,31 +112,31 @@ is_an_ASCII_letter(X) ->
 %% 5. must not already exist in codes table of database
 %%
 icode_exists(C) when is_integer(C) -> 
-   I = icode_fetch(#icode{id = lists:append("mfilecode-", integer_to_list(C))}),
+   I = icode_fetch(C),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
       "success" -> true;
       _ -> false
    end;
 icode_exists(C) when is_list(C) -> 
-   I = icode_fetch(#icode{cstr = C}),
+   I = icode_fetch(C),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
       "success" -> true;
       _ -> false
    end.
 
-icode_get_id(C) when is_list(C) ->
-   I = icode_fetch(#icode{cstr = C}),
+icode_get_bossid(C) when is_list(C) ->
+   I = icode_fetch(C),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
       "success" -> I#icode.id;
       _ -> 0
    end.
 
-icode_has_files(I) when is_record(I, icode) ->
-   lager:info("Looking up files that have code ID: ~p", [I#icode.id]),
-   Count = boss_db:count(mfile, [{code_id, 'equals', I#icode.id}]),
+icode_has_files(CId) when is_integer(CId) ->
+   lager:info("Looking up files that have code ID: ~p", [CId]),
+   Count = boss_db:count(mfile, [{code_id, 'equals', CId}]),
    lager:info("Number of files found: ~p", [Count]),
    case Count of
       0 -> false;
@@ -171,19 +171,31 @@ icode_insert(I) when is_record(I, icode) ->
 ifile_exists(I) when is_record(I, ifile) ->
    {no, I}.
 
+mfilecodeId_split("mfilecode-"++T) ->
+   list_to_integer(T).
+
 icode_delete(CStr) when is_list(CStr) ->
    lager:info("Entering icode_delete with argument: ~p", [CStr]),
-   case icode_get_id(CStr) of
-      0 ->
+   BossRec = boss_db:find_first(mfilecode, [{code_str, 'equals', CStr}]),
+   case BossRec of
+      undefined ->
          #icode{result = "No such code in the database"};
-      A when is_integer(A) ->
-         CId = lists:append("mfilecode-", integer_to_list(A)),
-         lager:info("About to delete the file code with ID ~p", [CId]),
-         case boss_db:delete(CId) of
-            ok -> 
-               #icode{result = "success"}; 
-            {error, DelErrMesg} ->
-               #icode{result = DelErrMesg}
+      A ->
+         lager:info("find_first(mfilecode) returned record: ~p", [A]),
+         lager:info("The record has ID: ~p", [A:id()]),
+	 CId = mfilecodeId_split(A:id()),
+         case icode_has_files(CId) of
+	    true ->
+	       #icode{result = "Files exist for this code: can't delete"};
+	    false ->
+	       lager:info("icode_has_files returned 'false' and A == ~p", [A]),
+               lager:info("About to delete the file code with ID ~p", [A:id()]),
+               case boss_db:delete(A:id()) of
+                  ok -> 
+                     #icode{result = "success"}; 
+                  {error, DelErrMesg} ->
+                     #icode{result = DelErrMesg}
+	       end
 	 end
    end.
 
@@ -253,6 +265,7 @@ icode_fetch(CStr) when is_list(CStr) ->
    lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
    icode_fetch(R);
 icode_fetch(BossRec) ->
+   lager:info("icode_fetch called with argument: ~p", [BossRec]),
    case BossRec of
       {mfilecode,CId,CTime,CStr,CDesc} -> 
          #icode{ result = "success", 

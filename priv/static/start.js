@@ -212,7 +212,7 @@ var MfilecodeObj = function(
 	   $("#code").empty();
 	   $("#codeid").empty();
 	   $("#mfileresult").empty();
-           $("#mfileresult").append("Deleted code '"+result.mfilecodeCode+"'");
+           $("#mfileresult").append("Code deleted");
 	}
 	else
 	{
