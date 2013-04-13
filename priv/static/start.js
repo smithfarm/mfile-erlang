@@ -108,6 +108,37 @@ var MfileObj = function(
       }
     });
   }
+
+  this.mfileDelete = function() {
+    console.log("Attempting to delete file "+this.mfileCode+"-"+this.mfileSern);
+    $.ajax({
+      url: "delete",
+      type: "POST",
+      dataType: "json",
+      data: this.mfileData,
+      success: function(result) { 
+        console.log("Query result is: '"+result.queryResult+"'");
+	$("#id").empty();
+        if (result.queryResult == "success")
+	{ 
+	   console.log("SUCCESS");
+           console.log(result);
+	   $("#code").empty();
+	   $("#codeid").empty();
+	   $("#sern").empty();
+	   $("#mfileresult").empty();
+           $("#mfileresult").append("File deleted");
+	}
+	else
+	{
+	   console.log("FAILURE")
+	   console.log(result);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
+	}
+      }
+    });
+  }
 }
 
 // mfilecode object
@@ -362,11 +393,11 @@ $(document).ready(function() {
 
 // allow editing keys
 function isEditingKey(evt) {
-   if (event.keyCode == 37) return true;  // Left arrow key is OK
-   if (event.keyCode == 39) return true;  // Right arrow key is OK
-   if (event.keyCode == 45) return true;  // Insert key is OK
-   if (event.keyCode == 46) return true;  // Delete key is OK
-   if (event.keyCode == 114) return true; // F3 key is OK
+   if (evt.keyCode == 37) return true;  // Left arrow key is OK
+   if (evt.keyCode == 39) return true;  // Right arrow key is OK
+   if (evt.keyCode == 45) return true;  // Insert key is OK
+   if (evt.keyCode == 46) return true;  // Delete key is OK
+   if (evt.keyCode == 114) return true; // F3 key is OK
    return false;
 }
 
@@ -529,15 +560,15 @@ function mfileProcessFetch() {
 
 function mfileProcessDelete() {
     console.log("FILE DELETE FUNCTION ACTIVATED");
-    $("#mfileresult").empty();
-    $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
-//    var currentRec = new MfileObj( 
-//      "", "", "", "",
-//      document.getElementById("code").value,
-//      document.getElementById("sern").value,
-//      "", ""
-//    );
-//    currentRec.mfileDelete();
+//  $("#mfileresult").empty();
+//  $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
+    var currentRec = new MfileObj( 
+      "", "", "", "",
+      document.getElementById("code").value,
+      document.getElementById("sern").value,
+      "", ""
+    );
+    currentRec.mfileDelete();
 }
 
 function mfileProcessSearch() {

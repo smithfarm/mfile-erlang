@@ -216,19 +216,25 @@ icode_delete(CStr) when is_list(CStr) ->
 	 end
    end.
 
-ifile_delete(I) when is_record(I, ifile) ->
-   lager:info("Entering ifile_delete with argument: ~p", [I]),
-   case icode_exists(I#ifile.cstr) of
+ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+   lager:info("Entering ifile_delete with arguments: ~p, ~p", [CStr, Sern]),
+   case icode_exists(CStr) of
       false ->
          #ifile{result = "No such code in the database"};
       true ->
-         FId = lists:append("mfile-", integer_to_list(I#ifile.id)),
-         lager:info("About to delete the file with ID ~p", [FId]),
-         case boss_db:delete(FId) of
-            ok -> 
-               #ifile{result = "success"};  % !!!!!........XXXXWWWWWXXXXX............
-            {error, DelErrMesg} ->
-               #ifile{result = DelErrMesg}
+         I = ifile_fetch(#ifile{cstr = CStr, sern = Sern}),
+	 case I#ifile.result of
+	    "success" ->
+	       FId = I#ifile.id,
+               lager:info("About to delete the file with ID ~p", [FId]),
+               case boss_db:delete(FId) of
+                  ok -> 
+                     #ifile{result = "success"}; 
+                  {error, DelErrMesg} ->
+                     #ifile{result = DelErrMesg}
+	       end;
+	    _ ->
+	       #ifile{result = "No such file in the database"}
 	 end
    end.
 

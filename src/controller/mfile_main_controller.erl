@@ -31,8 +31,8 @@ fetch('POST', []) ->
 % delete record by Code and Serial Number (called asynchronously using AJAX)
 delete('POST', []) ->
    CStr = Req:post_param("mfileCode"),  % get Code string from form
-   Sn = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
-   I = mfilelib:ifile_delete(#ifile{cstr = CStr, sern = Sn}),
+   Sern = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
+   I = mfilelib:ifile_delete(CStr, Sern),
    mfilelib:ifile_JSON(I).
 
 % insert code (called asynchronously using AJAX)
