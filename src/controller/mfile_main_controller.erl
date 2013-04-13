@@ -37,8 +37,7 @@ delete('POST', []) ->
 
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
-   CStr = Req:post_param("mfilecodeCode"), 
-   I = mfilelib:icode_insert(#icode{cstr = CStr}),
+   I = mfilelib:icode_insert(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
 
 % fetch code (called asynchronously using AJAX)

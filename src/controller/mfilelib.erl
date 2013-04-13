@@ -24,11 +24,10 @@ find_last_sern(CId) ->
       undefined ->           0
    end.
 
-% 
-% Function to validate serial number entered by user into the form:
-% test if it's a number and, if it is, convert it into an integer
-% Returns tuple {{result, RESULT_STRING}, {sern, SERIAL_NUMBER}}
-%
+%% validate_serial_number/1 %% takes a value (integer, binary, string)
+%%                          %% returns 0 if it's not a natural number
+%%                          %% or integer if it is
+%% 
 validate_serial_number(Sf) ->
    % convert "it" (whatever it is) into a list
    Sl = if
@@ -59,6 +58,9 @@ validate_codestr_and_sern(I) when is_record(I, ifile) ->
    end,
    Result.
 
+
+%% getMfileVerNum/0 %% extracts "vsn" value from ebin/mfile.app
+%%
 getMfileVerNum() -> 
    case application:get_key(mfile, vsn) of
       {ok, Result} -> Result;
@@ -67,15 +69,12 @@ getMfileVerNum() ->
    Result.
 
 
-uppercase_it(E) ->
-   case lists:member(E, lists:seq(97,122)) of
-      true -> E - 32;
-      false -> E
-   end.
-
-
-integer_to_month(MonInt) ->
-   case MonInt of
+%% integer_to_month %% takes an integer in the range 1-12
+%%                  %% returns list containing a three-letter representation 
+%%                  %% of the month
+%%
+integer_to_month(M) when is_integer(M) and (M > 0) and (M < 13) ->
+   case M of
       1 -> "JAN";
       2 -> "FEB";
       3 -> "MAR";
@@ -91,6 +90,9 @@ integer_to_month(MonInt) ->
    end.
 
 
+%% timestamp_to_binary_date_only %% takes a timestamp {{Y, M, D}, {H, M, S}}
+%%                               %% returns binary <<"YYYY-MMM-DD">>
+%%
 timestamp_to_binary_date_only(Timest) ->
    {{Y, M, D},{_,_,_}} = Timest,
    list_to_binary( [ integer_to_list(Y), "-", 
@@ -98,13 +100,25 @@ timestamp_to_binary_date_only(Timest) ->
                      integer_to_list(D) ] ).
 
 
+%% uppercase_it %% takes an integer, deducts 32 if it corresponds to a lowercase letter
+%%              %% returns an integer
+%%
+uppercase_it(E) ->
+   case lists:member(E, lists:seq($a, $z)) of
+      true -> E - 32;
+      false -> E
+   end.
+
+
+%% is_an_ASCII_letter %% takes a integer
+%%                    %% returns true or false
+%%
 is_an_ASCII_letter(X) ->
     Uppers = lists:seq($A, $Z),
     Lowers = lists:seq($a, $z),
     lists:member(X, Uppers) or lists:member(X, Lowers).
 
 
-%%
 %% icode_exists %% takes a CId (integer) or CStr (list)
 %%              %% returns true or false
 %%
@@ -149,29 +163,35 @@ icode_JSON(I) when is_record(I, icode) ->
 	    {mfilecodeCode, I#icode.cstr},
 	    {mfilecodeDesc, I#icode.desc} ] }.
 
-%% icode_insert
-icode_insert(I) when is_record(I, icode) ->
+%% icode_insert/1 %% takes a code string
+%%                %% returns a populated icode record
+%%
+icode_insert(CStr) when is_list (CStr) ->
    MfilecodeRec = mfilecode:new( id,
                                  calendar:now_to_datetime(erlang:now()),
-				 lists:map(fun mfilelib:uppercase_it/1, I#icode.cstr),
+				 lists:map(fun mfilelib:uppercase_it/1, CStr),
 				 [] ),
    case MfilecodeRec:save() of
-      {ok,{mfilecode, Id, T, Code, _}} ->
+      {ok, _} ->
          #icode{result = "success", 
-	        id = Id, 
-		dstr = mfilelib:timestamp_to_binary_date_only(T),
-		cstr = Code};
+	        id = MfilecodeRec:id(), 
+		dstr = mfilelib:timestamp_to_binary_date_only(MfilecodeRec:created_at()),
+		cstr = MfilecodeRec:code_str()};
       {error, [FirstErrMesg|_]} -> 
          #icode{result = FirstErrMesg}
    end.
 
-%% ifile_exists
+
+%% ifile_exists/1 %% takes an ifile record
+%%
+%% * * * NOT IMPLEMENTED * * *
+%%
 ifile_exists(I) when is_record(I, ifile) ->
    {no, I}.
 
-mfilecodeId_split("mfilecode-"++T) ->
-   list_to_integer(T).
 
+%% icode_delete/1 %% takes a string (file code)
+%%
 icode_delete(CStr) when is_list(CStr) ->
    lager:info("Entering icode_delete with argument: ~p", [CStr]),
    BossRec = boss_db:find_first(mfilecode, [{code_str, 'equals', CStr}]),
@@ -180,7 +200,7 @@ icode_delete(CStr) when is_list(CStr) ->
          #icode{result = "No such code in the database"};
       _ ->
          lager:info("find_first(mfilecode) returned record: ~p", [BossRec]),
-	 CId = mfilecodeId_split(BossRec:id()),
+	 CId = mfilecodeId_strip(BossRec:id()),
          lager:info("The record has ID: ~p", [CId]),
          case icode_has_files(CId) of
 	    true ->
@@ -212,27 +232,29 @@ ifile_delete(I) when is_record(I, ifile) ->
 	 end
    end.
 
-%% ifile_insert
-%% attempt to insert mfile record and produce JSON output
+%% ifile_insert %% takes an ifile record populated with values (cid, cstr, keyw, file_desc)
+%%              %% inserts new file and returns completed populated ifile record
+%%              
 ifile_insert(I) when is_record(I, ifile) ->
-   MfileRec = boss_record:new( mfile, [ {id, id},
+   MfileRec = boss_record:new( mfile, [ {id,         id},
                                         {created_at, calendar:now_to_datetime(erlang:now())}, 
-					{code_id, I#ifile.cid},
-					{sern, (find_last_sern(I#ifile.cid)+1)},  % not atomic, unfortunately!
-			                {keyw, I#ifile.keyw}, 
-			                {file_desc, I#ifile.desc} ] 
-                              ),
-   lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
+					{code_id,    I#ifile.cid},
+					{sern,       find_last_sern(I#ifile.cid) + 1},  % not atomic, unfortunately!
+			                {keyw,       I#ifile.keyw}, 
+			                {file_desc,  I#ifile.desc} 
+			              ] 
+                             ),
+   %lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
    case MfileRec:save() of
-      {ok,{mfile, Id, T, CId, Sern, Keyw, FileDesc}} ->
+      {ok, _} ->
 	  #ifile{ result = "success",
-                  id =     Id, 
-                  dstr =   mfilelib:timestamp_to_binary_date_only(T),
-		  cid =    CId,
+                  id =     MfileRec:id(), 
+                  dstr =   mfilelib:timestamp_to_binary_date_only(MfileRec:created_at()),
+		  cid =    MfileRec:code_id(),
                   cstr =   I#ifile.cstr,
-                  sern =   Sern,
-                  keyw =   Keyw, 
-                  desc =   FileDesc };
+                  sern =   MfileRec:sern(),
+                  keyw =   MfileRec:keyw(), 
+                  desc =   MfileRec:file_desc() };
       {error, _} -> 
           #ifile{result = "Internal error on insert (see log for details)"}
    end.
@@ -249,8 +271,8 @@ ifile_insert(I) when is_record(I, ifile) ->
 %% pattern-matching operator. This is a kind of short-hand for:
 %% [$m, $f, $i, $l, $e, $c, $o, $d, $e, $- | T]
 %%
-mfilecodeId_strip("mfilecode-"++T) ->  
-   list_to_integer(T).  % isn't Erlang amazing?
+mfilecodeId_strip("mfilecode-" ++ T) ->                     % isn't Erlang amazing?
+   list_to_integer(T).  
 
 %%
 %% icode_fetch %% Fetch code by CId or CStr
