@@ -179,7 +179,7 @@ var MfilecodeObj = function(
   	   $("#code").val(result.mfilecodeCode);
 	   $("#codeid").val(result.mfilecodeId);
            $("#mfileresult").empty();
-           $("#mfileresult").append("New code '"+result.mfilecodeCode+"' added to database.")
+           $("#mfileresult").append("New code "+result.mfilecodeCode+" (ID "+result.mfilecodeId+") added to database.")
 	}
 	else
 	{
