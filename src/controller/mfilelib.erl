@@ -260,11 +260,10 @@ ifile_insert(I) when is_record(I, ifile) ->
 			              ] 
                              ),
    lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
-   case MfileRec:save() of   %% N.B.: Does not update id field!
-      {ok, _} ->
-          lager:info("Inserted new file with vitals ~p", [MfileRec]),
+   case MfileRec:save() of   %% N.B.: Does not update id field!!
+      {ok, {mfile, AllocatedId, _, _, _, _, _}} ->
 	  #ifile{ result = "success",
-                  id =     MfileRec:id(), 
+                  id =     AllocatedId,
                   dstr =   mfilelib:timestamp_to_binary_date_only(MfileRec:created_at()),
 		  cid =    MfileRec:code_id(),
                   cstr =   I#ifile.cstr,
