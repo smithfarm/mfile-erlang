@@ -185,19 +185,19 @@ icode_insert(CStr) when is_list (CStr) ->
    MfilecodeRec = mfilecode:new( id,
                                  calendar:now_to_datetime(erlang:now()),
 				 lists:map(fun mfilelib:uppercase_it/1, CStr),
-				 [] ),
-   R = MfilecodeRec:save(),   % N.B.: does NOT update Id!!
+				 [] ),   % code_desc field is currently unused
+   R = MfilecodeRec:save(),   % N.B.: save() does NOT update Id field!!
    %lager:info("MfilecodeRec:save() returned: ~p", [R]),
-   case R of
-      {ok, {mfilecode, CId, _, _, _}} ->
-	 lager:info("MfilecodeRec:id() == ~p", [CId]),
-         #icode{result = "success", 
-	        id = CId,
-		dstr = mfilelib:timestamp_to_binary_date_only(MfilecodeRec:created_at()),
-		cstr = MfilecodeRec:code_str()};
-      {error, [FirstErrMesg|_]} -> 
-         #icode{result = FirstErrMesg}
-   end.
+   icode_insert(R);
+% This (having to write out the entire mfilecode tuple) is sub-optimal
+icode_insert( {ok, {mfilecode, CId, _, _, _}} ) ->
+   lager:info("MfilecodeRec:id() == ~p", [CId]),
+   #icode{result = "success", 
+          id = CId,
+   	  dstr = mfilelib:timestamp_to_binary_date_only(MfilecodeRec:created_at()),
+	  cstr = MfilecodeRec:code_str()};
+icode_insert( {error, [FirstErrMesg|_]} ) -> 
+   #icode{result = FirstErrMesg}
 
 
 %% ifile_exists/2 %% takes a string (CStr) and an integer (Sern)

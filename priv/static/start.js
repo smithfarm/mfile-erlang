@@ -262,7 +262,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Code field
   $("#code").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write Code, F3=Validate Code, Del=Delete Code';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert Code, F3=Validate Code, Del=Delete Code';
   });
   $("#code").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
@@ -278,7 +278,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Key Words field
   $("#keywords").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write, F3=Search';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert File, F3=Search';
   });
   $("#keywords").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
