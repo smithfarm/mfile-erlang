@@ -1,3 +1,4 @@
+20130413: learn how to use -belongs_to_mfilecode(Id)
 20130412: write EUnit tests for mfile, mfilecode insert, fetch, and delete functions (so I don't have to test manually)
 20130412: learn how to write EUnit tests for ChicagoBoss
 20130412: finish mfile delete (see mfilelib:ifile_delete/1)

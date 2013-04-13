@@ -126,14 +126,15 @@ icode_exists(C) when is_list(C) ->
       _ -> false
    end.
 
-icode_get_bossid(C) when is_list(C) ->
-   I = icode_fetch(C),
+icode_get_bossid(CStr) when is_list(CStr) ->
+   I = icode_fetch(CStr),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
       "success" -> I#icode.id;
       _ -> 0
    end.
 
+%% takes an integer, e.g. 8, not "mfilecode-8"
 icode_has_files(CId) when is_integer(CId) ->
    lager:info("Looking up files that have code ID: ~p", [CId]),
    Count = boss_db:count(mfile, [{code_id, 'equals', CId}]),
@@ -180,17 +181,16 @@ icode_delete(CStr) when is_list(CStr) ->
    case BossRec of
       undefined ->
          #icode{result = "No such code in the database"};
-      A ->
-         lager:info("find_first(mfilecode) returned record: ~p", [A]),
-         lager:info("The record has ID: ~p", [A:id()]),
-	 CId = mfilecodeId_split(A:id()),
+      _ ->
+         lager:info("find_first(mfilecode) returned record: ~p", [BossRec]),
+	 CId = mfilecodeId_split(BossRec:id()),
+         lager:info("The record has ID: ~p", [CId]),
          case icode_has_files(CId) of
 	    true ->
 	       #icode{result = "Files exist for this code: can't delete"};
 	    false ->
-	       lager:info("icode_has_files returned 'false' and A == ~p", [A]),
-               lager:info("About to delete the file code with ID ~p", [A:id()]),
-               case boss_db:delete(A:id()) of
+               lager:info("About to delete the file code with ID ~p", [CId]),
+               case boss_db:delete(BossRec:id()) of
                   ok -> 
                      #icode{result = "success"}; 
                   {error, DelErrMesg} ->
@@ -200,6 +200,7 @@ icode_delete(CStr) when is_list(CStr) ->
    end.
 
 ifile_delete(I) when is_record(I, ifile) ->
+   lager:info("Entering ifile_delete with argument: ~p", [I]),
    case icode_exists(I#ifile.cstr) of
       false ->
          #ifile{result = "No such code in the database"};
@@ -240,11 +241,12 @@ ifile_insert(I) when is_record(I, ifile) ->
    end.
 
 
-%% mfilecodeID_strip
+%% mfilecodeId_strip
 %% 
 %% the Boss DB model returns the Code ID in the format "mfilecode-" ++ SOME_INTEGER, 
-%% (e.g. "mfilecode-1"), but to be useful to us we need to strip off the "mfilecode-"
-%% part and leave just the integer
+%% (e.g. "mfilecode-1"), but since the mfiles table links to the mfilecodes table
+%% using an integer CodeId field, we need to strip off the "mfilecode-" part and 
+%% leave just the integer
 %%
 %% Note the special-case use of the operator '++' on the left-hand side of the
 %% pattern-matching operator. This is a kind of short-hand for:
@@ -253,31 +255,28 @@ ifile_insert(I) when is_record(I, ifile) ->
 mfilecodeId_strip("mfilecode-"++T) ->  
    list_to_integer(T).  % isn't Erlang amazing?
 
-%% icode_fetch
 %%
-%% Fetch code by CId or CStr
+%% icode_fetch %% Fetch code by CId or CStr
+%%
+%% Returns an icode record
+%%
 icode_fetch(CId) when is_number(CId) ->
    R = boss_db:find_first(mfilecode, [{id, 'equals', lists:append("mfilecode-", integer_to_list(CId))}]),
-   lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
    icode_fetch(R);
 icode_fetch(CStr) when is_list(CStr) ->
    R = boss_db:find_first(mfilecode, [{code_str, 'equals', lists:map(fun uppercase_it/1, CStr)}]),
-   lager:info("boss_db:find_first(mfilecode) returned: ~p", [R]),
    icode_fetch(R);
 icode_fetch(BossRec) ->
-   lager:info("icode_fetch called with argument: ~p", [BossRec]),
+   lager:info("icode_fetch(BossRec) called with argument: ~p", [BossRec]),
    case BossRec of
-      {mfilecode,CId,CTime,CStr,CDesc} -> 
-         #icode{ result = "success", 
-                 id     = mfilecodeId_strip(CId),
-                 dstr   = mfilelib:timestamp_to_binary_date_only(CTime),
-		 cstr   = CStr,
-		 desc   = CDesc };
       undefined -> 
          #icode{ result = "Code not found" };
-      ErrorValue  ->              
-         lager:info("Error value rcvd in icode_fetch: ~p", [ErrorValue]),
-         #icode{ result = "Internal error on fetch (see log for details)" }
+      _ ->
+         #icode{ result = "success", 
+                 id     = mfilecodeId_strip(BossRec:id()),
+                 dstr   = timestamp_to_binary_date_only(BossRec:created_at()),
+		 cstr   = BossRec:code_str(),
+		 desc   = BossRec:code_desc() }
    end.
 
 %% ifile_fetch
