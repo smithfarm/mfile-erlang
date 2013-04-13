@@ -190,21 +190,21 @@ icode_insert(CStr) when is_list (CStr) ->
    %lager:info("MfilecodeRec:save() returned: ~p", [R]),
    icode_insert(R);
 % This (having to write out the entire mfilecode tuple) is sub-optimal
-icode_insert( {ok, {mfilecode, CId, _, _, _}} ) ->
+icode_insert( {ok, {mfilecode, CId, CreatedAt, CStr, _}} ) ->
    lager:info("MfilecodeRec:id() == ~p", [CId]),
    #icode{result = "success", 
           id = CId,
-   	  dstr = mfilelib:timestamp_to_binary_date_only(MfilecodeRec:created_at()),
-	  cstr = MfilecodeRec:code_str()};
+   	  dstr = mfilelib:timestamp_to_binary_date_only(CreatedAt),
+	  cstr = CStr};
 icode_insert( {error, [FirstErrMesg|_]} ) -> 
-   #icode{result = FirstErrMesg}
+   #icode{result = FirstErrMesg}.
 
 
 %% ifile_exists/2 %% takes a string (CStr) and an integer (Sern)
 %%                %% returns true or false
 %%
 ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) -> 
-   I = ifile_fetch(#ifile{cstr = CStr, sern = Sern}),
+   I = ifile_fetch(CStr, Sern),
    case I#ifile.result of
       "success" -> true;
       _         -> false
@@ -248,7 +248,7 @@ ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
       false ->
          #ifile{result = "No such code in the database"};
       true ->
-         I = ifile_fetch(#ifile{cstr = CStr, sern = Sern}),
+         I = ifile_fetch(CStr, Sern),
 	 case I#ifile.result of
 	    "success" ->
 	       FId = I#ifile.id,
@@ -338,8 +338,8 @@ icode_fetch(BossRec) ->
 %% ifile_fetch/1 %% takes an ifile record populated with cstr and sern
 %%               %% returns a populated ifile record
 %%
-ifile_fetch(I) when is_record(I, ifile) ->
-   IFile = validate_codestr_and_sern(I#ifile.cstr, I#ifile.sern),
+ifile_fetch(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+   IFile = validate_codestr_and_sern(CStr, Sern),
    lager:info("validate_codestr_and_sern returned ~p", [IFile]),
    case IFile#ifile.result of
       "success" -> 

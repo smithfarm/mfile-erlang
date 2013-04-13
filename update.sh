@@ -13,7 +13,9 @@ read CHGLOGENTRY
 # update Changelog
 CMD="sed \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" Changelog >$TMPFILE"
 eval $CMD
+mv $TMPFILE Changelog
+
+# commit changes to local git repo
 CMD="git commit -a -m \"$CHGLOGENTRY\""
 eval $CMD
-mv $TMPFILE Changelog
 

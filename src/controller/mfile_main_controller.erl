@@ -4,12 +4,10 @@
 
 % GET /
 start('GET', []) ->
-   lager:info("Firing up mfile web UI"),
-   {ok, mfilelib:initializeForm() }.
+   { ok, mfilelib:initializeForm() }.
 
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
-   lager:info("Entering main insert function"),
    C = mfilelib:icode_fetch(Req:post_param("mfileCode")),
    case C#icode.result of 
       "success" -> I = #ifile{cid  = C#icode.id,
@@ -24,8 +22,8 @@ insert('POST', []) ->
 % fetch record by Code and Serial Number (called asynchronously using AJAX)
 fetch('POST', []) ->
    CStr = Req:post_param("mfileCode"),  % get Code string from form
-   Sn = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
-   I = mfilelib:ifile_fetch(#ifile{cstr = CStr, sern = Sn}),
+   Sern = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
+   I = mfilelib:ifile_fetch(CStr, Sern),
    mfilelib:ifile_JSON(I).
 
 % delete record by Code and Serial Number (called asynchronously using AJAX)
