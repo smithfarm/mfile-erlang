@@ -1,10 +1,12 @@
 *.swp
+.eunit/
 bubba
 main.erl
 mfile.erl
 mfile.routes
 mfilecode.erl
 mfilelib.erl
+mfile_test.erl
 start.css
 start.html
 start.js

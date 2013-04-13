@@ -1,6 +1,3 @@
-grant all privileges on database mfiledb to public;
-grant all privileges on database mfiledb to smithfarm;
-
 create table mfiles (
   id serial NOT NULL,
   created_at timestamp NOT NULL,

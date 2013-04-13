@@ -215,27 +215,26 @@ ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
 %%                %% returns a populated icode record
 %%
 icode_delete(CStr) when is_list(CStr) ->
-   lager:info("Entering icode_delete with argument: ~p", [CStr]),
-   BossRec = boss_db:find_first(mfilecode, [{code_str, 'equals', CStr}]),
-   case BossRec of
-      undefined ->
-         #icode{result = "No such code in the database"};
-      _ ->
-         lager:info("find_first(mfilecode) returned record: ~p", [BossRec]),
-	 CId = mfilecodeId_strip(BossRec:id()),
-         lager:info("The record has ID: ~p", [CId]),
+   I = icode_fetch(CStr),
+   case I#icode.result of
+      "success" ->
+         lager:info("icode_delete/1: Found mfilecode: ~p", [I]),
+	 CId = I#icode.id,
+         lager:info("icode_delete/1: The record has ID: ~p", [CId]),
          case icode_has_files(CId) of
 	    true ->
 	       #icode{result = "Files exist for this code: can't delete"};
 	    false ->
-               lager:info("About to delete the file code with ID ~p", [CId]),
-               case boss_db:delete(BossRec:id()) of
+               lager:info("icode_delete/1: About to delete the file code with ID ~p", [CId]),
+               case boss_db:delete(lists:append("mfilecode-", integer_to_list(CId))) of
                   ok -> 
                      #icode{result = "success"}; 
                   {error, DelErrMesg} ->
                      #icode{result = DelErrMesg}
 	       end
-	 end
+	 end;
+      _ ->
+         I
    end.
 
 
