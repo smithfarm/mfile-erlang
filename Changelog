@@ -1,3 +1,4 @@
+2013-04-14 Version 0.3.10 Updated TODO, added UNIT_TESTING explanatory file
 2013-04-14 Version 0.3.10 Finally added EUnit-testing infrastructure (and fixed first errors uncovered by first tests)
 2013-04-13 Version 0.3.10 Changed arguments of ifile_fetch and corrected regressions introduced by previous commit
 2013-04-13 Version 0.3.10 Revised mfilelib:icode_insert to make it more Erlang-idiomatic

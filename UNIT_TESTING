@@ -1,0 +1,14 @@
+Unit-testing of mfile implemented using EUnit.
+
+The testing framework consists of the following files and directories:
+src/test/
+src/test/mfile_test.erl
+dbinit-test.sh
+boss.test.config
+test
+
+The last of these (test) is the script for running the tests. Just run it.
+
+The testing framework uses its own database, mfiletestdb. It is re-initialized 
+every time the 'test' script is run, so the tests always start with a clean
+slate.

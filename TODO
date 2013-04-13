@@ -1,8 +1,6 @@
 20130413: streamline mfilelib:ifile_delete/2
 20130413: learn how to use -belongs_to_mfilecode(Id)
 20130412: write EUnit tests for mfile, mfilecode insert, fetch, and delete functions (so I don't have to test manually)
-20130412: learn how to write EUnit tests for ChicagoBoss
-20130412: finish mfile delete (see mfilelib:ifile_delete/1)
 20130412: stop using the Id field of the mfilecodes table to link from the mfiles table: use an internal "CodeId" field instead (this field will need to be added to the mfilecodes table)
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
 20130409: write unit tests for all functions in mfilelib.erl
@@ -10,6 +8,8 @@
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130412: finish mfile delete (see mfilelib:ifile_delete/1)
+*20130412: learn how to write EUnit tests for ChicagoBoss
 *20130412: make it use records internally (#icode, #ifile) 
 *20130411: when you fetch an mfile and then fetch a different mfilecode, it leaves the mfile ID and date on-screen, which is confusing
 *20130411: go through erl files looking for WARNING: comments, take appropriate action
