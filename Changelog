@@ -1,3 +1,4 @@
+2013-04-13 Version 0.3.6 Push changes to 'external repo' (Github) and test apostrophe handling in mfile-release
 2013-04-13 Version 0.3.6 git is playing tricks on me! For some reason it keeps reverting to a working branch and then back again; can't figure it out
 2013-04-13 Version 0.3.5 New release with mfilecode delete functionality added and working
 2013-04-13 Version 0.3.5 Recovered from another git mishap, starting to use more features of the DB model

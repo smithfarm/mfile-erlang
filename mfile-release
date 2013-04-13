@@ -13,15 +13,17 @@ cd /home/smithfarm/src/mfile
 
 # get mfile version number
 VERNUM=`head -n 1 VERSION`
+TMPFILE=Changelog.tmp
 
 # get release description
 echo "Changelog entry for this release:"
 read CHGLOGENTRY
 
 # update Changelog
-CMD="sed -e \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" -e \"s/'/''/g\" Changelog >Changelog.new"
+#CMD="sed -e \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" -e \"s/'/''/g\" Changelog >$TMPFILE
+CMD="sed \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" Changelog >$TMPFILE"
 eval $CMD
-mv Changelog.new Changelog
+mv $TMPFILE Changelog
 
 # create tar archive of present release
 ( mkdir -p ../mfile-releases && cd .. && tar cfz mfile-releases/mfile-$VERNUM.tar.gz \

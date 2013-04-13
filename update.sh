@@ -2,13 +2,16 @@
 
 # get mfile version number
 VERNUM=`head -n 1 VERSION`
+TMPFILE=Changelog.tmp
 
 # get release description
 echo "Changelog entry for this update:"
 read CHGLOGENTRY
+#echo -n $CHGLOGENTRY | sed "s/'/''/g" > $TMPFILE
+#CHGLOGENTRY=`cat $TMPFILE`
 
 # update Changelog
-CMD="sed -e \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" -e \"s/'/''/g\" Changelog >Changelog.new"
+CMD="sed \"1 i `date +%Y-%m-%d` Version $VERNUM $CHGLOGENTRY\" Changelog >$TMPFILE"
 eval $CMD
-mv Changelog.new Changelog
+mv $TMPFILE Changelog
 
