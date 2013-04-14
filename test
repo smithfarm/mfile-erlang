@@ -3,4 +3,3 @@ echo -n "Make sure init-dev.sh is not running (and press ENTER to continue)"
 read a
 ./dbinit-test.sh
 ./rebar boss c=test_eunit
-echo "Testing complete. If rebar choked, try running the test again."

@@ -40,3 +40,24 @@ skel/boss.config under the ChicagoBoss directory. By default, the "info" and
 (console) when you start the server using init-dev.sh, and they are also
 written to the console.log and error.log files in the log directory of your
 app.
+
+
+LESSON -- EUNIT (unit testing):
+Testy mam v souboru mfile_test.erl
+
+Kdyz v adresari .eunit chybel soubor mfile_test.beam, dostaval jsem tyto chybove hlasky:
+$ ./rebar boss c=test_eunit
+==> mfile (boss)
+Compiled src/test/mfile_test.erl
+.eunit/mfile_test.beam: failed to delete temporary file .eunit/mfile_test.bea#: no such file or directory
+.eunit/mfile_test.beam: failed to rename .eunit/mfile_test.bea# to .eunit/mfile_test.beam: no such file or directory
+
+V rebar.config jsem mel:
+{plugin_dir, ["priv/rebar"]}.
+{plugins, [boss_plugin]}.
+{eunit_compile_opts, [{src_dirs, ["src/test"]}]}.
+{deps, []}.
+
+Na zaklade tohoto threadu
+https://github.com/basho/rebar/pull/126
+jsem vypustil "src/test" a ted je to OK.

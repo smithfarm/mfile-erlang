@@ -31,11 +31,11 @@ insert_an_mfilecode() ->
     ?assertNotEqual(id, I#icode.id).
  
 delete_an_mfilecode() ->
-    I0 = mfilelib:icode_insert("dtst"),
-    ?assertEqual("success", I0#icode.result),
-    I1 = mfilelib:icode_delete("dtst"),
+%    I0 = mfilelib:icode_insert("dtst"),
+%    ?assertEqual("success", I0#icode.result),
+    I1 = mfilelib:icode_delete("test"),
     ?assertEqual("success", I1#icode.result),
-    I2 = mfilelib:icode_delete("dtst"),
+    I2 = mfilelib:icode_delete("test"),
     ?assertEqual("Code not found", I2#icode.result).
  
 %test_function_3() ->
