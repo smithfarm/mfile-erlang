@@ -19,7 +19,7 @@ validation_tests() ->
        "Code is empty"},
       {fun() -> length(CodeStr) < 9 end,
        "Code string too long (max. 8 characters)"},
-      {fun() -> lists:all(fun mfilelib:is_an_ASCII_letter/1, CodeStr) end,
+      {fun() -> mfilelib:is_valid_cstr(CodeStr) end,
        "Upper and lower case ASCII characters only"},
       {fun() -> not mfilelib:icode_exists(CodeStr) end,
        "That code is already in the database"},

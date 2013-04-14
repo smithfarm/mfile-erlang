@@ -65,6 +65,11 @@ tests() ->
  
 test_is_valid_cstr() ->
     ?assertEqual(true, mfilelib:is_valid_cstr("test")),
+    ?assertEqual(false, mfilelib:is_valid_cstr("1test")),
+    ?assertEqual(true, mfilelib:is_valid_cstr("test1")),
+    ?assertEqual(true, mfilelib:is_valid_cstr("TEST")),
+    ?assertEqual(false, mfilelib:is_valid_cstr("1TEST")),
+    ?assertEqual(true, mfilelib:is_valid_cstr("TEST1")),
     ?assertEqual(false, mfilelib:is_valid_cstr("mfilecode-1")).
 
 test_validate_serial_number() ->

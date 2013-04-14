@@ -24,11 +24,37 @@ getMfileVerNum() ->
    Result.
 
 
+%% is_ASCII_letter_or_numeral %% takes a integer
+%%                            %% returns true or false
+%%
+is_ASCII_letter_or_numeral(X) when is_integer(X), X >= $A, X =< $Z ->
+   true;
+is_ASCII_letter_or_numeral(X) when is_integer(X), X >= $a, X =< $z ->
+   true;
+is_ASCII_letter_or_numeral(X) when is_integer(X), X >= $0, X =< $9 ->
+   true;
+is_ASCII_letter_or_numeral(X) when is_integer(X) ->
+   false.
+
+
+%% is_ASCII_letter %% takes a integer
+%%                 %% returns true or false
+%%
+is_ASCII_letter(X) when is_integer(X), X >= $A, X =< $Z ->
+   true;
+is_ASCII_letter(X) when is_integer(X), X >= $a, X =< $z ->
+   true;
+is_ASCII_letter(X) when is_integer(X) ->
+   false.
+
+
 %% is_valid_cstr/1   %% takes a string S
-%%                  %% returns true or false
+%%                   %% returns true or false
 %%***
-is_valid_cstr(S) when is_list(S) ->
-   lists:all(fun mfilelib:is_an_ASCII_letter/1, S).   
+is_valid_cstr([H|T]) ->
+   is_ASCII_letter(H) and lists:all(fun is_ASCII_letter_or_numeral/1, T);
+is_valid_cstr([]) ->
+   false.
 
 
 %% validate_serial_number/1 %% takes a value (integer, binary, string)
@@ -73,7 +99,7 @@ find_last_code_id() ->
 
 %% uppercase_it %% takes an integer, deducts 32 if it corresponds to a lowercase letter
 %%              %% returns an integer
-%%
+%%***
 uppercase_it(E) when E >= $0, E =< $9 ->
    E;
 uppercase_it(E) when E >= $A, E =< $Z ->
@@ -254,15 +280,6 @@ icode_fetch(BossRec) ->
 		 cstr   = BossRec:code_str(),
 		 desc   = BossRec:code_desc() }
    end.
-
-
-%% is_an_ASCII_letter %% takes a integer
-%%                    %% returns true or false
-%%
-is_an_ASCII_letter(X) ->
-    Uppers = lists:seq($A, $Z),
-    Lowers = lists:seq($a, $z),
-    lists:member(X, Uppers) or lists:member(X, Lowers).
 
 
 %% validate_codestr_and_sern/2 %% takes a string (CStr) and an integer (Sern)
