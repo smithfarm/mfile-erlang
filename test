@@ -1,5 +1,5 @@
 #!/bin/bash
 echo -n "Make sure init-dev.sh is not running (and press ENTER to continue)"
 read a
-./dbinit-test.sh
+./priv/static/dbinit-test.sh
 ./rebar boss c=test_eunit

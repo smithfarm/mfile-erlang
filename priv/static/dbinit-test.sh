@@ -2,6 +2,8 @@
 #
 # initialize mfiletestdb (EUnit testing database)
 #
+cd ./priv/static/
+
 declare MFILEDB="mfiletestdb"
 declare OWNER="smithfarm"
 declare PGCMD="/usr/bin/sudo su postgres -c"

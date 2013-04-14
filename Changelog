@@ -1,3 +1,4 @@
+2013-04-14 Version 0.3.11 Cleaned up top directory a little, updated TODO
 2013-04-14 Version 0.3.10 Fixed glitch in rebar.config (description in BLOG_THIS)
 2013-04-14 Version 0.3.10 Updated TODO, added UNIT_TESTING explanatory file
 2013-04-14 Version 0.3.10 Finally added EUnit-testing infrastructure (and fixed first errors uncovered by first tests)
