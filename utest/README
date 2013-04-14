@@ -1,7 +1,0 @@
-Copy mfilelib.erl to this directory and then do (in Erlang shell):
-
-> c(utest).
-> c(mfilelib).
-> % replace UTEST_FILE with the name of your utest file
-> % e.g. utest:utest("utest-validate-serial-number").
-> utest:utest("UTEST_FILE").

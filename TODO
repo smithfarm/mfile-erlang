@@ -1,4 +1,3 @@
-20130414: convert unit tests in 'utest' directory to the new EUnit framework, then delete utest directory
 20130413: streamline mfilelib:ifile_delete/2
 20130413: learn how to use -belongs_to_mfilecode(Id)
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
@@ -7,6 +6,7 @@
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130414: convert unit tests in 'utest' directory to the new EUnit framework, then delete utest directory
 *20130412: stop using the Id field of the mfilecodes table to link from the mfiles table: use an internal "CodeId" field instead (this field will need to be added to the mfilecodes table)
 *20130412: write EUnit tests for mfile, mfilecode insert, fetch, and delete functions (so I don't have to test manually)
 *20130412: finish mfile delete (see mfilelib:ifile_delete/1)

@@ -15,8 +15,6 @@
 %%
 validation_tests() ->
    [
-      {fun() -> is_list(CodeStr) end,
-       "Not a list"},
       {fun() -> length(CodeStr) > 0 end,
        "Code is empty"},
       {fun() -> length(CodeStr) < 9 end,

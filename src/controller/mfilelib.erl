@@ -90,7 +90,8 @@ validate_serial_number(Sf) ->
    try 
       list_to_integer(Sl) 
    of
-      Sn when (is_number(Sn)) and (Sn > 0) -> Sn
+      Sn when (is_number(Sn)) and (Sn >= 0) -> Sn;
+      Sm when (is_number(Sm)) and (Sm < 0)  -> 0
    catch
       _:_ -> 0   
    end.
@@ -173,7 +174,6 @@ icode_exists(CId) when is_integer(CId) ->
       _ -> false
    end;
 icode_exists(CStr) when is_list(CStr) -> 
-   true = is_valid_cstr(CStr),
    I = icode_fetch(CStr),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of

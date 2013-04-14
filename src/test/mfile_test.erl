@@ -20,6 +20,12 @@ tests() ->
      {"is_valid_cstr function",
       ?_test(test_is_valid_cstr())}
      ,
+     {"validate_serial_number function",
+      ?_test(test_validate_serial_number())}
+     ,
+     {"mfilecode validation",
+      ?_test(test_mfilecode_validation())}
+     ,
      {"Insert an mfilecode",
       ?_test(insert_an_mfilecode())}
      ,
@@ -43,6 +49,35 @@ test_is_valid_cstr() ->
     ?assertEqual(true, mfilelib:is_valid_cstr("test")),
     ?assertEqual(false, mfilelib:is_valid_cstr("mfilecode-1")).
 
+test_validate_serial_number() ->
+    ?assertEqual(123, mfilelib:validate_serial_number(123)),
+    ?assertEqual(123, mfilelib:validate_serial_number("123")),
+    ?assertEqual(123, mfilelib:validate_serial_number(<<"123">>)),
+    ?assertEqual(0, mfilelib:validate_serial_number(a)),
+    ?assertEqual(0, mfilelib:validate_serial_number(-1)),
+    ?assertEqual(0, mfilelib:validate_serial_number(0)),
+    ?assertEqual(0, mfilelib:validate_serial_number(3.145)),
+    ?assertEqual(0, mfilelib:validate_serial_number([])),
+    ?assertEqual(0, mfilelib:validate_serial_number({123})).
+
+test_mfilecode_validation_ok(CStr) ->
+    BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
+                                           { code_str, CStr } ] ),
+    R = BossRec:validate(),
+    ?assertEqual(ok, R).
+
+test_mfilecode_validation_not_ok(CStr, ErrorMsg) ->
+    BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
+                                           { code_str, CStr } ] ),
+    {error, [ErrorMsg|_]} = BossRec:validate().
+
+test_mfilecode_validation() ->
+    test_mfilecode_validation_not_ok(abc, "Invalid data type for code_str"),
+    test_mfilecode_validation_not_ok([], "Code is empty"),
+    test_mfilecode_validation_not_ok("NineChars", "Code string too long (max. 8 characters)"),
+    test_mfilecode_validation_not_ok("123", "Upper and lower case ASCII characters only"),
+    test_mfilecode_validation_ok("hippo").
+
 insert_an_mfilecode() ->
     lager:info("Test: insert an mfilecode"),
     I = mfilelib:icode_insert("test"),
@@ -50,7 +85,9 @@ insert_an_mfilecode() ->
     ?assertEqual("TEST", I#icode.cstr),
     ?assertNotEqual(id, I#icode.id),
     ?assertEqual(true, is_integer(I#icode.id)),
-    I#icode.id > 0.
+    I#icode.id > 0,
+    test_mfilecode_validation_not_ok(I#icode.cstr, "That code is already in the database").
+
 
 test_get_code_id_as_integer() ->
     lager:info("Test: get code id as integer"),
