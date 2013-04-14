@@ -24,18 +24,41 @@ getMfileVerNum() ->
    Result.
 
 
-%% find_last_sern/1 %% takes an integer (CId)
+%% get_code_id_as_integer/1    %% takes a string (CStr)
+%%                             %% returns an integer (CId)
+%%
+get_code_id_as_integer(CStr) when is_list(CStr) ->
+   R = icode_fetch(CStr),
+   ReturnVal = mfilecodeId_strip(R#icode.id),
+   is_integer(ReturnVal) =:= true,
+   ReturnVal.
+
+
+%% is_valid_cstr/1   %% takes a string S
+%%                  %% returns true or false
+%%
+is_valid_cstr(S) when is_list(S) ->
+   lists:all(fun mfilelib:is_an_ASCII_letter/1, S).   
+
+
+%% find_last_sern/1 %% takes a string (CStr)
 %%                  %% returns an integer (Sern)
 %%
-%% Finds the current last serial number for a given CodeId
+%% Finds the current last serial number for a given CodeStr
+%% Returns 0 if the CodeId doesn't exist
 %%
-find_last_sern(CId) when is_integer(CId) ->
+find_last_sern(CStr) when is_list(CStr) ->
+   is_valid_cstr(CStr) =:= true,
+   CId = get_code_id_as_integer(CStr),
    R = boss_db:find_last(mfile, [{code_id, 'equals', CId}]),
    lager:info("boss_db:find_last(mfile) returned: ~p", [R]),
-   case R of
-      {mfile,_,_,_,S,_,_} -> S;
-      undefined ->           0
-   end.
+   ReturnVal = case R of
+                  {mfile,_,_,_,S,_,_} -> S;
+                  undefined ->           0
+               end,
+   is_integer(ReturnVal),
+   lager:info("find_last_sern(): returning ~p", [ReturnVal]),
+   ReturnVal.
 
 %% validate_serial_number/1 %% takes a value (integer, binary, string)
 %%                          %% returns 0 if it's not a natural number
@@ -63,13 +86,14 @@ validate_serial_number(Sf) ->
 %%                             %% returns a populated icode instance
 %%
 validate_codestr_and_sern(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+   is_valid_cstr(CStr) =:= true,
    case validate_serial_number(Sern) of
       0 -> Result = #ifile{result = "Invalid serial number or other weirdness",
                            sern   = 0};
       Sern -> T = icode_fetch(CStr),
               Result = #ifile{result = T#icode.result,
 	                      cstr   = T#icode.cstr,
-	    	 	      cid    = T#icode.id,
+	    	 	      cid    = mfilecodeId_strip(T#icode.id),
 			      sern   = Sern}
    end,
    Result.
@@ -128,15 +152,16 @@ is_an_ASCII_letter(X) ->
 %% icode_exists %% takes a CId (integer) or CStr (list)
 %%              %% returns true or false
 %%
-icode_exists(C) when is_integer(C) -> 
-   I = icode_fetch(C),
+icode_exists(CId) when is_integer(CId) -> 
+   I = icode_fetch(CId),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
       "success" -> true;
       _ -> false
    end;
-icode_exists(C) when is_list(C) -> 
-   I = icode_fetch(C),
+icode_exists(CStr) when is_list(CStr) -> 
+   is_valid_cstr(CStr) =:= true,
+   I = icode_fetch(CStr),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
       "success" -> true;
@@ -147,10 +172,11 @@ icode_exists(C) when is_list(C) ->
 %% NOT USED
 %%
 icode_get_bossid(CStr) when is_list(CStr) ->
+   is_valid_cstr(CStr) =:= true,
    I = icode_fetch(CStr),
    lager:info("icode_fetch returned ~p", [I]),
    case I#icode.result of
-      "success" -> I#icode.id;
+      "success" -> mfilecodeId_strip(I#icode.id);
       _ -> 0
    end.
 
@@ -182,6 +208,7 @@ icode_JSON(I) when is_record(I, icode) ->
 %%                %% returns a populated icode record
 %%
 icode_insert(CStr) when is_list (CStr) ->
+   is_valid_cstr(CStr) =:= true,
    MfilecodeRec = mfilecode:new( id,
                                  calendar:now_to_datetime(erlang:now()),
 				 lists:map(fun mfilelib:uppercase_it/1, CStr),
@@ -204,6 +231,7 @@ icode_insert( {error, [FirstErrMesg|_]} ) ->
 %%                %% returns true or false
 %%
 ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) -> 
+   is_valid_cstr(CStr) =:= true,
    I = ifile_fetch(CStr, Sern),
    case I#ifile.result of
       "success" -> true;
@@ -215,11 +243,12 @@ ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
 %%                %% returns a populated icode record
 %%
 icode_delete(CStr) when is_list(CStr) ->
+   is_valid_cstr(CStr) =:= true,
    I = icode_fetch(CStr),
    case I#icode.result of
       "success" ->
          lager:info("icode_delete/1: Found mfilecode: ~p", [I]),
-	 CId = I#icode.id,
+	 CId = mfilecodeId_strip(I#icode.id),
          lager:info("icode_delete/1: The record has ID: ~p", [CId]),
          case icode_has_files(CId) of
 	    true ->
@@ -242,6 +271,7 @@ icode_delete(CStr) when is_list(CStr) ->
 %%                %% returns a populated ifile record
 %%
 ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+   is_valid_cstr(CStr) =:= true,
    lager:info("Entering ifile_delete with arguments: ~p, ~p", [CStr, Sern]),
    case icode_exists(CStr) of
       false ->
@@ -268,16 +298,20 @@ ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
 %%              %% inserts new file and returns completed populated ifile record
 %%              
 ifile_insert(I) when is_record(I, ifile) ->
+   is_integer(I#ifile.cid) =:= true,
+   is_valid_cstr(I#ifile.cstr) =:= true,
    MfileRec = boss_record:new( mfile, [ 
                                         {created_at, calendar:now_to_datetime(erlang:now())}, 
 					{code_id,    I#ifile.cid},
-					{sern,       find_last_sern(I#ifile.cid) + 1},  % not atomic, unfortunately!
+					{sern,       find_last_sern(I#ifile.cstr) + 1},  % not atomic, unfortunately!
 			                {keyw,       I#ifile.keyw}, 
 			                {file_desc,  I#ifile.desc} 
 			              ] 
                              ),
    lager:info("boss_record:new(mfile) returned: ~p", [MfileRec]),
-   case MfileRec:save() of   %% N.B.: Does not update id field!!
+   BossRec = MfileRec:save(),
+   lager:info("MfileRec:save() returned: ~p", [BossRec]),
+   case BossRec of   %% N.B.: Does not update id field!!
       {ok, {mfile, AllocatedId, _, _, _, _, _}} ->
 	  #ifile{ result = "success",
                   id =     AllocatedId,
@@ -287,8 +321,8 @@ ifile_insert(I) when is_record(I, ifile) ->
                   sern =   MfileRec:sern(),
                   keyw =   MfileRec:keyw(), 
                   desc =   MfileRec:file_desc() };
-      {error, _} -> 
-          #ifile{result = "Internal error on insert (see log for details)"}
+      {error, SaveErrMesg} -> 
+          #ifile{result = SaveErrMesg}
    end.
 
 
@@ -316,6 +350,7 @@ icode_fetch(CId) when is_number(CId) ->
 				      lists:append("mfilecode-", integer_to_list(CId))} ]),
    icode_fetch(R);
 icode_fetch(CStr) when is_list(CStr) ->
+   is_valid_cstr(CStr) =:= true,
    R = boss_db:find_first(mfilecode, [{code_str, 
                                        'equals', 
 				       lists:map(fun uppercase_it/1, CStr)} ]),
@@ -324,10 +359,11 @@ icode_fetch(BossRec) ->
    lager:info("icode_fetch(BossRec) called with argument: ~p", [BossRec]),
    case BossRec of
       undefined -> 
-         #icode{ result = "Code not found" };
+         #icode{ result = "Code not found",
+                 id     = "mfilecode-0" };
       _ ->
          #icode{ result = "success", 
-                 id     = mfilecodeId_strip(BossRec:id()),
+                 id     = BossRec:id(),
                  dstr   = timestamp_to_binary_date_only(BossRec:created_at()),
 		 cstr   = BossRec:code_str(),
 		 desc   = BossRec:code_desc() }

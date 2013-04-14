@@ -37,13 +37,13 @@ git push -u origin master
 echo "Done."
 
 # parse version number using trick from stackoverflow.com
-oIFS="$IFS"
-IFS=.
-set -- $VERNUM
-IFS="$oIFS"
+oIFS="$IFS"      # IFS is bash's argument separator, normally a space
+IFS=.            # set it to a period
+set -- $VERNUM   # take contents of VERNUM as the new set of arguments
+IFS="$oIFS"      # return IFS the way it was
 
-# increment version number
-REV=`expr $3 + 1`
+# increment version number (using new set of arguments obtained just above)
+REV=`expr $3 + 1`    
 VERNUM="$1.$2.$REV"
 git tag ver-$VERNUM
 

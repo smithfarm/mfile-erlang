@@ -1,4 +1,4 @@
-mfile/deps/*
 mfile/log/*
 mfile/ebin/*
 mfile/.git
+mfile/.eunit
