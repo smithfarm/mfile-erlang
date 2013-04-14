@@ -1,3 +1,5 @@
+20130414: add mfilecode validation test that it should start with a letter
+20130414: allow numbers in mfilecode (server side done, need to do client)
 20130413: streamline mfilelib:ifile_delete/2
 20130413: learn how to use -belongs_to_mfilecode(Id)
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message

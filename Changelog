@@ -1,3 +1,4 @@
+2013-04-14 Version 0.3.13 Systematically writing unit tests for all functions in mfilelib.erl, fixing issues as they arise.
 2013-04-14 Version 0.3.13 Moved two old 'utest' unit tests to the new EUnit testing framework.
 2013-04-14 Version 0.3.12 Added new CodeId/code_id field to mfilecodes table
 2013-04-14 Version 0.3.11 Expanded unit tests, fixed another bug
