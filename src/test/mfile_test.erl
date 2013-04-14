@@ -18,17 +18,23 @@ suite_test_()->
 tests() ->
     [       
      {"is_valid_cstr function",
-      ?_test(test_is_valid_cstr())},
+      ?_test(test_is_valid_cstr())}
+     ,
      {"Insert an mfilecode",
-      ?_test(insert_an_mfilecode())},
+      ?_test(insert_an_mfilecode())}
+     ,
      {"Get the code id as an integer",
-      ?_test(test_get_code_id_as_integer())},
+      ?_test(test_get_code_id_as_integer())}
+     ,
      {"Delete an mfilecode",
-      ?_test(delete_an_mfilecode())},
+      ?_test(delete_an_mfilecode())}
+     ,
      {"Insert an mfile",
-      ?_test(insert_an_mfile())},
+      ?_test(insert_an_mfile())}
+     ,
      {"Find last serial number",
       ?_test(find_last_sern())}
+%     ,
 %     {"Description of test 3",
 %      ?_test(test_function_3())}
     ].
@@ -43,8 +49,8 @@ insert_an_mfilecode() ->
     ?assertEqual("success", I#icode.result),
     ?assertEqual("TEST", I#icode.cstr),
     ?assertNotEqual(id, I#icode.id),
-    ?assertEqual(true, is_list(I#icode.id)),
-    "mfilecode-" ++ CId = I#icode.id.         % format is 'mfilecode-' ++ integer
+    ?assertEqual(true, is_integer(I#icode.id)),
+    I#icode.id > 0.
 
 test_get_code_id_as_integer() ->
     lager:info("Test: get code id as integer"),
@@ -63,7 +69,7 @@ insert_an_mfile() ->
     IC = mfilelib:icode_insert("test"),
     ?assertEqual("success", IC#icode.result),
     IF = mfilelib:ifile_insert(#ifile{
-                                        cid = mfilelib:mfilecodeId_strip(IC#icode.id),
+                                        cid = IC#icode.id,
                                         cstr = IC#icode.cstr,
                                         keyw = "Test file"
                                      }),
