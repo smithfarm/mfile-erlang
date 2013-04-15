@@ -2,7 +2,7 @@ create table mfiles (
   id serial NOT NULL,
   created_at timestamp NOT NULL,
   code_id int NOT NULL,
-  sern int NOT NULL UNIQUE,
+  sern int NOT NULL,
   keyw varchar(120),
   file_desc varchar(320),
   primary key (id)

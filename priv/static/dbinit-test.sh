@@ -14,4 +14,5 @@ $PGCMD "dropdb $MFILEDB"
 #$PGCMD "dropuser $OWNER"
 #$PGCMD "createuser -W $OWNER"
 $PGCMD "createdb $MFILEDB -O $OWNER"
+pwd
 psql $MFILEDB <dbinit.sql

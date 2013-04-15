@@ -32,19 +32,22 @@ tests() ->
      {"find last code_id when mfilecodes table is empty",
       ?_test(find_last_code_id_empty_table())}
      ,
-     {"Insert an mfilecode",
+     {"insert an mfilecode",
       ?_test(insert_an_mfilecode())}
+     ,
+     {"test get_boss_code_id",
+      ?_test(test_get_boss_code_id())}
      ,
      {"find last code_id when mfilecodes table is not empty",
       ?_test(find_last_code_id_non_empty_table())}
      ,
-     {"Get the code id as an integer",
+     {"get the code id as an integer",
       ?_test(test_get_code_id_as_integer())}
      ,
-     {"Delete an mfilecode",
+     {"delete an mfilecode",
       ?_test(delete_an_mfilecode())}
      ,
-     {"Find last serial number of a non-existing code",
+     {"find last serial number of a non-existing code",
       ?_test(find_last_sern_of_nonexist_code())}
      ,
      {"test integer_to_month function",
@@ -53,7 +56,7 @@ tests() ->
      {"test timestamp_to_date_string function",
       ?_test(test_timestamp_to_date_string())}
      ,
-     {"Insert an mfile",
+     {"insert an mfile",
       ?_test(insert_an_mfile())}
      ,
      {"Find last serial number of an existing code",
@@ -107,7 +110,8 @@ test_mfilecode_validation() ->
     test_mfilecode_validation_not_ok(abc, "Invalid data type for code_str"),
     test_mfilecode_validation_not_ok([], "Code is empty"),
     test_mfilecode_validation_not_ok("NineChars", "Code string too long (max. 8 characters)"),
-    test_mfilecode_validation_not_ok("123", "Upper and lower case ASCII characters only"),
+    test_mfilecode_validation_not_ok("123", "Malformed code"),
+    test_mfilecode_validation_not_ok("A**", "Malformed code"),
     test_mfilecode_validation_ok("hippo").
 
 find_last_code_id_empty_table() ->
@@ -122,6 +126,12 @@ insert_an_mfilecode() ->
     ?assertEqual(true, is_integer(I#icode.id)),
     I#icode.id > 0,
     test_mfilecode_validation_not_ok(I#icode.cstr, "That code is already in the database").
+
+test_get_boss_code_id() ->
+    ?assertEqual([], mfilelib:get_boss_code_id("testnon")),
+    Val = mfilelib:get_boss_code_id("test"),
+    ?assertEqual(true, is_list(Val)),
+    ?assertEqual(true, length(Val) > 0).
 
 find_last_code_id_non_empty_table() ->
     CId = mfilelib:find_last_code_id(),

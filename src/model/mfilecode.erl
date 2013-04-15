@@ -20,7 +20,7 @@ validation_tests() ->
       {fun() -> length(CodeStr) < 9 end,
        "Code string too long (max. 8 characters)"},
       {fun() -> mfilelib:is_valid_cstr(CodeStr) end,
-       "Upper and lower case ASCII characters only"},
+       "Malformed code"},
       {fun() -> not mfilelib:icode_exists(CodeStr) end,
        "That code is already in the database"},
       {fun() -> is_integer(CodeId) end,

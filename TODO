@@ -1,3 +1,4 @@
+20130414: debug issue "ifile_insert doesn't communicate back to start.js"
 20130414: add mfilecode validation test that it should start with a letter
 20130414: allow numbers in mfilecode (server side done, need to do client)
 20130413: streamline mfilelib:ifile_delete/2
