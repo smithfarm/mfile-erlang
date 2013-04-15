@@ -23,8 +23,11 @@ tests() ->
      {"validate_serial_number function",
       ?_test(test_validate_serial_number())}
      ,
-     {"test uppercase_it function",
-      ?_test(test_uppercase_it())}
+     {"test uppercase_char function",
+      ?_test(test_uppercase_char())}
+     ,
+     {"test uppercase_string function",
+      ?_test(test_uppercase_string())}
      ,
      {"mfilecode validation",
       ?_test(test_mfilecode_validation())}
@@ -36,13 +39,13 @@ tests() ->
       ?_test(insert_an_mfilecode())}
      ,
      {"test get_boss_code_id",
-      ?_test(test_get_boss_code_id())}
+      ?_test(test_get_code_id())}
      ,
      {"find last code_id when mfilecodes table is not empty",
       ?_test(find_last_code_id_non_empty_table())}
      ,
-     {"get the code id as an integer",
-      ?_test(test_get_code_id_as_integer())}
+     {"test icode_has_files function when no files in DB",
+      ?_test(test_icode_has_files_when_no_files())}
      ,
      {"delete an mfilecode",
       ?_test(delete_an_mfilecode())}
@@ -86,14 +89,18 @@ test_validate_serial_number() ->
     ?assertEqual(0, mfilelib:validate_serial_number([])),
     ?assertEqual(0, mfilelib:validate_serial_number({123})).
 
-test_uppercase_it() ->
-    ?assertEqual($A, mfilelib:uppercase_it($A)),
-    ?assertEqual($Z, mfilelib:uppercase_it($Z)),
-    ?assertEqual($A, mfilelib:uppercase_it($a)),
-    ?assertEqual($Z, mfilelib:uppercase_it($Z)),
-    ?assertEqual($0, mfilelib:uppercase_it($0)),
-    ?assertError(function_clause, mfilelib:uppercase_it(0)),
-    ?assertError(function_clause, mfilelib:uppercase_it(175)).
+test_uppercase_char() ->
+    ?assertEqual($A, mfilelib:uppercase_char($A)),
+    ?assertEqual($Z, mfilelib:uppercase_char($Z)),
+    ?assertEqual($A, mfilelib:uppercase_char($a)),
+    ?assertEqual($Z, mfilelib:uppercase_char($Z)),
+    ?assertEqual($0, mfilelib:uppercase_char($0)).
+
+test_uppercase_string() ->
+    ?assertEqual("TEST", mfilelib:uppercase_string("test")),
+    ?assertEqual("TEST", mfilelib:uppercase_string("TEst")),
+    ?assertEqual("T1", mfilelib:uppercase_string("t1")),
+    ?assertEqual("T1", mfilelib:uppercase_string("T1")).
 
 test_mfilecode_validation_ok(CStr) ->
     BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
@@ -123,25 +130,26 @@ insert_an_mfilecode() ->
     ?assertEqual("success", I#icode.result),
     ?assertEqual("TEST", I#icode.cstr),
     ?assertNotEqual(id, I#icode.id),
-    ?assertEqual(true, is_integer(I#icode.id)),
-    I#icode.id > 0,
+    ?assertEqual(true, is_list(I#icode.id)),
+    ?assertEqual(true, length(I#icode.id) > 0),
     test_mfilecode_validation_not_ok(I#icode.cstr, "That code is already in the database").
 
-test_get_boss_code_id() ->
-    ?assertEqual([], mfilelib:get_boss_code_id("testnon")),
-    Val = mfilelib:get_boss_code_id("test"),
+test_get_code_id() ->
+    ?assertEqual([], mfilelib:get_code_id("testnon")),
+    Val = mfilelib:get_code_id("test"),
     ?assertEqual(true, is_list(Val)),
     ?assertEqual(true, length(Val) > 0).
 
 find_last_code_id_non_empty_table() ->
     CId = mfilelib:find_last_code_id(),
-    ?assertEqual(true, is_integer(CId)),
-    ?assertEqual(true, CId > 0).
+    ?assertEqual(true, is_list(CId)),
+    ?assertEqual(true, length(CId) > 0).
 
-test_get_code_id_as_integer() ->
-    lager:info("Test: get code id as integer"),
-    I = mfilelib:get_code_id_as_integer("test"),
-    ?assertEqual(true, is_integer(I)).
+test_icode_has_files_when_no_files() ->
+    CId = mfilelib:get_code_id("test"),
+    ?assertEqual(false, mfilelib:icode_has_files(CId)),
+    Cnon = mfilelib:get_code_id("testnon"),
+    ?assertEqual(undefined, mfilelib:icode_has_files(Cnon)).
 
 delete_an_mfilecode() ->
     lager:info("Test: delete an mfilecode"),
@@ -152,8 +160,8 @@ delete_an_mfilecode() ->
  
 find_last_sern_of_nonexist_code() ->
     lager:info("Test: find last serial number of non-existent code"),
-    L1 = mfilelib:find_last_sern("testnon"),
-    ?assertEqual(0, L1).
+    ?assertEqual(0, mfilelib:find_last_sern("testnon")),
+    ?assertEqual(undefined, mfilelib:find_last_sern([])).
 
 test_integer_to_month() ->
     ?assertError(function_clause, mfilelib:integer_to_month(0)),

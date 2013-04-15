@@ -82,31 +82,43 @@ validate_serial_number(Sf) ->
 
 
 %% find_last_code_id/0 %% 
-%%                     %% returns an integer: either the last
-%%                     %% code_id/CodeID or 0 if table empty
-%%***
+%%                     %% returns either a string containing the last
+%%                     %% code_id/CodeID, or undefined if table empty
+%%
 find_last_code_id() ->
    R = boss_db:find_last(mfilecode, []),
-   lager:info("boss_db:find_last(mfilecode) returned: ~p", [R]),
-   ReturnVal = case R of
-                  {mfilecode,_,_,S,_,_} -> S;
-                  undefined ->             0
-               end,
-   true = is_integer(ReturnVal),
-   lager:info("find_last_code_id(): returning ~p", [ReturnVal]),
-   ReturnVal.
+   case R of
+      undefined ->             0;
+      _ -> R:id()
+   end.
 
 
-%% uppercase_it %% takes an integer, deducts 32 if it corresponds to a lowercase letter
+%% icode_exists %% takes a CId (integer) or CStr (list)
+%%              %% returns true or false
+%%
+icode_exists(CStr) when is_list(CStr) -> 
+   lager:info("Preparing to fetch Code ~p", [CStr]),
+   R = boss_db:find_first(mfilecode, [{code_str, 'equals', uppercase_string(CStr)}]),
+   case R of
+      undefined -> false;
+      _ -> true
+   end.
+
+
+%% uppercase_char %% takes an integer, deducts 32 if it corresponds to a lowercase letter
 %%              %% returns an integer
 %%***
-uppercase_it(E) when E >= $0, E =< $9 ->
+uppercase_char(E) when is_integer(E), E >= $a, E =< $z ->
+   E - 32;
+uppercase_char(E) when is_integer(E) ->
    E;
-uppercase_it(E) when E >= $A, E =< $Z ->
-   E;
-uppercase_it(E) when E >= $a, E =< $z ->
-   E - 32.
+uppercase_char(E) when not is_integer(E) ->
+   undefined.
 
+uppercase_string(E) when is_list(E), length(E) > 0 ->
+   lists:map(fun uppercase_char/1, E);
+uppercase_string([]) ->
+   [].
 
 %% icode_insert/1 %% takes a code string
 %%                %% returns a populated icode record
@@ -115,70 +127,52 @@ icode_insert(CStr) when is_list (CStr) ->
    true = is_valid_cstr(CStr),
    MfilecodeRec = mfilecode:new( id,
                                  calendar:now_to_datetime(erlang:now()),
-                                 find_last_code_id() + 1,
-				 lists:map(fun mfilelib:uppercase_it/1, CStr),
+				 uppercase_string(CStr),
 				 [] ),   % code_desc field is currently unused
    R = MfilecodeRec:save(),  
    %lager:info("MfilecodeRec:save() returned: ~p", [R]),
    icode_insert(R);
 icode_insert( {ok, BossRec} ) ->
+   CId = get_code_id(BossRec:code_str()),
    %lager:info("MfilecodeRec:id() == ~p", [CId]),
    #icode{result = "success", 
-          id = BossRec:code_id(),
+          id = CId,
    	  dstr = mfilelib:timestamp_to_date_string(BossRec:created_at()),
 	  cstr = BossRec:code_str()};
 icode_insert( {error, [FirstErrMesg|_]} ) -> 
    #icode{result = FirstErrMesg}.
 
 
-%% get_code_id_as_integer/1    %% takes a string (CStr)
-%%                             %% returns an integer (CId)
-%%***
-get_code_id_as_integer(CStr) when is_list(CStr) ->
-   R = icode_fetch(CStr),
-   ReturnVal = R#icode.id,
-   true = is_integer(ReturnVal),
-   ReturnVal.
-
-
-%% icode_exists %% takes a CId (integer) or CStr (list)
-%%              %% returns true or false
-%%
-icode_exists(CId) when is_integer(CId), CId > 0 -> 
-   lager:info("Preparing to fetch Code ID ~p", [CId]),
-   I = icode_fetch(CId),
-   lager:info("icode_fetch returned ~p", [I]),
-   case I#icode.result of
-      "success" -> true;
-      _ -> false
-   end;
-icode_exists(CStr) when is_list(CStr), CStr =/= [] -> 
-   lager:info("Preparing to fetch Code ~p", [CStr]),
-   I = icode_fetch(CStr),
-   lager:info("icode_fetch returned ~p", [I]),
-   case I#icode.result of
-      "success" -> true;
-      _ -> false
-   end;
-icode_exists(_) ->
-   false.
-
-
-%% get_boss_code_id/1 ** takes string (CStr)
+%% get_code_id/1 ** takes string (CStr)
 %%                    ** returns a string something like "mfilecode-8"
 %%                    ** if found, but don't rely on it having that format
 %%                    ** if not found, returns []
 %%
-get_boss_code_id(CStr) when is_list(CStr) ->
+get_code_id(CStr) when is_list(CStr) ->
    true = is_valid_cstr(CStr),
    R = boss_db:find_first(mfilecode, [{code_str, 
                                        'equals', 
-				       lists:map(fun uppercase_it/1, CStr)} ]),
-   lager:info("get_boss_code_id(): boss_db:find_first(mfilecode) returned ~p", [R]),
+				       uppercase_string(CStr)} ]),
+   lager:info("get_code_id(): boss_db:find_first(mfilecode) returned ~p", [R]),
    case R of
       undefined -> [];
       _ ->         R:id()
    end.
+
+
+%% icode_has_files/1 %% takes an mfilecode ID string
+%%                   %% returns true or false
+%%
+icode_has_files(CId) when is_list(CId), length(CId) > 0 ->
+   lager:info("Looking up files that have code ID: ~p", [CId]),
+   Count = boss_db:count(mfile, [{mfilecode_id, 'equals', CId}]),
+   lager:info("Number of files found: ~p", [Count]),
+   case Count of
+      0 -> false;
+      _ -> true
+   end;
+icode_has_files([]) ->
+   undefined.
 
 
 %% icode_delete/1 %% takes a string (file code)
@@ -187,15 +181,16 @@ get_boss_code_id(CStr) when is_list(CStr) ->
 icode_delete(CStr) when is_list(CStr) ->
    true = is_valid_cstr(CStr),
    BoolVal = icode_exists(CStr),
+   lager:info("icode_exists(~p) returned ~p", [CStr, BoolVal]),
    case BoolVal of
       true ->
-         CId = get_code_id_as_integer(CStr),
+         CId = get_code_id(CStr),
          lager:info("icode_delete/1: Found mfilecode: ~p", [CId]),
          case icode_has_files(CId) of
 	    true ->
 	       #icode{result = "Files exist for this code: can't delete"};
 	    false ->
-               CodeId = get_boss_code_id(CStr),
+               CodeId = get_code_id(CStr),
                lager:info("icode_delete/1: The record has Boss ID: ~p", [CodeId]),
                lager:info("icode_delete/1: About to delete the file code with ID ~p", [CodeId]),
                case boss_db:delete(CodeId) of
@@ -216,19 +211,23 @@ icode_delete(CStr) when is_list(CStr) ->
 %% Finds the current last serial number for a given CodeStr
 %% Returns 0 if the CodeId doesn't exist
 %%***
-find_last_sern(CStr) when is_list(CStr) ->
+find_last_sern(CStr) when is_list(CStr), length(CStr) > 0 ->
    true = is_valid_cstr(CStr),
-   CId = get_code_id_as_integer(CStr),
-   lager:info("find_last_sern(): CId == ~p", [CId]),
-   R = boss_db:find_last(mfile, [{code_id, 'equals', CId}]),
-   lager:info("boss_db:find_last(mfile) returned: ~p", [R]),
+   case icode_exists(CStr) of
+      true -> find_last_sern({exists, CStr});
+      false -> 0
+   end;
+find_last_sern({exists, CStr}) ->
+   CId = get_code_id(CStr),
+   R = boss_db:find_last(mfile, [{mfilecode_id, 'equals', CId}]),
    ReturnVal = case R of
-                  {mfile,_,_,_,S,_,_} -> S;
-                  undefined ->           0
+                  undefined ->           0;
+                  _ -> R:sern()
                end,
    true = is_integer(ReturnVal),
-   lager:info("find_last_sern(): returning ~p", [ReturnVal]),
-   ReturnVal.
+   ReturnVal;
+find_last_sern([]) -> 
+   undefined.
 
 
 %% integer_to_month %% takes an integer in the range 1-12
@@ -265,12 +264,15 @@ timestamp_to_date_string({{Y, M, D}, _}) ->
 %%              %% inserts new file and returns completed populated ifile record
 %%***              
 ifile_insert(I) when is_record(I, ifile) ->
-   true = is_integer(I#ifile.cid),
+   true = is_list(I#ifile.cid) and (length(I#ifile.cid) > 0),
    true = is_valid_cstr(I#ifile.cstr),
+   true = icode_exists(I#ifile.cstr),
+   CId = get_code_id(I#ifile.cstr),
+   lager:info("ifile_insert(~p) found code ID ~p", [I, CId]),
    MfileRec = boss_record:new(mfile, 
          [ 
             {created_at, calendar:now_to_datetime(erlang:now())}, 
-            {code_id,    I#ifile.cid},
+            {mfilecode_id,    CId},
             {sern,       find_last_sern(I#ifile.cstr) + 1},  % not atomic, unfortunately!
             {keyw,       I#ifile.keyw}, 
             {file_desc,  I#ifile.desc} 
@@ -283,7 +285,7 @@ ifile_insert(I) when is_record(I, ifile) ->
 	  #ifile{ result = "success",
                   id =     BossId,
                   dstr =   mfilelib:timestamp_to_date_string(MfileRec:created_at()),
-		  cid =    MfileRec:code_id(),
+		  cid =    MfileRec:mfilecode_id(),
                   cstr =   I#ifile.cstr,
                   sern =   MfileRec:sern(),
                   keyw =   MfileRec:keyw(), 
@@ -293,52 +295,15 @@ ifile_insert(I) when is_record(I, ifile) ->
    end.
 
 
-%% icode_fetch/1 %% Takes either a CId or a CStr
-%%               %% Fetches it from the DB and returns a populated icode record
+%% icode_fetch/1 %% Takes a CStr;
+%%               %% Fetches it from the DB and returns an mfilecode instance
+%%               %% or undefined
 %%
-icode_fetch(CId) when is_number(CId) ->
-   icode_fetch( 
-      boss_db:find_first(mfilecode, [{id, 
-                                     'equals', 
-                                     lists:append("mfilecode-", integer_to_list(CId))} ])
-   );
 icode_fetch(CStr) when is_list(CStr) ->
-   icode_fetch( 
-      case is_valid_cstr(CStr) of
-          true -> 
-             boss_db:find_first(mfilecode, [{code_str, 
-                                            'equals', 
-                                            lists:map(fun uppercase_it/1, CStr)} ]);
-          false ->
-             undefined
-       end
-    );
-icode_fetch(BossRec) ->
-   lager:info("icode_fetch(BossRec) called with argument: ~p", [BossRec]),
-   case BossRec of
-      undefined -> 
-         #icode{ result = "Code not found",
-                 id     = 0 };
-      _ ->
-         #icode{ result = "success", 
-                 id     = BossRec:code_id(),
-                 dstr   = timestamp_to_date_string(BossRec:created_at()),
-		 cstr   = BossRec:code_str(),
-		 desc   = BossRec:code_desc() }
-   end.
-
-
-%% icode_has_files/1 %% takes an integer (CId), e.g. 8, not "mfilecode-8"
-%%                   %% returns true or false
-%%
-icode_has_files(CId) when is_integer(CId) ->
-   lager:info("Looking up files that have code ID: ~p", [CId]),
-   Count = boss_db:count(mfile, [{code_id, 'equals', CId}]),
-   lager:info("Number of files found: ~p", [Count]),
-   case Count of
-      0 -> false;
-      _ -> true
-   end.
+   R = boss_db:find_first(mfilecode, [{code_str, 
+                                       'equals', 
+                                       uppercase_string(CStr)} ]),
+   R.
 
 
 %% icode_JSON/1 %% takes an icode instance and
@@ -368,11 +333,12 @@ ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
 %%               %% returns a populated ifile record
 %%
 ifile_fetch(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
-   ICode = icode_fetch(CStr),
+   CRec = icode_fetch(CStr),
    RetVal = 
-      case ICode#icode.result of 
-         "success" -> ifile_fetch(#ifile{cid =  ICode#icode.id,
-                                         cstr = ICode#icode.cstr,
+      case CRec of 
+         undefined -> #ifile{ result = "Code not found" };
+         _ -> ifile_fetch(#ifile{cid =  CRec#icode.id,
+                                         cstr = CRec#icode.cstr,
                                          sern = Sern});
          R ->         #ifile{ result = R }
    end.

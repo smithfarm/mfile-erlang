@@ -1,5 +1,7 @@
--module(mfilecode, [Id, CreatedAt::datetime(), CodeId::integer(), CodeStr::string(), CodeDesc::string()]).
+-module(mfilecode, [Id, CreatedAt::datetime(), CodeStr::string(), CodeDesc::string()]).
+-has({mfiles, many}).
 -compile(export_all).
+
 
 %% validation_tests for mfilecode
 %% 
@@ -22,9 +24,9 @@ validation_tests() ->
       {fun() -> mfilelib:is_valid_cstr(CodeStr) end,
        "Malformed code"},
       {fun() -> not mfilelib:icode_exists(CodeStr) end,
-       "That code is already in the database"},
-      {fun() -> is_integer(CodeId) end,
-       "Code ID is not an integer"},
-      {fun() -> CodeId > 0 end,
-       "Code ID is not greater than zero"}
+       "That code is already in the database"}
+%      {fun() -> is_integer(CodeId) end,
+%       "Code ID is not an integer"},
+%      {fun() -> CodeId > 0 end,
+%       "Code ID is not greater than zero"}
    ].

@@ -1,11 +1,11 @@
 -record(icode, {result = "Internal error (no result given)", 
-                id = 0, 
+                id = [], 
                 dstr = [], 
 		cstr = [], 
 		desc = []} 
        ).
 -record(ifile, {result = "Internal error (no result given)", 
-                id = 0, 
+                id = [], 
 		dstr = [], 
 		cid = [], 
 		cstr = [], 

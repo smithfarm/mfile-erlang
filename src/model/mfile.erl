@@ -1,4 +1,5 @@
--module(mfile, [Id, CreatedAt::datetime(), CodeId::integer(), Sern::integer(), Keyw::string(), FileDesc::string()]).
+-module(mfile, [Id, CreatedAt::datetime(), MfilecodeId, Sern::integer(), Keyw::string(), FileDesc::string()]).
+-belongs_to(mfilecode).
 -compile(export_all).
 
 validation_tests() ->
