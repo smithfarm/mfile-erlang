@@ -4,6 +4,21 @@
 
 validation_tests() ->
    [
-      {fun() -> mfilelib:icode_exists(CodeId) end,
+      {fun() -> 
+          Rec = boss_db:find_first(mfilecode, [{id, 'equals', MfilecodeId}]),
+          R = boss_record:new(mfilecode, [{id, MfilecodeId}, {code_str, Rec:code_str()}]),
+          R:exists() 
+       end,
        "Attempt to insert file with non-existent Code ID"}
-   ]
+   ].
+
+
+%% exists/0 %% takes MfilecodeId, Sern
+%%          %% returns true/false
+exists() ->
+   case boss_db:find_first(mfile, [{mfilecode_id, 'equals', MfilecodeId},
+                                   {sern, 'equals', Sern}]) of
+      undefined -> false;
+      _ -> true
+   end.
+

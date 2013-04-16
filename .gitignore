@@ -6,6 +6,7 @@ mfile.erl
 mfile.routes
 mfilecode.erl
 mfilelib.erl
+mfiledb.erl
 mfile_test.erl
 start.css
 start.html
