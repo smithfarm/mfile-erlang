@@ -1,3 +1,4 @@
+2013-04-17 Version 0.3.14 Ironing out wrinkles
 2013-04-17 Version 0.3.13 Trying to get a grip
 2013-04-16 Version 0.3.13 Split off mfiledb.erl from mfilelib.erl, split up unit tests into two files, in process of rewriting ifile_insert()
 2013-04-15 Version 0.3.13 Switched to -belongs_to, -has association, passes unit tests

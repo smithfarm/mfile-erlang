@@ -29,6 +29,12 @@ tests() ->
      {"test get_boss_code_id",
       ?_test(test_get_code_id())}
      ,
+     {"test icode_exists_cstr",
+      ?_test(test_icode_exists_cstr())}
+     ,
+     {"test icode_exists_cstr",
+      ?_test(test_icode_exists_cid())}
+     ,
      {"test_icode_fetch",
       ?_test(test_icode_fetch())}
      ,
@@ -49,6 +55,12 @@ tests() ->
      ,
      {"insert an mfile",
       ?_test(insert_an_mfile())}
+     ,
+     {"attempt to insert invalid mfile",
+      ?_test(attempt_insert_invalid_mfile())}
+     ,
+     {"test get_file_id",
+      ?_test(test_get_file_id())}
      ,
      {"Find last serial number of an existing code with one file",
       ?_test(find_last_sern_of_existing_code_with_one_file())}
@@ -95,8 +107,18 @@ insert_an_mfilecode() ->
 test_get_code_id() ->
     ?assertEqual([], mfiledb:get_code_id("testnon")),
     Val = mfiledb:get_code_id("test"),
+    lager:info("mfiledb:get_code_id() returned ~p", [Val]),
     ?assertEqual(true, is_list(Val)),
     ?assertEqual(true, length(Val) > 0).
+
+test_icode_exists_cstr() ->
+    ?assertEqual(false, mfiledb:icode_exists_cstr("testnon")),
+    ?assertEqual(true, mfiledb:icode_exists_cstr("test")).
+
+test_icode_exists_cid() ->
+    ?assertEqual(false, mfiledb:icode_exists_cid("mfilecode-55")),
+    CId = mfiledb:get_code_id("test"),
+    ?assertEqual(true, mfiledb:icode_exists_cid(CId)).
 
 test_icode_fetch() ->
     R = mfiledb:icode_fetch("non-existent"),
@@ -136,12 +158,35 @@ find_last_sern_of_nonexist_code() ->
 insert_an_mfile() ->
     lager:info("Test: insert an mfile"),
     IC = mfiledb:icode_insert("test"),
-    lager:info("cid == ~p, cstr = ~p", [IC#icode.id, IC#icode.cstr]),
+    lager:info("IC#icode.result == ~p", [IC#icode.result]),
+    ?assertEqual("mfilecode-2", IC#icode.id),
+    ?assertEqual("TEST", IC#icode.cstr),
     ?assertEqual("success", IC#icode.result),
     IF = mfiledb:ifile_insert(IC#icode.cstr,
                               "Test file",
                               [] ),
     ?assertEqual("success", IF#ifile.result).
+
+attempt_insert_invalid_mfile() ->
+    lager:info("Test: attempt to insert an invalid mfile"),
+    IF = mfiledb:ifile_insert("HorbleyDorbley",
+                              "Test file",
+                              [] ),
+    ?assertEqual("Attempt to insert file with invalid Code", IF#ifile.result).
+
+test_get_file_id() ->
+    %need a function that checks if a string is an mfile/mfilecode ID    
+    %something that splits the string into parts before and after the "-"
+    %and checks if the second part is an integer, etc.
+    FId = mfiledb:get_file_id("test", 1),
+    lager:info("test_get_file_id() got FId ~p", [FId]),
+    [Type, TableId] = re:split(FId, "-", 
+                               [{return, list}, {parts, 2}]),
+    ?assertEqual("mfile", Type),
+    I = list_to_integer(TableId),
+    ?assertEqual(true, is_integer(I)),
+    F2 = mfiledb:get_file_id("arbleberryness", 3543),
+    ?assertEqual([], F2).
 
 find_last_sern_of_existing_code_with_one_file() ->
     lager:info("Test: find last serial number of existing code with one file"),
