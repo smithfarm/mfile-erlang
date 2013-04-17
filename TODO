@@ -1,14 +1,16 @@
-20130414: debug issue "ifile_insert doesn't communicate back to start.js"
+20130417: go over unit tests for mfiledb more carefully, see if any can be added
+20130417: find out how to look at parameters in "Req" in main.erl, so I can make calls from unit test suite (currently main.erl has no tests)
 20130414: add mfilecode validation test that it should start with a letter
 20130414: allow numbers in mfilecode (server side done, need to do client)
 20130413: streamline mfilelib:ifile_delete/2
-20130413: learn how to use -belongs_to_mfilecode(Id)
 20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
-20130409: write unit tests for all functions in mfilelib.erl
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130413: learn how to use -belongs_to_mfilecode(Id)
+*20130409: write unit tests for all functions in mfilelib.erl
+*20130414: debug issue "ifile_insert doesn't communicate back to start.js"
 *20130414: convert unit tests in 'utest' directory to the new EUnit framework, then delete utest directory
 *20130412: stop using the Id field of the mfilecodes table to link from the mfiles table: use an internal "CodeId" field instead (this field will need to be added to the mfilecodes table)
 *20130412: write EUnit tests for mfile, mfilecode insert, fetch, and delete functions (so I don't have to test manually)

@@ -1,4 +1,5 @@
 -module(mfilelib).
+-include("mfile.hrl").
 -compile(export_all).
 
 %%%============================================================================
@@ -25,6 +26,29 @@ getMfileVerNum() ->
    end,
    Result.
 
+
+%% icode_JSON/1 %% takes an icode instance and
+%%              %% stringifies it
+%%
+icode_JSON(I) when is_record(I, icode) ->
+   {json, [ {queryResult,   I#icode.result},
+            {mfilecodeId,   I#icode.id},
+            {mfilecodeDate, I#icode.dstr},
+	    {mfilecodeCode, I#icode.cstr},
+	    {mfilecodeDesc, I#icode.desc} ] }.
+
+
+%% ifile_JSON
+ifile_JSON(I) when is_record(I, ifile) ->
+   {json, [ {queryResult, I#ifile.result},
+            {mfileId,     I#ifile.id},
+            {mfileDate,   I#ifile.dstr},
+	    {mfileCodeId, I#ifile.cid},
+            {mfileCode,   I#ifile.cstr},
+            {mfileSern,   I#ifile.sern},
+            {mfileKeyw,   I#ifile.keyw},
+	    {mfileDesc,   I#ifile.desc} ] }.
+  
 
 %% is_valid_cstr/1   %% takes a string S
 %%                   %% returns true or false

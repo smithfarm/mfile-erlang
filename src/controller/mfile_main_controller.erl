@@ -8,14 +8,11 @@ start('GET', []) ->
 
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
-   C = mfilelib:icode_fetch(Req:post_param("mfileCode")),
-   case C#icode.result of 
-      "success" -> I = #ifile{cid  = C#icode.id,
-                              cstr = C#icode.cstr,
-			      keyw = Req:post_param("mfileKeyw"), 
-			      desc = Req:post_param("mfileDesc")},
-                   IFile = mfilelib:ifile_insert(I);
-      _         -> IFile = #ifile{result = C#icode.result}
+   case mfiledb:icode_exists_cstr(Req:post_param("mfileCode")) of 
+      false -> IFile = #ifile{result = "Code not found"};
+      true  -> IFile = mfiledb:ifile_insert(Req:post_param("mfileCode"),
+                                            Req:post_param("mfileKeyw"),
+                                            Req:post_param("mfileDesc"))
    end,
    mfilelib:ifile_JSON(IFile).
 
@@ -23,29 +20,29 @@ insert('POST', []) ->
 fetch('POST', []) ->
    CStr = Req:post_param("mfileCode"),  % get Code string from form
    Sern = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
-   I = mfilelib:ifile_fetch(CStr, Sern),
+   I = mfiledb:ifile_fetch(CStr, Sern),
    mfilelib:ifile_JSON(I).
 
 % delete record by Code and Serial Number (called asynchronously using AJAX)
 delete('POST', []) ->
    CStr = Req:post_param("mfileCode"),  % get Code string from form
    Sern = list_to_integer(Req:post_param("mfileSern")),    % get Serial Number from form
-   I = mfilelib:ifile_delete(CStr, Sern),
+   I = mfiledb:ifile_delete(CStr, Sern),
    mfilelib:ifile_JSON(I).
 
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
-   I = mfilelib:icode_insert(Req:post_param("mfilecodeCode")),
+   I = mfiledb:icode_insert(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
 
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST', []) ->
-   I = mfilelib:icode_fetch(Req:post_param("mfilecodeCode")),
+   I = mfiledb:icode_fetch(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
    
 % delete code (called asynchronously using AJAX)
 deletecode('POST', []) ->
-   I = mfilelib:icode_delete(Req:post_param("mfilecodeCode")),
+   I = mfiledb:icode_delete(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
    
 % error handler (same for 'GET' and 'POST')

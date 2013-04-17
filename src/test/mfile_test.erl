@@ -29,6 +29,9 @@ tests() ->
      {"test get_boss_code_id",
       ?_test(test_get_code_id())}
      ,
+     {"test_icode_fetch",
+      ?_test(test_icode_fetch())}
+     ,
      {"Find last serial number of an existing code with no files in DB",
       ?_test(find_last_sern_of_existing_code_nofiles())}
      ,
@@ -95,9 +98,16 @@ test_get_code_id() ->
     ?assertEqual(true, is_list(Val)),
     ?assertEqual(true, length(Val) > 0).
 
+test_icode_fetch() ->
+    R = mfiledb:icode_fetch("non-existent"),
+    ?assertEqual("Code not found", R#icode.result),
+    R1 = mfiledb:icode_fetch("test"),
+    ?assertEqual("success", R1#icode.result).
+
 find_last_sern_of_existing_code_nofiles() ->
     lager:info("Test: find last serial number of existing code with no files in DB"),
-    L2 = mfiledb:find_last_sern("test"),
+    CId = mfiledb:get_code_id("test"),
+    L2 = mfiledb:find_last_sern(CId),
     ?assertEqual(0, L2).
 
 find_last_code_id_non_empty_table() ->
@@ -120,7 +130,7 @@ delete_an_mfilecode() ->
  
 find_last_sern_of_nonexist_code() ->
     lager:info("Test: find last serial number of non-existent code"),
-    ?assertEqual(0, mfiledb:find_last_sern("testnon")),
+    ?assertEqual(0, mfiledb:find_last_sern("mfilecode-55")),
     ?assertEqual(undefined, mfiledb:find_last_sern([])).
 
 insert_an_mfile() ->
@@ -135,7 +145,8 @@ insert_an_mfile() ->
 
 find_last_sern_of_existing_code_with_one_file() ->
     lager:info("Test: find last serial number of existing code with one file"),
-    L2 = mfiledb:find_last_sern("test"),
+    CId = mfiledb:get_code_id("test"),
+    L2 = mfiledb:find_last_sern(CId),
     ?assertEqual(1, L2).
 
 fetch_an_mfile() ->
