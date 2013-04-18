@@ -7,9 +7,9 @@
 %% =======================================================================
 
 %% get_code_id/1 ** takes string (CStr)
-%%                    ** returns a string something like "mfilecode-8"
-%%                    ** if found, but don't rely on it having that format
-%%                    ** if not found, returns []
+%%               ** returns a string something like "mfilecode-8"
+%%               ** if found, but don't rely on it having that format
+%%               ** if not found, returns []
 %%***
 get_code_id([]) ->
    [];
@@ -49,13 +49,11 @@ icode_exists_cid(CId) when is_list(CId) ->
 %%                %% returns a populated icode record
 %%***
 icode_insert(CStr) when is_list (CStr) ->
-   true = mfilelib:is_valid_cstr(CStr),
-   MfilecodeRec = boss_record:new( mfilecode, 
-      [ { code_str, mfilelib:uppercase_string(CStr) },
-        { created_at, calendar:now_to_datetime(erlang:now()) } ] ),
-   R = MfilecodeRec:save(),  
-   %lager:info("MfilecodeRec:save() returned: ~p", [R]),
-   icode_insert(R);
+   Valid = mfilelib:is_valid_cstr(CStr),
+   case Valid of
+      false -> icode_insert( {error, ["Malformed code string"]} );
+      true -> icode_insert_valid(CStr)
+   end;
 icode_insert( {ok, BossRec} ) ->
    CId = get_code_id(BossRec:code_str()),
    %lager:info("MfilecodeRec:id() == ~p", [CId]),
@@ -66,6 +64,13 @@ icode_insert( {ok, BossRec} ) ->
 icode_insert( {error, [FirstErrMesg|_]} ) -> 
    #icode{result = FirstErrMesg}.
 
+icode_insert_valid(CStr) ->
+   MfilecodeRec = boss_record:new( mfilecode, 
+      [ { id, id }, { code_str, mfilelib:uppercase_string(CStr) },
+        { created_at, calendar:now_to_datetime(erlang:now()) } ] ),
+   R = MfilecodeRec:save(),  
+   %lager:info("MfilecodeRec:save() returned: ~p", [R]),
+   icode_insert(R).
 
 %% icode_has_files/1 %% takes an mfilecode ID string
 %%                   %% returns true or false

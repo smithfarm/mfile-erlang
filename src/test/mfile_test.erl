@@ -26,6 +26,9 @@ tests() ->
      {"insert an mfilecode",
       ?_test(insert_an_mfilecode())}
      ,
+     {"attempt to insert malformed mfilecodes",
+      ?_test(insert_an_mfilecode_not_ok())}
+     , 
      {"test get_boss_code_id",
       ?_test(test_get_code_id())}
      ,
@@ -105,6 +108,17 @@ insert_an_mfilecode() ->
     ?assertEqual(true, is_list(I#icode.id)),
     ?assertEqual(true, length(I#icode.id) > 0),
     test_mfilecode_validation_not_ok(I#icode.cstr, "That code is already in the database").
+
+insert_an_mfilecode_not_ok() ->
+    lager:info("Test: attempt to insert some malformed mfilecodes"),
+    I1 = mfiledb:icode_insert("And now is the time for all good men to come in and rock"),
+    ?assertEqual("Malformed code string", I1#icode.result),
+    I1 = mfiledb:icode_insert("mfilecode-1"),
+    ?assertEqual("Malformed code string", I1#icode.result),
+    I1 = mfiledb:icode_insert([]),
+    ?assertEqual("Malformed code string", I1#icode.result),
+    ?assertError(function_clause, mfiledb:icode_insert(123)),
+    ?assertError(function_clause, mfiledb:icode_insert(abc)).
 
 test_get_code_id() ->
     lager:info("Test: look up code IDs by code strings (non-existent and existing)"),

@@ -16,6 +16,12 @@
 % Front page
 {"/", [{controller, "main"}, {action, "start"}]}.
 
+% Lost
+{"/lost", [{controller, "main"}, {action, "lost"}]}.
+
+% Confirm
+{"/confirm", [{controller, "main"}, {action, "confirm"}]}.
+
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.
 

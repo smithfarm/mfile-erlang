@@ -3,9 +3,17 @@
 -include("mfile.hrl").
 -compile([{parse_transform, lager_transform}]).
 
-% GET /
+% GET / 
 start('GET', []) ->
    { ok, mfilelib:initializeForm() }.
+
+% error handler (same for 'GET' and 'POST')
+lost(_, []) ->
+   {ok, mfilelib:initializeForm() }.
+
+% confirmation handler (same for 'GET' and 'POST')
+confirm(_, []) ->
+   {ok, mfilelib:initializeForm() }.
 
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
@@ -60,6 +68,3 @@ deletecode('POST', []) ->
    I = mfiledb:icode_delete(Req:post_param("mfilecodeCode")),
    mfilelib:icode_JSON(I).
    
-% error handler (same for 'GET' and 'POST')
-lost(_, []) ->
-   {ok, mfilelib:initializeForm() }.

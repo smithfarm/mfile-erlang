@@ -1,13 +1,15 @@
-20130417: go over unit tests for mfiledb more carefully, see if any can be added
+20130418: implement a function key that clears the data entry area, displays some text, and returns when the user presses another key
+20130418: update file - ask for confirmation first
 20130417: find out how to look at parameters in "Req" in main.erl, so I can make calls from unit test suite (currently main.erl has no tests)
+20130417: go over unit tests for mfiledb more carefully, see if any can be added
 20130414: add mfilecode validation test that it should start with a letter
 20130414: allow numbers in mfilecode (server side done, need to do client)
 20130413: streamline mfilelib:ifile_delete/2
-20130411: implement update functionality that checks if anything has changed and then displays a new screen with a summary of the changes, ask user to confirm and then back to the main start screen with an appropriate message
 20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" gets redirected to http://localhost:8001
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130411: implement basic update functionality  
 *20130413: learn how to use -belongs_to_mfilecode(Id)
 *20130409: write unit tests for all functions in mfilelib.erl
 *20130414: debug issue "ifile_insert doesn't communicate back to start.js"

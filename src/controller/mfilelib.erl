@@ -88,7 +88,7 @@ is_ASCII_letter(X) when is_integer(X) ->
 
 
 %% uppercase_char %% takes an integer, deducts 32 if it corresponds to a lowercase letter
-%%              %% returns an integer
+%%                %% returns an integer
 %%***
 uppercase_char(E) when is_integer(E), E >= $a, E =< $z ->
    E - 32;
@@ -97,6 +97,10 @@ uppercase_char(E) when is_integer(E) ->
 uppercase_char(E) when not is_integer(E) ->
    undefined.
 
+
+%% uppercase_str/1 %% takes a string, converts it to uppercase
+%%                 %% using uppercase_char/1
+%%
 uppercase_string(E) when is_list(E), length(E) > 0 ->
    lists:map(fun uppercase_char/1, E);
 uppercase_string([]) ->
@@ -131,7 +135,7 @@ validate_serial_number(Sf) ->
 %%                  %% returns list containing a three-letter representation 
 %%                  %% of the month
 %%***
-integer_to_month(M) when is_integer(M) and (M > 0) and (M < 13) ->
+integer_to_month(M) when is_integer(M), M > 0, M < 13 ->
    case M of
       1 -> "JAN";
       2 -> "FEB";
@@ -151,7 +155,9 @@ integer_to_month(M) when is_integer(M) and (M > 0) and (M < 13) ->
 %% timestamp_to_date_string %% takes a timestamp {{Y, M, D}, {H, M, S}}
 %%                               %% returns binary <<"YYYY-MMM-DD">>
 %%***
-timestamp_to_date_string({{Y, M, D}, _}) ->
+timestamp_to_date_string({{Y, M, D}, _}) when is_integer(Y), 
+                                              is_integer(M),
+                                              is_integer(D)  ->
    lists:append([ integer_to_list(Y), "-", 
                   integer_to_month(M), "-", 
                   integer_to_list(D) ]).
