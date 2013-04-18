@@ -1,6 +1,7 @@
 -module(mfile_main_controller, [Req]).
 -compile(export_all).
 -include("mfile.hrl").
+-compile([{parse_transform, lager_transform}]).
 
 % GET /
 start('GET', []) ->
@@ -16,6 +17,20 @@ insert('POST', []) ->
    end,
    mfilelib:ifile_JSON(IFile).
 
+% update record (AJAX)
+update('POST', []) ->
+   IFile = case mfiledb:ifile_exists(Req:post_param("mfileCode"),
+                                     list_to_integer(Req:post_param("mfileSern"))) of
+              false ->
+                 #ifile{result = "Attempt to update non-existent file"};
+              true -> 
+                 mfiledb:ifile_update(Req:post_param("mfileCode"),
+                                      list_to_integer(Req:post_param("mfileSern")),
+                                      Req:post_param("mfileKeyw"),
+                                      Req:post_param("mfileDesc"))
+           end,
+   mfilelib:ifile_JSON(IFile).
+  
 % fetch record by Code and Serial Number (called asynchronously using AJAX)
 fetch('POST', []) ->
    CStr = Req:post_param("mfileCode"),  % get Code string from form

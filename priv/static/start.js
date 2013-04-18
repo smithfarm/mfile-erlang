@@ -75,6 +75,41 @@ var MfileObj = function(
     });
   }
 
+  // Update an mfile record
+  // - interfaces with "update" URL handler in main.erl
+  this.mfileUpdate = function() {
+    console.log("Attempting to update mfile record:");
+    console.log(this.mfileData);
+    $.ajax({
+      url: "update",
+      type: "POST",
+      dataType: "json",
+      data: this.mfileData,
+      success: function(result) { 
+        console.log(result);
+        if (result.queryResult == "success")
+        { 
+	   console.log("SUCCESS")
+           $("#id").empty();
+	   $("#id").append("ID No. "+result.mfileId+" &nbsp;Date: "+result.mfileDate);
+	   $("#code").val(result.mfileCode);
+	   $("#codeid").val(result.mfileCodeId);
+	   $("#sern").val(result.mfileSern);
+           $("#keywords").val(result.mfileKeyw);
+           $("#description").val(result.mfileDesc);
+           $("#mfileresult").empty();
+           $("#mfileresult").append("Updated record ID "+result.mfileId)
+	}
+	else
+	{
+	   console.log("FAILURE")
+           $("#mfileresult").empty();
+           $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
+	}
+      }
+    });
+  }
+
   // Fetch mfile record by its Code + Serial Number (Sern)
   // - interfaces with "fetch" URL handler in main.erl
   this.mfileFetch = function() {
@@ -278,7 +313,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Key Words field
   $("#keywords").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert File, F3=Search';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert File, F3=Search, F5=Update';
   });
   $("#keywords").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
@@ -286,7 +321,7 @@ $(document).ready(function() {
 
   // Display/erase help message for Description field
   $("#description").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Write, F3=Search';
+    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert File, F3=Search, F5=Update';
   });
   $("#description").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
@@ -322,6 +357,7 @@ $(document).ready(function() {
     handleEsc(event);
     handleIns(event);
     handleF3(event);
+    handleF5(event);
   });
 
   // Handle function keys in Description field
@@ -330,6 +366,7 @@ $(document).ready(function() {
     handleEsc(event);
     handleIns(event);
     handleF3(event);
+    handleF5(event);
     if (event.which == 9 && event.shiftKey)
     {
        event.preventDefault();
@@ -457,13 +494,23 @@ function handleF3Sern(evt) {
     }
 }
 
-// handle F3 keypress ("look up"/"search"), except in Code field
+// handle F3 keypress ("look up"/"search"), except in Code and SerNum fields
 function handleF3(evt) {
     if (evt.keyCode == 114) // F3
     {
       evt.preventDefault();
       console.log("F3 PRESSED");
       return mfileProcessSearch();
+    }
+}
+
+// handle F5 keypress ("update"), except in Code field
+function handleF5(evt) {
+    if (evt.keyCode == 116) // F5
+    {
+      evt.preventDefault();
+      console.log("F5 PRESSED");
+      return mfileProcessUpdate();
     }
 }
 
@@ -575,6 +622,18 @@ function mfileProcessSearch() {
     console.log("SEARCH FUNCTION ACTIVATED");
     $("#mfileresult").empty();
     $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
+}
+
+function mfileProcessUpdate() {
+    console.log("UPDATE FUNCTION ACTIVATED");
+    var currentRec = new MfileObj( 
+      "", "", "", "",
+      document.getElementById("code").value,
+      document.getElementById("sern").value,
+      document.getElementById("keywords").value,
+      document.getElementById("description").value
+    );
+    currentRec.mfileUpdate();
 }
 
 function mfilecodeProcessFetch() {

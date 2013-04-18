@@ -17,11 +17,11 @@ suite_test_()->
  
 tests() ->
     [       
-     {"mfilecode validation",
-      ?_test(test_mfilecode_validation())}
+     {"mfilecode validation of invalid strings",
+      ?_test(test_mfilecode_validation_not_ok())}
      ,
-     {"find last code_id when mfilecodes table is empty",
-      ?_test(find_last_code_id_empty_table())}
+     {"mfilecode validation of a valid string",
+      ?_test(test_mfilecode_validation_ok())}
      ,
      {"insert an mfilecode",
       ?_test(insert_an_mfilecode())}
@@ -40,9 +40,6 @@ tests() ->
      ,
      {"Find last serial number of an existing code with no files in DB",
       ?_test(find_last_sern_of_existing_code_nofiles())}
-     ,
-     {"find last code_id when mfilecodes table is not empty",
-      ?_test(find_last_code_id_non_empty_table())}
      ,
      {"test icode_has_files function when no files in DB",
       ?_test(test_icode_has_files_when_no_files())}
@@ -67,32 +64,37 @@ tests() ->
      ,
      {"fetch an mfile",
       ?_test(fetch_an_mfile())}
+     ,
+     {"update an mfile",
+      ?_test(test_ifile_update())}
 %     ,
 %     {"Description of test 3",
 %      ?_test(test_function_3())}
     ].
  
+test_mfilecode_validation_not_ok(CStr, DesiredErr) ->
+    BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
+                                           { code_str, CStr } ] ),
+    {error, [ReceivedErr|_]} = BossRec:validate(),
+    ?assertEqual(DesiredErr, ReceivedErr).
+
+test_mfilecode_validation_not_ok() ->
+    lager:info("Test: try to validate several invalid mfile Code strings"),
+    test_mfilecode_validation_not_ok(abc, "Invalid data type for code_str"),
+    test_mfilecode_validation_not_ok([], "Code is empty"),
+    test_mfilecode_validation_not_ok("NineChars", "Code string too long (max. 8 characters)"),
+    test_mfilecode_validation_not_ok("123", "Malformed code"),
+    test_mfilecode_validation_not_ok("A**", "Malformed code").
+
 test_mfilecode_validation_ok(CStr) ->
     BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
                                            { code_str, CStr } ] ),
     R = BossRec:validate(),
     ?assertEqual(ok, R).
 
-test_mfilecode_validation_not_ok(CStr, ErrorMsg) ->
-    BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
-                                           { code_str, CStr } ] ),
-    {error, [ErrorMsg|_]} = BossRec:validate().
-
-test_mfilecode_validation() ->
-    test_mfilecode_validation_not_ok(abc, "Invalid data type for code_str"),
-    test_mfilecode_validation_not_ok([], "Code is empty"),
-    test_mfilecode_validation_not_ok("NineChars", "Code string too long (max. 8 characters)"),
-    test_mfilecode_validation_not_ok("123", "Malformed code"),
-    test_mfilecode_validation_not_ok("A**", "Malformed code"),
+test_mfilecode_validation_ok() ->
+    lager:info("Test: validate a valid mfile Code string"),
     test_mfilecode_validation_ok("hippo").
-
-find_last_code_id_empty_table() ->
-    ?assertEqual(0, mfiledb:find_last_code_id()).
 
 insert_an_mfilecode() ->
     lager:info("Test: insert an mfilecode"),
@@ -105,6 +107,7 @@ insert_an_mfilecode() ->
     test_mfilecode_validation_not_ok(I#icode.cstr, "That code is already in the database").
 
 test_get_code_id() ->
+    lager:info("Test: look up code IDs by code strings (non-existent and existing)"),
     ?assertEqual([], mfiledb:get_code_id("testnon")),
     Val = mfiledb:get_code_id("test"),
     lager:info("mfiledb:get_code_id() returned ~p", [Val]),
@@ -112,15 +115,18 @@ test_get_code_id() ->
     ?assertEqual(true, length(Val) > 0).
 
 test_icode_exists_cstr() ->
+    lager:info("Test: whether a given code string exists"),
     ?assertEqual(false, mfiledb:icode_exists_cstr("testnon")),
     ?assertEqual(true, mfiledb:icode_exists_cstr("test")).
 
 test_icode_exists_cid() ->
+    lager:info("Test: whether a given code ID exists"),
     ?assertEqual(false, mfiledb:icode_exists_cid("mfilecode-55")),
     CId = mfiledb:get_code_id("test"),
     ?assertEqual(true, mfiledb:icode_exists_cid(CId)).
 
 test_icode_fetch() ->
+    lager:info("Test: fetch entire code record by code string"),
     R = mfiledb:icode_fetch("non-existent"),
     ?assertEqual("Code not found", R#icode.result),
     R1 = mfiledb:icode_fetch("test"),
@@ -131,11 +137,6 @@ find_last_sern_of_existing_code_nofiles() ->
     CId = mfiledb:get_code_id("test"),
     L2 = mfiledb:find_last_sern(CId),
     ?assertEqual(0, L2).
-
-find_last_code_id_non_empty_table() ->
-    CId = mfiledb:find_last_code_id(),
-    ?assertEqual(true, is_list(CId)),
-    ?assertEqual(true, length(CId) > 0).
 
 test_icode_has_files_when_no_files() ->
     CId = mfiledb:get_code_id("test"),
@@ -200,6 +201,16 @@ fetch_an_mfile() ->
     ?assertEqual("TEST", IF#ifile.cstr),
     ?assertEqual("Test file", IF#ifile.keyw).
 
+test_ifile_update() ->
+    R1 = mfiledb:ifile_update("TEST", 1, "Updated keywords", "Updated description"),
+    ?assertEqual("success", R1#ifile.result),
+    R2 = mfiledb:ifile_fetch("test", 1), 
+    ?assertEqual(true, is_tuple(R2)),
+    ?assertEqual("TEST", R2#ifile.cstr),
+    ?assertEqual("Updated keywords", R2#ifile.keyw),
+    ?assertEqual("Updated description", R2#ifile.desc).
+
+
 %test_function_3() ->
 %     
  
@@ -212,3 +223,5 @@ fetch_an_mfile() ->
 %%--------------------------------------------------------------------
 setup()->
     ok.
+
+

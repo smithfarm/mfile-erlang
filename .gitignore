@@ -8,6 +8,7 @@ mfilecode.erl
 mfilelib.erl
 mfiledb.erl
 mfile_test.erl
+mfilelib_tests.erl
 start.css
 start.html
 start.js

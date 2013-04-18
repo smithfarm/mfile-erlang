@@ -6,18 +6,6 @@
 %% mfile - DB-related functions
 %% =======================================================================
 
-%% find_last_code_id/0 %% 
-%%                     %% returns either a string containing the last
-%%                     %% code_id/CodeID, or undefined if table empty
-%%***
-find_last_code_id() ->
-   R = boss_db:find_last(mfilecode, []),
-   case R of
-      undefined -> 0;
-      _ ->         R:id()
-   end.
-
-
 %% get_code_id/1 ** takes string (CStr)
 %%                    ** returns a string something like "mfilecode-8"
 %%                    ** if found, but don't rely on it having that format
@@ -210,6 +198,55 @@ ifile_insert(CStr, Keyw, Desc) when is_list(CStr), length(CStr) > 0,
                #ifile{ result = Reason }
          end
    end.
+
+
+%% ifile_update/1 %% takes an existing ifile record populated with values:
+%%                %% (id, cid, sern, keyw, file_desc)
+%%                %% updates file and returns completed populated ifile record
+ifile_update(Rwanted) when is_tuple(Rwanted) ->
+   %lager:info("TRANS: ifile_update() called with tuple ~p", [Rwanted]),
+   Rexisting = boss_db:find_first(mfile, [{mfilecode_id, Rwanted:mfilecode_id()},
+                                          {sern, Rwanted:sern()}]),  % should not fail
+   Rnew = Rexisting:set([ { created_at, calendar:now_to_datetime(erlang:now()) },
+             { keyw, Rwanted:keyw() }, { file_desc, Rwanted:file_desc() } ] ),
+   R = Rnew:save(),
+   lager:info("TRANS: BRwS:save() returned ~p", [R]),
+   case R of
+      {ok, Rsaved} -> {ok, Rsaved};
+      {error, [ErrMesg|_]} -> ErrMesg
+   end.
+
+ifile_update(CStr, Sern, Keyw, Desc) when is_list(CStr), length(CStr) > 0,
+                                          is_integer(Sern), Sern > 0,
+                                          is_list(Keyw), is_list(Desc) ->
+   lager:info("ifile_update() called with CStr ~p, Sern ~p, Keyw ~p, Desc ~p", [CStr, Sern, Keyw, Desc]), 
+   % get the code ID (thereby making sure it exists, first)
+Q = case get_code_id(CStr) of
+      [] -> #ifile{ result = "Attempt to update file with invalid Code" };
+      CId when is_list(CId) -> 
+         T = boss_record:new(mfile, [ { mfilecode_id, CId }, { sern, Sern },
+             { keyw, Keyw }, { file_desc, Desc } ] ),
+         lager:info("ifile_update(): calling transaction with ~p", [T]),
+         Result = boss_db:transaction(fun() -> ifile_update(T) end),
+         lager:info("transaction returned ~p", [Result]),
+         case Result of
+            {atomic, {ok, BRsaved}} -> 
+               #ifile{ result = "success",
+                       id =     BRsaved:id(),
+                       dstr =   mfilelib:timestamp_to_date_string(BRsaved:created_at()),
+                       cid =    BRsaved:mfilecode_id(),
+                       cstr =   CStr,
+                       sern =   BRsaved:sern(),
+                       keyw =   BRsaved:keyw(), 
+                       desc =   BRsaved:file_desc() };
+            {atomic, ErrMesg} -> 
+               #ifile{ result = ErrMesg };
+            {aborted, Reason} -> 
+               #ifile{ result = Reason }
+         end
+   end,
+lager:info("ifile_update(), returning ~p", [Q]),
+Q.
 
 
 %% ifile_exists/2 %% takes a string (CStr) and an integer (Sern)

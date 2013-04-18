@@ -19,6 +19,9 @@
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.
 
+% Update
+{"/update", [{controller, "main"}, {action, "update"}]}.
+
 % Fetch
 {"/fetch", [{controller, "main"}, {action, "fetch"}]}.
 
