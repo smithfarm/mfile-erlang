@@ -290,6 +290,10 @@ var MfilecodeObj = function(
       }
     });
   }
+
+  this.mfilecodeConfirm = function() {
+     document.getElementById('confirmlink').click();
+  }
 }
 
 // *LIS* When the document finishes loading, add event listeners
@@ -341,6 +345,7 @@ $(document).ready(function() {
     handleInsCode(event);
     handleDelCode(event);
     handleF3Code(event);
+    handleF1Code(event);
   });
 
   // Handle function keys in Serial Number (sern) field
@@ -558,6 +563,18 @@ function handleF3Code(evt) {
     }
 }
 
+// handle F1 keypress ("Fetch Code") in Code field (this is experimental)
+function handleF1Code(evt) {
+    console.log("F1 POSSIBLY PRESSED IN CODE FIELD");
+    if (evt.keyCode == 112) // F1
+    {
+      evt.preventDefault();
+      console.log("F1 PRESSED IN CODE FIELD");
+      mfilecodeProcessConfirm();
+      return true;
+    }
+}
+
 // *DBA* database interaction functions
 // These functions gather form data and send it to the server
 // when the user issues a command.
@@ -644,6 +661,14 @@ function mfilecodeProcessFetch() {
       ""
     );
     currentRec.mfilecodeFetch();
+}
+
+function mfilecodeProcessConfirm() {
+    console.log("CONFIRM FUNCTION ACTIVATED");
+    var currentRec = new MfilecodeObj( 
+      "", "", "", "", ""
+    );
+    currentRec.mfilecodeConfirm();
 }
 
 // Reset the form, losing all data that might be in it
