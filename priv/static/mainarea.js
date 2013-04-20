@@ -1,7 +1,24 @@
 // *LIS* When the document finishes loading, add event listeners
 $(document).ready(function() {
 
-  $("#code").focus();
+  $("#code").val(document.getElementById("savedcode").value);
+  $("#sern").val(document.getElementById("savedsern").value);
+  $("#keywords").val(document.getElementById("savedkeyw").value);
+  $("#description").val(document.getElementById("saveddesc").value);
+  if ($("#savedresult").val() == "update")
+  {
+    console.log("Saved result is "+$("#savedresult").val());
+    $("#savedresult").val("");
+    var currentRec = new MfileObj(
+      "", "", "", "",
+      $("#savedcode").val(),
+      $("#savedsern").val(),
+      $("#savedkeyw").val(),
+      $("#saveddesc").val()
+    );
+    currentRec.mfileUpdate();
+    document.getElementById('helpmesg').innerHTML='';
+  }
 
   // Display/erase help message for Code field
   $("#code").focus(function(event) {
@@ -10,6 +27,8 @@ $(document).ready(function() {
   $("#code").blur(function(event) {
     document.getElementById('helpmesg').innerHTML='';
   });
+
+  $("#code").focus();
 
   // Display/erase help message for Serial Number (Sern) field
   $("#sern").focus(function(event) {
@@ -49,7 +68,6 @@ $(document).ready(function() {
     handleInsCode(event);
     handleDelCode(event);
     handleF3Code(event);
-    handleF1Code(event);
   });
 
   // Handle function keys in Serial Number (sern) field
@@ -347,14 +365,18 @@ function mfileProcessSearch() {
 
 function mfileProcessUpdate() {
     console.log("UPDATE FUNCTION ACTIVATED");
-    var currentRec = new MfileObj( 
-      "", "", "", "",
+    $("#savedcode").val(document.getElementById("code").value);
+    $("#savedsern").val(document.getElementById("sern").value);
+    $("#savedkeyw").val(document.getElementById("keywords").value);
+    $("#saveddesc").val(document.getElementById("description").value);
+    var currentRec = new ConfirmObj(
+      "update", 
       document.getElementById("code").value,
       document.getElementById("sern").value,
       document.getElementById("keywords").value,
       document.getElementById("description").value
     );
-    currentRec.mfileUpdate();
+    currentRec.opconfirm();
 }
 
 function mfilecodeProcessFetch() {
@@ -365,14 +387,6 @@ function mfilecodeProcessFetch() {
       ""
     );
     currentRec.mfilecodeFetch();
-}
-
-function mfilecodeProcessConfirm() {
-    console.log("CONFIRM FUNCTION ACTIVATED");
-    var currentRec = new MfileObj( 
-      "", "", "", "", "TEST", "999", "EXPERIMENTAL", "EXPERIMENTAL"
-    );
-    currentRec.mfileConfirm();
 }
 
 // Reset the form, losing all data that might be in it

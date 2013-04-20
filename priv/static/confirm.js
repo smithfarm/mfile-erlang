@@ -16,18 +16,30 @@ $(document).ready(function() {
     {
       event.preventDefault();
       console.log("INSERT KEY PRESSED IN CONFIRM FIELD");
+      $("#savedresult").val("update");
+      $("#savedcode").val(document.getElementById("newcode").innerHTML);
+      $("#savedsern").val(document.getElementById("newsern").innerHTML);
+      $("#savedkeyw").val(document.getElementById("newkeyw").innerHTML);
+      $("#saveddesc").val(document.getElementById("newdesc").innerHTML);
       $.ajax({                                      
         url: 'mainarea',              
-        type: "get",          
-        beforeSend: function() {
-            $('#current_page').append("loading..");
-            },
+        type: "post",          
         success: function(s, result) { 
-          console.log("Success callback status: "+result);
+          console.log("Returned from confirm with result "+$("#savedresult").val());
           $("#mfilemainarea").html(s);
         }
       });
+      return false;
     }
-    return false;
+    event.preventDefault();
+    console.log("KEY OTHER THAN INSERT PRESSED IN CONFIRM FIELD");
+    $("#savedresult").val("");
+    $.ajax({                                      
+      url: 'mainarea',              
+      type: "post",          
+      success: function(s, result) { 
+        $("#mfilemainarea").html(s);
+      }
+    });
   });
 });

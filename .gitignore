@@ -1,7 +1,11 @@
 *.swp
 .eunit/
 bubba
+confirm.html
+confirm.js
 main.erl
+mainarea.html
+mainarea.js
 mfile.erl
 mfile.hrl
 mfile.routes

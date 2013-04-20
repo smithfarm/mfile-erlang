@@ -3,6 +3,7 @@ Unit-testing of mfile implemented using EUnit.
 The testing framework consists of the following files and directories:
 ./src/test/
 ./src/test/mfile_test.erl
+./src/test/mfilelib_tests.erl
 ./priv/static/dbinit-test.sh
 ./boss.test.config
 ./test

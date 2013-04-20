@@ -8,16 +8,28 @@ start('GET', []) ->
    { ok, mfilelib:initializeForm() }.
 
 % GET /mainarea
-mainarea('GET', []) ->
-   { ok, mfilelib:initializeForm() }.
+mainarea('POST', []) ->
+   {ok, [{filecode, Req:post_param("filecode")},
+         {filesern, Req:post_param("filesern")},
+         {filekeyw, Req:post_param("filekeyw")},
+         {filedesc, Req:post_param("filedesc")}] }.
 
 % error handler (same for 'GET' and 'POST')
 lost(_, []) ->
    {ok, mfilelib:initializeForm() }.
 
 % confirmation handler (same for 'GET' and 'POST')
-confirm(_, []) ->
-   {ok, mfilelib:initializeForm() }.
+confirm('POST', []) ->
+   CStr = Req:post_param("newcode"),  % get Code string from form
+   Sern = list_to_integer(Req:post_param("newsern")),    % get Serial Number from form
+   I = mfiledb:ifile_fetch(CStr, Sern),
+   {ok, [{command, Req:post_param("command")},
+         {newcode, Req:post_param("newcode")},
+         {newsern, Req:post_param("newsern")},
+         {oldkeyw, I#ifile.keyw},
+         {olddesc, I#ifile.desc},
+         {newkeyw, Req:post_param("newkeyw")},
+         {newdesc, Req:post_param("newdesc")}] }.
 
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->

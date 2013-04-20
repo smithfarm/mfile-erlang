@@ -174,22 +174,66 @@ var MfileObj = function(
       }
     });
   }
+}
 
-  this.mfileConfirm = function() {
+var ConfirmObj = function(
+			theCommand,
+			theNewCode, 
+			theNewSern, 
+			theNewKeyw, 
+			theNewDesc
+			) {
+
+  this.confirmData = { 
+		       "command" : theCommand,
+                       "newcode" : theNewCode,
+                       "newsern" : theNewSern,
+                       "newkeyw" : theNewKeyw,
+		       "newdesc" : theNewDesc
+  };
+
+  this.opconfirm = function() {
     console.log("Running experimental confirm AJAX call");
     $.ajax({
       url: "confirm",
       type: "POST",
-      data: this.mfileData,
+      data: this.confirmData,
       dataType: "html",
       success: function(s, result) { 
-        console.log("Success callback status: "+result);
+        console.log("Confirmation dialog is now on-screen");
         $("#mfilemainarea").html(s);
         $('#confirm').focus();
       }
     });
   }
+}
 
+var MainareaObj = function(
+			theCode, 
+			theSern, 
+			theKeyw, 
+			theDesc
+			) {
+
+  this.confirmData = { 
+                       "filecode" : theCode,
+                       "filesern" : theSern,
+                       "filekeyw" : theKeyw,
+		       "filedesc" : theDesc
+  };
+
+  this.dispmain = function() {
+    $.ajax({
+      url: "mainarea",
+      type: "POST",
+      data: this.confirmData,
+      dataType: "html",
+      success: function(s, result) { 
+        $("#mfilemainarea").html(s);
+        $('#confirm').focus();
+      }
+    });
+  }
 }
 
 // mfilecode object
@@ -310,15 +354,11 @@ var MfilecodeObj = function(
 }
  
 $(document).ready(function (){
-    $.ajax({                                      
-      url: 'mainarea',              
-      type: "get",          
-      beforeSend: function() {
-          $('#current_page').append("loading..");
-          },
-      success: function(s, result) { 
-        console.log("Success callback status: "+result);
-        $("#mfilemainarea").html(s);
-      }
-   });
+    var currentRec = new MainareaObj(
+      $("#savedcode").val(),
+      $("#savedsern").val(),
+      $("#savedkeyw").val(),
+      $("#saveddesc").val()
+    );  
+    currentRec.dispmain();
 });
