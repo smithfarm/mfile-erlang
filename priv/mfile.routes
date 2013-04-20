@@ -16,6 +16,9 @@
 % Front page
 {"/", [{controller, "main"}, {action, "start"}]}.
 
+% Main Area
+{"/mainarea", [{controller, "main"}, {action, "mainarea"}]}.
+
 % Lost
 {"/lost", [{controller, "main"}, {action, "lost"}]}.
 

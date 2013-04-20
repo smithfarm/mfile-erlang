@@ -7,6 +7,10 @@
 start('GET', []) ->
    { ok, mfilelib:initializeForm() }.
 
+% GET /mainarea
+mainarea('GET', []) ->
+   { ok, mfilelib:initializeForm() }.
+
 % error handler (same for 'GET' and 'POST')
 lost(_, []) ->
    {ok, mfilelib:initializeForm() }.
