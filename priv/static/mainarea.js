@@ -1,10 +1,10 @@
 // *LIS* When the document finishes loading, add event listeners
 $(document).ready(function() {
 
-  $("#code").val(document.getElementById("savedcode").value);
-  $("#sern").val(document.getElementById("savedsern").value);
-  $("#keywords").val(document.getElementById("savedkeyw").value);
-  $("#description").val(document.getElementById("saveddesc").value);
+  $("#code").val($("#savedcode").val());
+  $("#sern").val($("#savedsern").val());
+  $("#keywords").val($("#savedkeyw").val());
+  $("#description").val($("#saveddesc").val());
   if ($("#savedresult").val() == "update")
   {
     console.log("Saved result is "+$("#savedresult").val());
@@ -17,41 +17,54 @@ $(document).ready(function() {
       $("#saveddesc").val()
     );
     currentRec.mfileUpdate();
-    document.getElementById('helpmesg').innerHTML='';
+    $('#helpmesg').html('');
+  }
+  if ($("#savedresult").val() == "delete")
+  {
+    console.log("Saved result is "+$("#savedresult").val());
+    $("#savedresult").val("");
+    var currentRec = new MfileObj(
+      "", "", "", "",
+      $("#savedcode").val(),
+      $("#savedsern").val(),
+      "", ""
+    );
+    currentRec.mfileDelete();
+    $('#helpmesg').html('');
   }
 
   // Display/erase help message for Code field
   $("#code").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert Code, F3=Validate Code, Del=Delete Code';
+    $("#helpmesg").html("ESC=Clear, Ins=Insert Code, F3=Validate Code, Del=Delete Code");
   });
   $("#code").blur(function(event) {
-    document.getElementById('helpmesg').innerHTML='';
+    $('#helpmesg').html('');
   });
 
   $("#code").focus();
 
   // Display/erase help message for Serial Number (Sern) field
   $("#sern").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, F3=Fetch File, Del=Delete File';
+    $('#helpmesg').html('ESC=Clear, F3=Fetch File, Del=Delete File');
   });
   $("#sern").blur(function(event) {
-    document.getElementById('helpmesg').innerHTML='';
+    $('#helpmesg').html('');
   });
 
   // Display/erase help message for Key Words field
   $("#keywords").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert File, F3=Search, F5=Update';
+    $('#helpmesg').html('ESC=Clear, Ins=Insert File, F3=Search, F5=Update');
   });
   $("#keywords").blur(function(event) {
-    document.getElementById('helpmesg').innerHTML='';
+    $('#helpmesg').html('');
   });
 
   // Display/erase help message for Description field
   $("#description").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='ESC=Clear, Ins=Insert File, F3=Search, F5=Update';
+    $('#helpmesg').html('ESC=Clear, Ins=Insert File, F3=Search, F5=Update');
   });
   $("#description").blur(function(event) {
-    document.getElementById('helpmesg').innerHTML='';
+    $('#helpmesg').html('');
   });
 
   // Handle function keys in Code field
@@ -305,10 +318,10 @@ function mfileProcessInsert() {
     console.log("INSERT FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
       "", "", "", "",
-      document.getElementById("code").value,
-      document.getElementById("sern").value,
-      document.getElementById("keywords").value,
-      document.getElementById("description").value
+      $("#code").val(),
+      $("#sern").val(),
+      $("#keywords").val(),
+      $("#description").val()
     );
     currentRec.mfileInsert();
 }
@@ -317,7 +330,7 @@ function mfilecodeProcessInsert() {
     console.log("FILE CODE INSERT FUNCTION ACTIVATED");
     var currentRec = new MfilecodeObj( 
       "", "", "", 
-      document.getElementById("code").value,
+      $("#code").val(),
       ""
     );
     currentRec.mfilecodeInsert();
@@ -327,7 +340,7 @@ function mfilecodeProcessDelete() {
     console.log("FILE CODE DELETE FUNCTION ACTIVATED");
     var currentRec = new MfilecodeObj( 
       "", "", "", 
-      document.getElementById("code").value,
+      $("#code").val(),
       ""
     );
     currentRec.mfilecodeDelete();
@@ -337,8 +350,8 @@ function mfileProcessFetch() {
     console.log("FETCH FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
       "", "", "", "",
-      document.getElementById("code").value,
-      document.getElementById("sern").value,
+      $("#code").val(),
+      $("#sern").val(),
       "", ""
     );
     currentRec.mfileFetch();
@@ -346,15 +359,38 @@ function mfileProcessFetch() {
 
 function mfileProcessDelete() {
     console.log("FILE DELETE FUNCTION ACTIVATED");
-//  $("#mfileresult").empty();
-//  $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
-    var currentRec = new MfileObj( 
-      "", "", "", "",
-      document.getElementById("code").value,
-      document.getElementById("sern").value,
-      "", ""
+    $("#savedresult").val("delete");
+    $("#savedcode").val($("#code").val());
+    $("#savedsern").val($("#sern").val());
+    $("#savedkeyw").val($("#keywords").val());
+    $("#saveddesc").val($("#description").val());
+    var currentRec = new ConfirmObj( 
+      "delete",
+      $("#code").val(),
+      $("#sern").val(),
+      $("#keywords").val(),
+      $("#description").val()
     );
-    currentRec.mfileDelete();
+    console.log(currentRec);
+    currentRec.opconfirm();
+}
+
+function mfileProcessUpdate() {
+    console.log("UPDATE FUNCTION ACTIVATED");
+    $("#savedresult").val("update");
+    $("#savedcode").val($("#code").val());
+    $("#savedsern").val($("#sern").val());
+    $("#savedkeyw").val($("#keywords").val());
+    $("#saveddesc").val($("#description").val());
+    var currentRec = new ConfirmObj(
+      "update", 
+      $("#code").val(),
+      $("#sern").val(),
+      $("#keywords").val(),
+      $("#description").val()
+    );
+    console.log(currentRec);
+    currentRec.opconfirm();
 }
 
 function mfileProcessSearch() {
@@ -363,27 +399,11 @@ function mfileProcessSearch() {
     $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
 }
 
-function mfileProcessUpdate() {
-    console.log("UPDATE FUNCTION ACTIVATED");
-    $("#savedcode").val(document.getElementById("code").value);
-    $("#savedsern").val(document.getElementById("sern").value);
-    $("#savedkeyw").val(document.getElementById("keywords").value);
-    $("#saveddesc").val(document.getElementById("description").value);
-    var currentRec = new ConfirmObj(
-      "update", 
-      document.getElementById("code").value,
-      document.getElementById("sern").value,
-      document.getElementById("keywords").value,
-      document.getElementById("description").value
-    );
-    currentRec.opconfirm();
-}
-
 function mfilecodeProcessFetch() {
     console.log("FILE CODE FETCH FUNCTION ACTIVATED");
     var currentRec = new MfilecodeObj( 
       "", "", "",
-      document.getElementById("code").value,
+      $("#code").val(),
       ""
     );
     currentRec.mfilecodeFetch();

@@ -194,8 +194,9 @@ var ConfirmObj = function(
 
   this.opconfirm = function() {
     console.log("Running experimental confirm AJAX call");
+    console.log("The URL is confirm"+theCommand);
     $.ajax({
-      url: "confirm",
+      url: "confirm"+theCommand,
       type: "POST",
       data: this.confirmData,
       dataType: "html",
@@ -354,6 +355,13 @@ var MfilecodeObj = function(
 }
  
 $(document).ready(function (){
+  if ($("#savedresult").val() == "lost")
+  {
+    console.log("LOST!!!");
+  }
+  else
+  {
+    console.log("Normal operation.");
     var currentRec = new MainareaObj(
       $("#savedcode").val(),
       $("#savedsern").val(),
@@ -361,4 +369,5 @@ $(document).ready(function (){
       $("#saveddesc").val()
     );  
     currentRec.dispmain();
+  }
 });

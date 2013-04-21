@@ -4,10 +4,10 @@ $(document).ready(function() {
 
   // Display/erase help message for experimental Confirm screen
   $("#confirm").focus(function(event) {
-    document.getElementById('helpmesg').innerHTML='Experimental "confirm" function';
+    $("#helpmesg").html('Experimental "confirm" function');
   }); 
   $("#confirm").blur(function(event) {
-    document.getElementById('helpmesg').innerHTML='';
+    $("#helpmesg").html('');
   });
 
   // Handle function keys in Confirm field
@@ -16,11 +16,10 @@ $(document).ready(function() {
     {
       event.preventDefault();
       console.log("INSERT KEY PRESSED IN CONFIRM FIELD");
-      $("#savedresult").val("update");
-      $("#savedcode").val(document.getElementById("newcode").innerHTML);
-      $("#savedsern").val(document.getElementById("newsern").innerHTML);
-      $("#savedkeyw").val(document.getElementById("newkeyw").innerHTML);
-      $("#saveddesc").val(document.getElementById("newdesc").innerHTML);
+      $("#savedcode").val($("#newcode").html());
+      $("#savedsern").val($("#newsern").html());
+      $("#savedkeyw").val($("#newkeyw").html());
+      $("#saveddesc").val($("#newdesc").html());
       $.ajax({                                      
         url: 'mainarea',              
         type: "post",          

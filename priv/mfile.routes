@@ -22,8 +22,11 @@
 % Lost
 {"/lost", [{controller, "main"}, {action, "lost"}]}.
 
-% Confirm
-{"/confirm", [{controller, "main"}, {action, "confirm"}]}.
+% Confirm update
+{"/confirmupdate", [{controller, "main"}, {action, "confirmupdate"}]}.
+
+% Confirm delete
+{"/confirmdelete", [{controller, "main"}, {action, "confirmdelete"}]}.
 
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.
@@ -50,4 +53,4 @@
 {404, [{controller, "main"}, {action, "lost"}]}.
 
 % 500 Internal Error handler (only invoked in production)
-% {500, [{controller, "world"}, {action, "calamity"}]}.
+{500, [{controller, "main"}, {action, "lost"}]}.

@@ -16,20 +16,30 @@ mainarea('POST', []) ->
 
 % error handler (same for 'GET' and 'POST')
 lost(_, []) ->
-   {ok, mfilelib:initializeForm() }.
+   Alist = mfilelib:initializeForm(),
+   {ok, [{lost, "lost"}|Alist] }.
 
-% confirmation handler (same for 'GET' and 'POST')
-confirm('POST', []) ->
+% get user confirmation for update
+confirmupdate('POST', []) ->
    CStr = Req:post_param("newcode"),  % get Code string from form
    Sern = list_to_integer(Req:post_param("newsern")),    % get Serial Number from form
    I = mfiledb:ifile_fetch(CStr, Sern),
-   {ok, [{command, Req:post_param("command")},
-         {newcode, Req:post_param("newcode")},
+   {ok, [{newcode, Req:post_param("newcode")},
          {newsern, Req:post_param("newsern")},
          {oldkeyw, I#ifile.keyw},
          {olddesc, I#ifile.desc},
          {newkeyw, Req:post_param("newkeyw")},
          {newdesc, Req:post_param("newdesc")}] }.
+
+% get user confirmation for delete
+confirmdelete('POST', []) ->
+   CStr = Req:post_param("newcode"),  % get Code string from form
+   Sern = list_to_integer(Req:post_param("newsern")),    % get Serial Number from form
+   I = mfiledb:ifile_fetch(CStr, Sern),
+   {ok, [{newcode, Req:post_param("newcode")},
+         {newsern, Req:post_param("newsern")},
+         {newkeyw, I#ifile.keyw},
+         {newdesc, I#ifile.desc}] }.
 
 % insert record (called asynchronously using AJAX)
 insert('POST', []) ->
