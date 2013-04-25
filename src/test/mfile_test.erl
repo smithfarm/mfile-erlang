@@ -87,7 +87,9 @@ test_mfilecode_validation_not_ok() ->
     test_mfilecode_validation_not_ok([], "Code is empty"),
     test_mfilecode_validation_not_ok("NineChars", "Code string too long (max. 8 characters)"),
     test_mfilecode_validation_not_ok("123", "Malformed code"),
-    test_mfilecode_validation_not_ok("A**", "Malformed code").
+    test_mfilecode_validation_not_ok("A**", "Malformed code"),
+    test_mfilecode_validation_not_ok("1NLC", "Malformed code"),
+    test_mfilecode_validation_not_ok("hippo", "Malformed code").
 
 test_mfilecode_validation_ok(CStr) ->
     BossRec = boss_record:new(mfilecode, [ { code_id, 1 },
@@ -96,8 +98,11 @@ test_mfilecode_validation_ok(CStr) ->
     ?assertEqual(ok, R).
 
 test_mfilecode_validation_ok() ->
-    lager:info("Test: validate a valid mfile Code string"),
-    test_mfilecode_validation_ok("hippo").
+    lager:info("Test: validate some valid mfile Code strings"),
+    test_mfilecode_validation_ok("HIPPO"),
+    test_mfilecode_validation_ok("HIPPO123"),
+    test_mfilecode_validation_ok("A1B35R"),
+    test_mfilecode_validation_ok("Z").
 
 insert_an_mfilecode() ->
     lager:info("Test: insert an mfilecode"),
@@ -105,6 +110,7 @@ insert_an_mfilecode() ->
     ?assertEqual("success", I#icode.result),
     ?assertEqual("TEST", I#icode.cstr),
     ?assertNotEqual(id, I#icode.id),
+    lager:info("icode_insert() returned ~p", [I]),
     ?assertEqual(true, is_list(I#icode.id)),
     ?assertEqual(true, length(I#icode.id) > 0),
     test_mfilecode_validation_not_ok(I#icode.cstr, "That code is already in the database").
@@ -187,7 +193,9 @@ attempt_insert_invalid_mfile() ->
     IF = mfiledb:ifile_insert("HorbleyDorbley",
                               "Test file",
                               [] ),
-    ?assertEqual("Attempt to insert file with invalid Code", IF#ifile.result).
+    ?assertEqual("Attempt to insert file with invalid Code", IF#ifile.result),
+    IF2 = mfiledb:ifile_insert("TEST", [], "Fully valid description"),
+    ?assertEqual("Attempt to insert file with empty Keywords field", IF2#ifile.result).
 
 test_get_file_id() ->
     %need a function that checks if a string is an mfile/mfilecode ID    
@@ -211,12 +219,14 @@ find_last_sern_of_existing_code_with_one_file() ->
 
 fetch_an_mfile() ->
     IF = mfiledb:ifile_fetch("test", 1),
+    lager:info("ifile_fetch() returned ~p", [IF]),
     ?assertEqual(true, is_tuple(IF)),
     ?assertEqual("TEST", IF#ifile.cstr),
     ?assertEqual("Test file", IF#ifile.keyw).
 
 test_ifile_update() ->
     R1 = mfiledb:ifile_update("TEST", 1, "Updated keywords", "Updated description"),
+    lager:info("ifile_update() returned ~p", [R1]),
     ?assertEqual("success", R1#ifile.result),
     R2 = mfiledb:ifile_fetch("test", 1), 
     ?assertEqual(true, is_tuple(R2)),

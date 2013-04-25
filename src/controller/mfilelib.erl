@@ -41,6 +41,7 @@ icode_JSON(I) when is_record(I, icode) ->
 %% ifile_JSON
 ifile_JSON(I) when is_record(I, ifile) ->
    {json, [ {queryResult, I#ifile.result},
+            {mfileCount,  I#ifile.count},
             {mfileId,     I#ifile.id},
             {mfileDate,   I#ifile.dstr},
 	    {mfileCodeId, I#ifile.cid},
@@ -50,7 +51,7 @@ ifile_JSON(I) when is_record(I, ifile) ->
 	    {mfileDesc,   I#ifile.desc} ] }.
   
 
-%% is_valid_cstr/1   %% takes a string S
+%% is_valid_cstr/1   %% takes a string 
 %%                   %% returns true or false
 %%***
 is_valid_cstr([H|T]) ->
@@ -63,17 +64,31 @@ is_valid_cstr([]) ->
    false.
 
 
+%% is_valid_db_cstr/1   %% takes a string
+%%                      %% returns true or false
+%%***
+is_valid_db_cstr([H|T]) ->
+   is_ASCII_uppercase_letter(H)
+      and
+   lists:all(fun is_ASCII_uppercase_letter_or_numeral/1, T)
+      and 
+   (length(T) < 8);
+is_valid_db_cstr([]) ->
+   false.
+
+
 %% is_ASCII_letter_or_numeral %% takes a integer
 %%                            %% returns true or false
 %%***
-is_ASCII_letter_or_numeral(X) when is_integer(X), X >= $A, X =< $Z ->
-   true;
-is_ASCII_letter_or_numeral(X) when is_integer(X), X >= $a, X =< $z ->
-   true;
-is_ASCII_letter_or_numeral(X) when is_integer(X), X >= $0, X =< $9 ->
-   true;
 is_ASCII_letter_or_numeral(X) when is_integer(X) ->
-   false.
+   is_ASCII_letter(X) or is_numeral(X).
+
+
+%% is_ASCII_uppercase_letter_or_numeral %% takes a integer
+%%                                      %% returns true or false
+%%***
+is_ASCII_uppercase_letter_or_numeral(X) when is_integer(X) ->
+   is_ASCII_uppercase_letter(X) or is_numeral(X).
 
 
 %% is_ASCII_letter %% takes a integer
@@ -84,6 +99,24 @@ is_ASCII_letter(X) when is_integer(X), X >= $A, X =< $Z ->
 is_ASCII_letter(X) when is_integer(X), X >= $a, X =< $z ->
    true;
 is_ASCII_letter(X) when is_integer(X) ->
+   false.
+
+
+%% is_ASCII_uppercase_letter %% takes a integer
+%%                           %% returns true or false
+%%***
+is_ASCII_uppercase_letter(X) when is_integer(X), X >= $A, X =< $Z ->
+   true;
+is_ASCII_uppercase_letter(X) when is_integer(X) ->
+   false.
+
+
+%% is_numeral/1 %% takes an integer
+%%              %% returns true or false
+%%
+is_numeral(X) when is_integer(X), X >= $0, X =< $9 ->
+   true;
+is_numeral(X) when is_integer(X) ->
    false.
 
 
@@ -103,7 +136,7 @@ uppercase_char(E) when not is_integer(E) ->
 %%
 uppercase_string(E) when is_list(E), length(E) > 0 ->
    lists:map(fun uppercase_char/1, E);
-uppercase_string([]) ->
+uppercase_string(_) ->
    [].
 
 

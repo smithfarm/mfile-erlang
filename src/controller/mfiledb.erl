@@ -2,9 +2,9 @@
 -compile(export_all).
 -include("mfile.hrl").
 
-%% =======================================================================
-%% mfile - DB-related functions
-%% =======================================================================
+%%% =======================================================================
+%%% mfiledb - wrappers for DB model functions
+%%% =======================================================================
 
 %% get_code_id/1 ** takes string (CStr)
 %%               ** returns a string something like "mfilecode-8"
@@ -14,35 +14,37 @@
 get_code_id([]) ->
    [];
 get_code_id(CStr) when is_list(CStr) ->
-   R1 = boss_record:new(mfilecode, [{code_str, mfilelib:uppercase_string(CStr)}]),
-   R2 = R1:fetch_by_code_str(),   % see ./src/model/mfilecode.erl
-   case R2 of
+   R = boss_db:find_first(mfilecode, [{code_str, 'equals', mfilelib:uppercase_string(CStr)}]),
+   case R of
       undefined -> [];
-      _ ->         R2:id()
+      _ ->         R:id()
    end.
 
 
 %% icode_exists_cstr %% takes a CStr (list)
 %%                   %% returns true or false
-%% This is just a wrapper for mfilecode:exists_code_str/0
 %%***
 icode_exists_cstr([]) ->
    false;
 icode_exists_cstr(CStr) when is_list(CStr) -> 
-   R = boss_record:new(mfilecode, [{code_str, mfilelib:uppercase_string(CStr)}]),
-   R:exists_code_str().
+   R = boss_db:find_first(mfilecode, [{code_str, 'equals', mfilelib:uppercase_string(CStr)}]),
+   case R of 
+      undefined -> false;
+      _ -> true
+   end.
 
 
 %% icode_exists_cid %% takes a CId (list)
 %%              %% returns true or false
-%% This is just a wrapper for mfilecode:exists_id/0
 %%***
 icode_exists_cid([]) ->
    false;
 icode_exists_cid(CId) when is_list(CId) -> 
-   R = boss_record:new(mfilecode, [{id, CId}]),
-   %lager:info("icode_exists_cid() calling mfilecode:exists_id with arg ~p", [R]),
-   R:exists_id().
+   R = boss_db:find_first(mfilecode, [{id, 'equals', CId}]),
+   case R of 
+      undefined -> false;
+      _ -> true
+   end.
 
 
 %% icode_insert/1 %% takes a code string
@@ -56,7 +58,7 @@ icode_insert(CStr) when is_list (CStr) ->
    end;
 icode_insert( {ok, BossRec} ) ->
    CId = get_code_id(BossRec:code_str()),
-   %lager:info("MfilecodeRec:id() == ~p", [CId]),
+   lager:info("MfilecodeRec:id() == ~p", [CId]),
    #icode{result = "success", 
           id = CId,
    	  dstr = mfilelib:timestamp_to_date_string(BossRec:created_at()),
@@ -69,13 +71,14 @@ icode_insert_valid(CStr) ->
       [ { id, id }, { code_str, mfilelib:uppercase_string(CStr) },
         { created_at, calendar:now_to_datetime(erlang:now()) } ] ),
    R = MfilecodeRec:save(),  
-   %lager:info("MfilecodeRec:save() returned: ~p", [R]),
+   lager:info("MfilecodeRec:save() returned: ~p", [R]),
    icode_insert(R).
 
 %% icode_has_files/1 %% takes an mfilecode ID string
 %%                   %% returns true or false
 %%***
-icode_has_files(CId) when is_list(CId), length(CId) > 0 ->
+icode_has_files([H|T]) ->
+   CId = [H|T],
    %lager:info("Looking up files that have code ID: ~p", [CId]),
    Count = boss_db:count(mfile, [{mfilecode_id, 'equals', CId}]),
    %lager:info("Number of files found: ~p", [Count]),
@@ -174,18 +177,18 @@ ifile_insert(BR) when is_tuple(BR) ->
       {error, [ErrMesg|_]} -> ErrMesg
    end.
 
-ifile_insert(CStr, Keyw, Desc) when is_list(CStr), length(CStr) > 0,
-                                    is_list(Keyw), is_list(Desc) ->
+ifile_insert([H|T], Keyw, Desc) when is_list(Keyw), is_list(Desc) ->
+   CStr = [H|T],
    lager:info("ifile_insert() called with CStr ~p, Keyw ~p, Desc ~p", [CStr, Keyw, Desc]), 
    % now transform CStr into CId
    case get_code_id(CStr) of
       [] -> #ifile{ result = "Attempt to insert file with invalid Code" };
       CId when is_list(CId) -> 
-         T = boss_record:new(mfile, [ { id, id }, { mfilecode_id, CId }, 
+         BR = boss_record:new(mfile, [ { id, id }, { mfilecode_id, CId }, 
              { created_at, calendar:now_to_datetime(erlang:now()) },
              { keyw, Keyw }, { file_desc, Desc } ] ),
-         lager:info("calling transaction with ~p", [T]),
-         Result = boss_db:transaction(fun() -> ifile_insert(T) end),
+         lager:info("calling transaction with ~p", [BR]),
+         Result = boss_db:transaction(fun() -> ifile_insert(BR) end),
          lager:info("transaction returned ~p", [Result]),
          case Result of
             {atomic, {ok, BRsaved}} -> 
@@ -210,8 +213,8 @@ ifile_insert(CStr, Keyw, Desc) when is_list(CStr), length(CStr) > 0,
 %%                %% updates file and returns completed populated ifile record
 ifile_update(Rwanted) when is_tuple(Rwanted) ->
    %lager:info("TRANS: ifile_update() called with tuple ~p", [Rwanted]),
-   Rexisting = boss_db:find_first(mfile, [{mfilecode_id, Rwanted:mfilecode_id()},
-                                          {sern, Rwanted:sern()}]),  % should not fail
+   Rexisting = boss_db:find_first(mfile, [{mfilecode_id, 'equals', Rwanted:mfilecode_id()},
+                                          {sern, 'equals', Rwanted:sern()}]),  % should not fail
    Rnew = Rexisting:set([ { created_at, calendar:now_to_datetime(erlang:now()) },
              { keyw, Rwanted:keyw() }, { file_desc, Rwanted:file_desc() } ] ),
    R = Rnew:save(),
@@ -221,18 +224,18 @@ ifile_update(Rwanted) when is_tuple(Rwanted) ->
       {error, [ErrMesg|_]} -> ErrMesg
    end.
 
-ifile_update(CStr, Sern, Keyw, Desc) when is_list(CStr), length(CStr) > 0,
-                                          is_integer(Sern), Sern > 0,
+ifile_update([H|T], Sern, Keyw, Desc) when is_integer(Sern), Sern > 0,
                                           is_list(Keyw), is_list(Desc) ->
+   CStr = [H|T],
    lager:info("ifile_update() called with CStr ~p, Sern ~p, Keyw ~p, Desc ~p", [CStr, Sern, Keyw, Desc]), 
    % get the code ID (thereby making sure it exists, first)
 Q = case get_code_id(CStr) of
       [] -> #ifile{ result = "Attempt to update file with invalid Code" };
       CId when is_list(CId) -> 
-         T = boss_record:new(mfile, [ { mfilecode_id, CId }, { sern, Sern },
+         BR = boss_record:new(mfile, [ { mfilecode_id, CId }, { sern, Sern },
              { keyw, Keyw }, { file_desc, Desc } ] ),
-         lager:info("ifile_update(): calling transaction with ~p", [T]),
-         Result = boss_db:transaction(fun() -> ifile_update(T) end),
+         lager:info("ifile_update(): calling transaction with ~p", [BR]),
+         Result = boss_db:transaction(fun() -> ifile_update(BR) end),
          lager:info("transaction returned ~p", [Result]),
          case Result of
             {atomic, {ok, BRsaved}} -> 
@@ -257,7 +260,7 @@ Q.
 %% ifile_exists/2 %% takes a string (CStr) and an integer (Sern)
 %%                %% returns true or false
 %%
-ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) -> 
+ifile_exists(CStr, Sern) when is_list(CStr), is_integer(Sern) -> 
    true = mfilelib:is_valid_cstr(CStr),
    I = ifile_fetch(CStr, Sern),
    case I#ifile.result of
@@ -266,10 +269,34 @@ ifile_exists(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
    end.
 
 
+%% ifile_search/3 %% takes CStr, Keyw, and Desc
+%%                %% returns populated ifile record
+%%
+ifile_search([H1|T1], Keyw, Desc) when is_list(Keyw), is_list(Desc) ->
+   CStr = [H1|T1],
+   CId = get_code_id(CStr),
+   lager:info("Running search for ~p over ~p", [Keyw, CId]),
+   case CId of
+      [] -> #ifile{result = "Code not found"};
+      _ -> ifile_search_cid(CId, Keyw, [])
+   end;
+ifile_search(_, _, _) ->
+   #ifile{result = "To search, you must provide at least a valid Code"}.
+
+ifile_search_cid(CId, Keyw, Desc) ->
+   C = boss_db:count(mfile, [{mfilecode_id, 'equals', CId}, {keyw, 'matches', ".*"++Keyw++".*"}]),
+   lager:info("ifile_search: found ~p records", [C]),
+   case C of
+      0 -> #ifile{result = "Code exists, but key word doesn't match any files."};
+      _ -> #ifile{result = "Found "++integer_to_list(C)++" records matching that description.",
+                  count = C }
+   end.
+
+
 %% ifile_fetch/2 %% takes a CStr and Sern
 %%               %% returns a populated ifile record
 %%
-ifile_fetch(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+ifile_fetch(CStr, Sern) when is_list(CStr), is_integer(Sern) ->
    %lager:info("called: ifile_fetch(~p, ~p)", [CStr, Sern]),
    CId = case mfilelib:is_valid_cstr(CStr) of 
             true ->  get_code_id(CStr);
@@ -316,7 +343,7 @@ ifile_fetch(I) when is_record(I, ifile) ->
 %% ifile_delete/2 %% takes a string (CStr) and an integer (Sern)
 %%                %% returns a populated ifile record
 %%
-ifile_delete(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+ifile_delete(CStr, Sern) when is_list(CStr), is_integer(Sern) ->
    true = mfilelib:is_valid_cstr(CStr),
    %lager:info("Entering ifile_delete with arguments: ~p, ~p", [CStr, Sern]),
    case icode_exists_cstr(CStr) of
@@ -351,7 +378,7 @@ get_file_id(CStr, []) ->
    [];
 get_file_id([], Sern) ->
    [];
-get_file_id(CStr, Sern) when is_list(CStr) and is_integer(Sern) ->
+get_file_id(CStr, Sern) when is_list(CStr), is_integer(Sern) ->
    CId = get_code_id(CStr),
    case CId of
       [] -> 

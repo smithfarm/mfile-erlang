@@ -10,7 +10,7 @@ $(document).ready(function() {
     console.log("Saved result is "+$("#savedresult").val());
     $("#savedresult").val("");
     var currentRec = new MfileObj(
-      "", "", "", "",
+      "", "", "", "", "",
       $("#savedcode").val(),
       $("#savedsern").val(),
       $("#savedkeyw").val(),
@@ -24,7 +24,7 @@ $(document).ready(function() {
     console.log("Saved result is "+$("#savedresult").val());
     $("#savedresult").val("");
     var currentRec = new MfileObj(
-      "", "", "", "",
+      "", "", "", "", "",
       $("#savedcode").val(),
       $("#savedsern").val(),
       "", ""
@@ -317,7 +317,7 @@ function handleF1Code(evt) {
 function mfileProcessInsert() {
     console.log("INSERT FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
-      "", "", "", "",
+      "", "", "", "", "",
       $("#code").val(),
       $("#sern").val(),
       $("#keywords").val(),
@@ -349,7 +349,7 @@ function mfilecodeProcessDelete() {
 function mfileProcessFetch() {
     console.log("FETCH FUNCTION ACTIVATED");
     var currentRec = new MfileObj(
-      "", "", "", "",
+      "", "", "", "", "",
       $("#code").val(),
       $("#sern").val(),
       "", ""
@@ -396,7 +396,15 @@ function mfileProcessUpdate() {
 function mfileProcessSearch() {
     console.log("SEARCH FUNCTION ACTIVATED");
     $("#mfileresult").empty();
-    $("#mfileresult").append("* * * NOT IMPLEMENTED, YET * * *");
+    var currentRec = new MfileObj(
+      "", 0, "", "", "",
+      $("#code").val(),
+      "",
+      $("#keywords").val(),
+      $("#description").val()
+    );
+    console.log(currentRec);
+    currentRec.mfileSearch();
 }
 
 function mfilecodeProcessFetch() {

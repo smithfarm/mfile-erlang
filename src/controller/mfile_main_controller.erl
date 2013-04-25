@@ -79,6 +79,21 @@ delete('POST', []) ->
    I = mfiledb:ifile_delete(CStr, Sern),
    mfilelib:ifile_JSON(I).
 
+% search for records by Code+Key Words
+% N.B.: Search is different from all the other commands because it requires
+% preservation of state between calls - provided the search finds two or
+% more records of course. If one or zero records are found, then it's just
+% one function call with a return value. 
+%
+% For a start, we'll just find the _number_ of records that satisfy the search
+% criteria and return that to the caller (i.e. JavaScript)
+search('POST', []) ->
+   CStr = Req:post_param("mfileCode"),
+   Keyw = Req:post_param("mfileKeyw"),
+   Desc = Req:post_param("mfileDesc"),
+   I = mfiledb:ifile_search(CStr, Keyw, Desc),
+   mfilelib:ifile_JSON(I).
+   
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
    I = mfiledb:icode_insert(Req:post_param("mfilecodeCode")),

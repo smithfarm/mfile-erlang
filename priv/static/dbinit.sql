@@ -3,7 +3,7 @@ create table mfiles (
   created_at timestamp NOT NULL,
   mfilecode_id int NOT NULL,
   sern int NOT NULL,
-  keyw varchar(120),
+  keyw varchar(120) NOT NULL,
   file_desc varchar(320)
 );
 

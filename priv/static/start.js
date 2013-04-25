@@ -13,6 +13,7 @@
 // *OBJ mfile object definitions
 var MfileObj = function(
 			theQueryResult,
+                        theCount,
                         theId, 
                         theDate, 
 			theCodeId,
@@ -24,6 +25,7 @@ var MfileObj = function(
 
   this.mfileData = { 
 		       "queryResult" : theQueryResult,
+                       "mfileCount" : theCount,
                        "mfileId"    : theId,
   		       "mfileDate"  : theDate,
 		       "mfileCodeId": theCodeId,
@@ -171,6 +173,22 @@ var MfileObj = function(
            $("#mfileresult").empty();
            $("#mfileresult").append("FAILED: '"+result.queryResult+"'")
 	}
+      }
+    });
+  }
+
+  this.mfileSearch = function() {
+    console.log("Attempting to search for "+this.mfileKeyw+" in "+this.mfileCode);
+    $.ajax({
+      url: "search",
+      type: "POST",
+      dataType: "json",
+      data: this.mfileData,
+      success: function(result) { 
+        console.log("Search result is: '"+result.queryResult+"'");
+	console.log("Search found "+result.mfileCount+" records");
+        $("#mfileresult").empty();
+        $("#mfileresult").append(result.queryResult);
       }
     });
   }

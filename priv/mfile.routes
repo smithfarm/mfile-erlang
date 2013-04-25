@@ -40,6 +40,9 @@
 % Delete
 {"/delete", [{controller, "main"}, {action, "delete"}]}.
 
+% Search
+{"/search", [{controller, "main"}, {action, "search"}]}.
+
 % Insert code
 {"/insertcode", [{controller, "main"}, {action, "insertcode"}]}.
 

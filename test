@@ -1,4 +1,5 @@
 #!/bin/bash
+./rebar compile
 ./rebar eunit suite="mfilelib_tests"
 echo -n "Make sure init-dev.sh is not running (and press ENTER to continue)"
 read a

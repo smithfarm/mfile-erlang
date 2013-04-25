@@ -14,10 +14,15 @@ validation_tests() ->
        end,
        "Attempt to insert file with empty Code ID"}
       ,
+      {fun() ->
+          length(Keyw) > 0
+       end,
+       "Attempt to insert file with empty Keywords field"}
+      ,
       {fun() -> 
           Rec = boss_db:find_first(mfilecode, [{id, 'equals', MfilecodeId}]),
           R = boss_record:new(mfilecode, [{id, MfilecodeId}, {code_str, Rec:code_str()}]),
-          R:exists_code_str() 
+          mfiledb:icode_exists_cstr(Rec:code_str()) 
        end,
        "Attempt to insert file with non-existent Code"}
    ].
