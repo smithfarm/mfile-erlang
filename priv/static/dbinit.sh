@@ -2,7 +2,7 @@
 #
 # initialize 'mfiledb' (mfile production database)
 #
-cd ./priv/static
+#cd ./priv/static
 
 declare MFILEDB="mfiledb"
 declare OWNER="smithfarm"

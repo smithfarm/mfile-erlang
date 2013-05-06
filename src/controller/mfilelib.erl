@@ -14,7 +14,7 @@ initializeForm() ->
    % get PostgreSQL version number
    { ok, _, [ {DBS} ] } = boss_db:execute("SELECT version();"),
    % prep for sending to template (view/start.html)
-   [{mfilevernum, X}, {mfiledbstatus, binary_to_list(DBS)}].
+   [{vernum, X}, {dbstatus, binary_to_list(DBS)}].
 
 
 %% getMfileVerNum/0 %% extracts "vsn" value from ebin/mfile.app

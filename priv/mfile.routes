@@ -16,17 +16,8 @@
 % Front page
 {"/", [{controller, "main"}, {action, "start"}]}.
 
-% Main Area
-{"/mainarea", [{controller, "main"}, {action, "mainarea"}]}.
-
 % Lost
 {"/lost", [{controller, "main"}, {action, "lost"}]}.
-
-% Confirm update
-{"/confirmupdate", [{controller, "main"}, {action, "confirmupdate"}]}.
-
-% Confirm delete
-{"/confirmdelete", [{controller, "main"}, {action, "confirmdelete"}]}.
 
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.

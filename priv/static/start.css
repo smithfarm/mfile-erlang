@@ -4,47 +4,39 @@ body {
 		 Courier,
 		 monospace;
    font-size:   16px;
-   width:800px;
+   width:850px;
 }
 
-.mfileheader {
-   padding-left: 10px;
-   font-size: 24px;
-   border-top: solid;
+.abovebox {
+   padding-left: 5px;
+}
+
+.boxtop {
+   padding:5px;
    border-bottom: solid;
    border-left: solid;
-   height:26px;
-   width:100px;
-   float:left;
-}
-
-.mfileversion {
-   border-top: solid;
-   border-bottom: solid;
    border-right: solid;
-   height:26px;
-   width:180px;
-   line-height:26px;
-   float:left;
-}
-
-.mfiletopmesg {
-   padding-left: 10px;
    border-top: solid;
-   border-bottom: solid;
-   border-right: solid:
-   height:26px;
-   width:491px;
-   line-height:26px;
-   float:left;
+   line-height: 30px;
+   height:30px;
 }
 
-.mfilemainarea {
-   padding-left: 10px;
-   padding-top: 45px;
+.subbox {
+   display: inline-block;
+   background: #ccc;
+}
+
+.single {
    border-left: solid;
    border-right: solid;
-   height: 315px;
+}
+
+.mainarea {
+   padding: 10px;
+   border-left: solid;
+   border-right: solid;
+   background: #ccc;
+   height:250px;
 }
 
 .mfileid {
@@ -68,17 +60,8 @@ body {
    height:160px;
 }
 
-.helpmesg {
-   padding-left: 10px;
-   padding-bottom: 5px;
-   line-height: 30px;
-   border-left: solid;
-   border-right: solid;
-   height: 30px
-}
-
-.mfileresult {
-   padding:10px;
+.boxbot {
+   padding:5px;
    border-bottom: solid;
    border-left: solid;
    border-right: solid;

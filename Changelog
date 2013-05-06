@@ -1,3 +1,8 @@
+2013-05-06 Version 0.5.4 Got the new front-end working with ChicagoBoss
+2013-05-05 Version 0.5.3 New front-end: After login, main menu is displayed, and user can also log out
+2013-05-04 Version 0.5.2 New front-end: Filled out authentication funtionality; now using session cookie
+2013-05-04 Version 0.5.1 New front-end: basic structure, basic authentication
+2013-05-03 Version 0.5.0 Began complete rewrite of front-end in light of David Crockford's teachings on JavaScript
 2013-04-25 Version 0.4.7 Working on search functionality
 2013-04-21 Version 0.4.6 Delete now asks for confirmation; other random acts of kindness
 2013-04-20 Version 0.4.5 Update now asks for confirmation first. The implementation is a bit unwieldy, but it works.

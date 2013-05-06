@@ -1,3 +1,10 @@
+20130428: consider migrating to Webmachine, which seems like it might be more straightforward for implementing MFILE
+20130428: once LDAP authentication is finished, add a UID field to the application
+20130428: think about how to add LDAP authentication to MFILE
+20130428: study session management, cookies, sessions, etc.
+20130428: make the mfilecode field fixed, and determinable by the URL: e.g., http://localhost:8001/liv will start MFILE with a fixed mfilecode "LIV" - and trying to go to a non-existent mfilecode will simply result in a 404
+20130428: instead of allowing the user to insert, etc. mfilecodes, change the app so mfilecode manipulation/administration is done separately
+20130428: strategy for JS rewrite: write a monolithic JS program that puts the server through its paces using a sequence of AJAX calls, keeping a running log via document.writeln(...) statements, little or no direct user input. Use Douglas Crockford's "Simple Testing Ground" as a base.
 20130422: implement search function (Notes: first do a count of matching records; if <100, get them all and store them in an ETS table; if >100 ask the user if they really want to run the search and if they say yes, implement the search using a cursor)
 20130422: when a user updates or deletes a record from a search, warn them that the changes won't be reflected in the search data
 20130422: when browsing the search data, display a warning that the data may not reflect what is in the database
