@@ -1,3 +1,6 @@
+20130506 04code.js - copy over main AJAX function for mfilecode and start refactoring
+20130502 split off the mfilecode CRUD ("Administration" main menu entry)
+20130502 make it so mfilecode CRUD is conditional upon entering an admin password
 20130428: consider migrating to Webmachine, which seems like it might be more straightforward for implementing MFILE
 20130428: once LDAP authentication is finished, add a UID field to the application
 20130428: think about how to add LDAP authentication to MFILE

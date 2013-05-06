@@ -1,3 +1,4 @@
+2013-05-06 Version 0.5.5 Transferring old mfilecode functionality to new front-end
 2013-05-06 Version 0.5.4 Got the new front-end working with ChicagoBoss
 2013-05-05 Version 0.5.3 New front-end: After login, main menu is displayed, and user can also log out
 2013-05-04 Version 0.5.2 New front-end: Filled out authentication funtionality; now using session cookie

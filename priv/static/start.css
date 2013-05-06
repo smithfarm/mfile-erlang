@@ -12,13 +12,13 @@ body {
 }
 
 .boxtop {
-   padding:5px;
    border-bottom: solid;
    border-left: solid;
    border-right: solid;
    border-top: solid;
-   line-height: 30px;
-   height:30px;
+   line-height: 1;
+   padding: 5px;
+   height:24px;
 }
 
 .subbox {
@@ -46,8 +46,6 @@ body {
 }
 
 .mfilecode {
-   line-height: 1;
-   height:50px;
 }
 
 .mfilekeyw {
@@ -81,7 +79,7 @@ textarea {
    font-family:    "Courier New",
 		Courier,
 		monospace;
-   font-size: 	20px;
+   font-size: 20px;
    border-style:	none;
    background-color:black;
    color: #d0e4fe;
