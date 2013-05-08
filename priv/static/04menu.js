@@ -34,7 +34,6 @@ MFILE.mainMenu = function () {
       if (isNumberKey(event)) {
          switch (event.which) {
             case 49:  // 1
-               $("#topmesg").html("You pressed 1 (Select/Change Code)");
                MFILE.state = 'CHANGE_CODE';
                MFILE.actOnState();
                break;

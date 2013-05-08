@@ -28,7 +28,7 @@ MFILE.insertCode = function() {
    });
 }
 
-MFILE.fetchCode = function() {
+MFILE.fetchCode = function () {   // we fetch it in order to delete it
    console.log("Attempting to fetch code "+MFILE.activeCode["cstr"]);
    $.ajax({
       url: "fetchcode",
@@ -37,17 +37,61 @@ MFILE.fetchCode = function() {
       data: MFILE.activeCode,
       success: function(result) { 
          console.log("AJAX POST success, result is: '"+result.result+"'");
+         if (result.queryResult === "success") {
+            MFILE.activeCode.cstr = result.mfilecodeCode;
+  	    $("#code").val(MFILE.activeCode.cstr);
+            MFILE.deleteCodeConf();
+         } else {
+            $('#result').html("FAILED: '"+result.queryResult+"'");
+            return false;
+         }
+      }
+   });
+}
+
+MFILE.deleteCodeConf = function () {   // for now, called only from fetchCode
+   console.log("Asking for confirmation to delete "+MFILE.activeCode["cstr"]);
+   $("#mainarea").html(MFILE.html.code_delete_conf1);
+   $("#mainarea").append(MFILE.activeCode.cstr+"<BR>");
+   $("#mainarea").append(MFILE.html.code_delete_conf2);
+   $("#yesno").focus();
+   console.log("Attempting to fetch code "+MFILE.activeCode["cstr"]);
+   $("#yesno").keydown(function(event) {
+       event.preventDefault();
+       logKeyPress(event);
+       if (event.which === 89) {
+          MFILE.deleteCode();
+       }
+       MFILE.actOnState();
+   });
+}
+       
+MFILE.searchCode = function () {
+   console.log("Attempting to search code "+MFILE.activeCode["cstr"]);
+   $.ajax({
+      url: "searchcode",
+      type: "POST",
+      dataType: "json",
+      data: MFILE.activeCode,
+      success: function(result) { 
+         console.log("AJAX POST success, result is: '"+result.result+"'");
          if (result.result === "success") { 
             if (result.values.length === 0) {
-               $("#result").html("FAILED: 'No codes found'");
+               $("#result").html("FAILED: 'Nothing matches'");
             } else if (result.values.length === 1) {
                $("#result").html("SUCCESS: Code found");
                MFILE.activeCode.cstr = result.values[0];
                $("#code").val(MFILE.activeCode.cstr);
             } else {
-               $("#mainarea").append("<BR><BR>Your query returned "+result.values.length+" values<BR>");
+               $("#mainarea").html(MFILE.html.code_search_results1);
                $.each(result.values, function (key, value) {
                   $("#mainarea").append(value+" ");
+               });
+               $("#mainarea").append(MFILE.html.code_search_results2);
+               $("#continue").focus();
+               $("#continue").keydown(function(event) {
+                  event.preventDefault();
+                  MFILE.actOnState();
                });
                $("#result").html("Found multiple code(s). Please narrow it down.");
             }

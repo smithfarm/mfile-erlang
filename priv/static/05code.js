@@ -1,4 +1,5 @@
 MFILE.displayCode = function () {
+   $('#result').empty();
    $('#codebox').html(MFILE.html.code_box);
    if (MFILE.activeCode.cstr.length === 0) {
       //$('#code').val('<EMPTY>');
@@ -9,16 +10,16 @@ MFILE.displayCode = function () {
 }
 
 MFILE.changeCode = function () {
-   $("#mainarea").html(MFILE.html.change_code);
    MFILE.displayCode();
 
    // Display/erase help message for Code field
    $("#code").focus(function(event) {
-      $("#topmesg").html("ESC=Go back, Ins=Insert, F3=Look up, Del=Delete");
+      $("#topmesg").html("ESC=Back, Ins=Insert, F3=Lookup, F5=Delete, ENTER=Accept");
+      $("#mainarea").html(MFILE.html.change_code);
    });
 
    $("#code").blur(function(event) {
-      $('#topmesg').html('');
+      $('#topmesg').empty();
    });
 
    // Handle function keys in Code field
@@ -35,8 +36,8 @@ MFILE.changeCode = function () {
      }
      handleEsc(event);
      handleInsCode(event);
-     handleDelCode(event);
      handleF3Code(event);
+     handleF5Code(event);
    });
 
    $('#code').focus();
@@ -67,20 +68,7 @@ function handleInsCode(evt) {
     }
 }
 
-// handle Del keypress (DELETE key) in Code field
-function handleDelCode(evt) {
-    if (evt.keyCode == 46) // Ins
-    {
-       evt.preventDefault();
-       console.log("DELETE KEY PRESSED");
-       MFILE.activeCode.cstr = $('#code').val();
-       console.log("Asking server to delete code '"+MFILE.activeCode.cstr+"'");
-       MFILE.deleteCode();
-       $('#result').html(MFILE.activeCode.result);
-    }
-}
- 
-// handle F3 keypress ("Fetch Code") in Code field
+// handle F3 keypress ("Look up Code") in Code field
 function handleF3Code(evt) {
     if (evt.keyCode == 114) // F3
     {
@@ -88,7 +76,20 @@ function handleF3Code(evt) {
        console.log("F3 PRESSED");
        MFILE.activeCode.cstr = $('#code').val();
        console.log("Consulting server concerning the code '"+MFILE.activeCode.cstr+"'");
-       MFILE.fetchCode();
+       MFILE.searchCode();
     }
 }
 
+// handle F5 keypress ("Delete Code") in Code field
+function handleF5Code(evt) {
+    if (evt.keyCode == 116) // F5
+    {
+       evt.preventDefault();
+       console.log("DELETE CODE FUNCTIONALITY ACTIVATED");
+       MFILE.activeCode.cstr = $('#code').val();
+       console.log("Asking server to delete code '"+MFILE.activeCode.cstr+"'");
+       MFILE.fetchCode();
+       $('#result').html(MFILE.activeCode.result);
+    }
+}
+ 

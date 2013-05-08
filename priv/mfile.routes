@@ -40,6 +40,9 @@
 % Fetch code
 {"/fetchcode", [{controller, "main"}, {action, "fetchcode"}]}.
 
+% Search code
+{"/searchcode", [{controller, "main"}, {action, "searchcode"}]}.
+
 % Delete code
 {"/deletecode", [{controller, "main"}, {action, "deletecode"}]}.
 

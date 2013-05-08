@@ -120,7 +120,7 @@ icode_delete(CStr) when is_list(CStr) ->
    end.
 
 icode_fetch([]) ->
-   [];
+   #icode{result = "Cannot fetch empty code"};
 icode_fetch(CStr) when is_list(CStr) ->
    R = boss_db:find_first(mfilecode, [{code_str, 
                                        'equals', 

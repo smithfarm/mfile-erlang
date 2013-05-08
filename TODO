@@ -1,16 +1,16 @@
+20130508 limit the number of matching codes displayed by searchcode function
+20130508 implement "accept code" functionality, and finally be done with mfilecode manipulation part
 20130508 change .ajax calls to .post calls -- study up here: http://api.jquery.com/jQuery.post/
-20130508 make it so "delete code" function first looks up the code and, if it exists, makes user go through confirmation dialog before referring command to the server
 20130508 put LDAP information in mfile.app.src
 20130508 get slapd running on wilbur with a dummy version of the SUSE LDAP tree, with just me and a couple test users in it
 20130508 make it so the session expires after a certain period of inactivity
 20130508 implement a "last activity" value on the server side, tied to a particular UID+Session Key combination, which is updated every time the user does something
 20130508 make it so the server validates UID+Session Key on every AJAX call
-20130508 make it so client sends UID+Session Key with every AJAX call
+20130508 make it so client sends UID+Session Key with every AJAX call (note that session key and expires are already generated and sent by Boss, but need my app to somehow take this into account)
 20130507 study OTP and take another crack at getting poolboy+epgsql to work with mfile+webmachine (maybe first just run it without poolboy?  Question is, what will happen when I get multiple concurrent users?)
 20130507 take another crack at getting mfile to run on a vanilla openSUSE install (ATM I don't know exactly what packages need to be installed and what configuration steps need to be taken -- I just know I tried once and failed)
 20130507 take another look at the unit tests; see if they still work
 20130507 make sure all functions (except document.onload) always return a meaningful result, not just call other functions that call other functions, etc. ad nauseum
-20130507 put endless while loop into main document.ready function 
 20130502 make it so mfilecode CRUD is conditional upon entering an admin password
 20130428: once LDAP authentication is finished, add a UID field to the application
 20130428: think about how to add LDAP authentication to MFILE: http://www.erlang.org/doc/man/eldap.html
@@ -23,6 +23,7 @@
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130508 make it so "delete code" function first looks up the code and, if it exists, makes user go through confirmation dialog before referring command to the server
 *20130428: instead of allowing the user to insert, etc. mfilecodes, change the app so mfilecode manipulation/administration is done separately (i.e.  "Main Menu" functionality -- WIP)
 *20130414: allow numbers in mfilecode (server side done, need to do client)
 *20130502 split off the mfilecode CRUD ("Administration" main menu entry)
