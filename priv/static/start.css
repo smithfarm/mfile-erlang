@@ -23,7 +23,6 @@ body {
 
 .subbox {
    display: inline-block;
-   background: #ccc;
 }
 
 .single {
@@ -75,7 +74,7 @@ body {
    height:18px;
 }
 
-textarea {
+input, textarea {
    font-family:    "Courier New",
 		Courier,
 		monospace;

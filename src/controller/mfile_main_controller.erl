@@ -96,16 +96,22 @@ search('POST', []) ->
    
 % insert code (called asynchronously using AJAX)
 insertcode('POST', [])->
-   I = mfiledb:icode_insert(Req:post_param("mfilecodeCode")),
+   lager:info("icode_fetch() called with parameter ~p", [Req:post_param("cstr")]),
+   I = mfiledb:icode_insert(Req:post_param("cstr")),
    mfilelib:icode_JSON(I).
 
 % fetch code (called asynchronously using AJAX)
 fetchcode('POST', []) ->
-   I = mfiledb:icode_fetch(Req:post_param("mfilecodeCode")),
-   mfilelib:icode_JSON(I).
+   lager:info("icode_fetch() called with parameter ~p", [Req:post_param("cstr")]),
+   % I = mfiledb:icode_fetch(Req:post_param("cstr")),
+   I = mfiledb:icode_search(Req:post_param("cstr")),
+   lager:info("I is ~p", [I]),
+   {json, I}.
+   % mfilelib:icode_JSON(I).
    
 % delete code (called asynchronously using AJAX)
 deletecode('POST', []) ->
-   I = mfiledb:icode_delete(Req:post_param("mfilecodeCode")),
+   lager:info("icode_fetch() called with parameter ~p", [Req:post_param("cstr")]),
+   I = mfiledb:icode_delete(Req:post_param("cstr")),
    mfilelib:icode_JSON(I).
    

@@ -14,6 +14,16 @@ function isNumberKey(evt) {
     return true;
 }
 
+MFILE.startOver = function () {
+   $('#code').html('');
+   $('#result').html('');
+   MFILE.uid = undefined;
+   MFILE.sessionid = undefined;
+   eraseCookie('mfileuid');
+   eraseCookie('mfilesessionid');
+   MFILE.state = 'NOT_LOGGED_IN';
+}
+
 MFILE.mainMenu = function () {
    $("#mainarea").html(MFILE.html.main_menu);
    $("#getchar").focus();
@@ -39,11 +49,7 @@ MFILE.mainMenu = function () {
                break;
             case 53:  // 5
                $("#topmesg").html("Logging you out");
-               MFILE.uid = undefined;
-               MFILE.sessionid = undefined;
-               eraseCookie('mfileuid');
-               eraseCookie('mfilesessionid');
-               MFILE.state = 'NOT_LOGGED_IN';
+               MFILE.startOver();
                MFILE.actOnState();
                break;
          }

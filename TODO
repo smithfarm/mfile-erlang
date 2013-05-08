@@ -1,22 +1,34 @@
-20130506 04code.js - copy over main AJAX function for mfilecode and start refactoring
-20130502 split off the mfilecode CRUD ("Administration" main menu entry)
+20130508 change .ajax calls to .post calls -- study up here: http://api.jquery.com/jQuery.post/
+20130508 make it so "delete code" function first looks up the code and, if it exists, makes user go through confirmation dialog before referring command to the server
+20130508 put LDAP information in mfile.app.src
+20130508 get slapd running on wilbur with a dummy version of the SUSE LDAP tree, with just me and a couple test users in it
+20130508 make it so the session expires after a certain period of inactivity
+20130508 implement a "last activity" value on the server side, tied to a particular UID+Session Key combination, which is updated every time the user does something
+20130508 make it so the server validates UID+Session Key on every AJAX call
+20130508 make it so client sends UID+Session Key with every AJAX call
+20130507 study OTP and take another crack at getting poolboy+epgsql to work with mfile+webmachine (maybe first just run it without poolboy?  Question is, what will happen when I get multiple concurrent users?)
+20130507 take another crack at getting mfile to run on a vanilla openSUSE install (ATM I don't know exactly what packages need to be installed and what configuration steps need to be taken -- I just know I tried once and failed)
+20130507 take another look at the unit tests; see if they still work
+20130507 make sure all functions (except document.onload) always return a meaningful result, not just call other functions that call other functions, etc. ad nauseum
+20130507 put endless while loop into main document.ready function 
 20130502 make it so mfilecode CRUD is conditional upon entering an admin password
-20130428: consider migrating to Webmachine, which seems like it might be more straightforward for implementing MFILE
 20130428: once LDAP authentication is finished, add a UID field to the application
 20130428: think about how to add LDAP authentication to MFILE
-20130428: study session management, cookies, sessions, etc.
 20130428: make the mfilecode field fixed, and determinable by the URL: e.g., http://localhost:8001/liv will start MFILE with a fixed mfilecode "LIV" - and trying to go to a non-existent mfilecode will simply result in a 404
-20130428: instead of allowing the user to insert, etc. mfilecodes, change the app so mfilecode manipulation/administration is done separately
-20130428: strategy for JS rewrite: write a monolithic JS program that puts the server through its paces using a sequence of AJAX calls, keeping a running log via document.writeln(...) statements, little or no direct user input. Use Douglas Crockford's "Simple Testing Ground" as a base.
 20130422: implement search function (Notes: first do a count of matching records; if <100, get them all and store them in an ETS table; if >100 ask the user if they really want to run the search and if they say yes, implement the search using a cursor)
 20130422: when a user updates or deletes a record from a search, warn them that the changes won't be reflected in the search data
 20130422: when browsing the search data, display a warning that the data may not reflect what is in the database
 20130417: find out how to look at parameters in "Req" in main.erl, so I can make calls from unit test suite (currently main.erl has no tests)
 20130417: go over unit tests for mfiledb more carefully, see if any can be added
-20130414: allow numbers in mfilecode (server side done, need to do client)
 20130407: investigate what SQL commands I used in the original mfile to run searches
 
 DONE
+*20130428: instead of allowing the user to insert, etc. mfilecodes, change the app so mfilecode manipulation/administration is done separately (i.e.  "Main Menu" functionality -- WIP)
+*20130414: allow numbers in mfilecode (server side done, need to do client)
+*20130502 split off the mfilecode CRUD ("Administration" main menu entry)
+*20130428: study session management, cookies, sessions, etc.
+*20130428: consider migrating to Webmachine, which seems like it might be more straightforward for implementing MFILE (tried it and ran into some trouble integrating poolboy)
+*20130506 04code.js - copy over main AJAX function for mfilecode and start refactoring
 *20130408: fix it so, e.g., "http://localhost:8001/lost/bubba" displays proper 404 page
 *20130414: add mfilecode validation test that it should start with a letter
 *20130421: make keyw NOT NULL and enforce rule that there must be at least one keyword (i.e., length of keywords field must be >= 1)

@@ -135,6 +135,32 @@ icode_fetch(CStr) when is_list(CStr) ->
                   desc = R:code_desc()}
    end.
 
+
+icode_search([]) ->
+   [];
+icode_search(CStr) when is_list(CStr) ->
+   lager:info("icode_search(): checking if ~p is a valid code_str", [CStr]),
+   case mfilelib:is_valid_cstr(CStr) of
+      true -> 
+         lager:info("icode_search(): searching for codes matching ~p", [CStr]),
+         R = boss_db:find(mfilecode, [{code_str, 'matches', ".*"++mfilelib:uppercase_string(CStr)++".*"}]),
+         % now, extract the code_str field from each result record
+         [{result, "success"}, {values, icode_assemble_cstr_list(R)}];
+      false ->
+         [{result, "Invalid search term"}, {values, []}]
+   end.
+
+
+icode_assemble_cstr_list(I) ->
+   icode_assemble_cstr_list([], I).
+
+icode_assemble_cstr_list(Acc, []) ->
+   lists:reverse(Acc);
+icode_assemble_cstr_list(Acc, [H|T]) ->
+   icode_assemble_cstr_list([list_to_binary(H:code_str())|Acc], T).
+
+   
+
 %% find_last_sern/1 %% takes a string (CId), (e.g. "mfilecode-8" but don't count
 %%                  %% it having this format1)
 %%                  %% returns an integer (Sern)

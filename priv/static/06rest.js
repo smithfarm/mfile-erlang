@@ -18,32 +18,31 @@ MFILE.determineState = function () {
 // MFILE.actOnState()
 // ------------------
 MFILE.actOnState = function () {
+
    var retval;
+
    console.log("Acting on state "+MFILE.state);
-   switch (MFILE.state) {
-      case "NOT_LOGGED_IN":
+   if (MFILE.state === "NOT_LOGGED_IN") {
          $('#userid').html('');
          $('#topmesg').html('');
          $('#mainarea').html("Not logged in");
          retval = MFILE.authenticateUser();
          console.log("MFILE.authenticateUser() returned "+retval);
-         break;
-      case "LOGIN_FAIL":
+   } else if (MFILE.state === "LOGIN_FAIL") {
          $('#mainarea').html("Not logged in");
          retval = MFILE.authenticateUser();
          console.log("MFILE.authenticateUser() returned "+retval);
-         break;
-      case "MAIN_MENU":
+   } else if (MFILE.state === "MAIN_MENU") {
          MFILE.uid = readCookie('mfileuid');
          MFILE.sessionid = readCookie('mfilesessionid');
-         $("#userid").html("Logged in as: "+MFILE.uid);
+         $("#userid").html("Username: "+MFILE.uid);
          console.log("Logged in! Session cookie: "+MFILE.sessionid);
          retval = MFILE.mainMenu();
-         break;
-      case "CHANGE_CODE":
+   } else if (MFILE.state === "CHANGE_CODE") {
          console.log("Calling MFILE.changeCode()");
          MFILE.changeCode();
-         break;
+   } else {
+      console.log("MFILE INTERNAL ERROR: Inconsistent state!");
    }
 }
 
