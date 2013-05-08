@@ -136,14 +136,20 @@ icode_fetch(CStr) when is_list(CStr) ->
    end.
 
 
-icode_search([]) ->
-   [];
 icode_search(CStr) when is_list(CStr) ->
-   lager:info("icode_search(): checking if ~p is a valid code_str", [CStr]),
-   case mfilelib:is_valid_cstr(CStr) of
-      true -> 
+   Continue = case mfilelib:is_valid_cstr(CStr) of
+                 true -> true;
+                 false when CStr =:= [] -> true;
+                 _ -> false
+              end,
+   case Continue of 
+      true ->         
          lager:info("icode_search(): searching for codes matching ~p", [CStr]),
-         R = boss_db:find(mfilecode, [{code_str, 'matches', ".*"++mfilelib:uppercase_string(CStr)++".*"}]),
+         SearchTerm = case CStr of
+                         [] -> ".*";
+                         Any -> ".*"++mfilelib:uppercase_string(CStr)++".*"
+                      end,
+         R = boss_db:find(mfilecode, [{code_str, 'matches', SearchTerm}]),
          % now, extract the code_str field from each result record
          [{result, "success"}, {values, icode_assemble_cstr_list(R)}];
       false ->
@@ -151,6 +157,9 @@ icode_search(CStr) when is_list(CStr) ->
    end.
 
 
+%% icode_assemble_cstr_list/1 %% takes a list of icode records
+%%                            %% returns a list of their cstr elements
+%%                               (as binaries)
 icode_assemble_cstr_list(I) ->
    icode_assemble_cstr_list([], I).
 

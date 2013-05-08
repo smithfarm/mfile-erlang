@@ -13,7 +13,7 @@
 20130507 put endless while loop into main document.ready function 
 20130502 make it so mfilecode CRUD is conditional upon entering an admin password
 20130428: once LDAP authentication is finished, add a UID field to the application
-20130428: think about how to add LDAP authentication to MFILE
+20130428: think about how to add LDAP authentication to MFILE: http://www.erlang.org/doc/man/eldap.html
 20130428: make the mfilecode field fixed, and determinable by the URL: e.g., http://localhost:8001/liv will start MFILE with a fixed mfilecode "LIV" - and trying to go to a non-existent mfilecode will simply result in a 404
 20130422: implement search function (Notes: first do a count of matching records; if <100, get them all and store them in an ETS table; if >100 ask the user if they really want to run the search and if they say yes, implement the search using a cursor)
 20130422: when a user updates or deletes a record from a search, warn them that the changes won't be reflected in the search data

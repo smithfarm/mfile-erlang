@@ -49,7 +49,7 @@ MFILE.fetchCode = function() {
                $.each(result.values, function (key, value) {
                   $("#mainarea").append(value+" ");
                });
-               $("#result").append("Found multiple code(s). Please narrow it down.");
+               $("#result").html("Found multiple code(s). Please narrow it down.");
             }
          } else {
             console.log("FAILURE: "+result);
