@@ -7,17 +7,18 @@
 start('GET', []) ->
    { ok, mfilelib:initializeForm() }.
 
+
+% error handler (same for 'GET' and 'POST')
+lost(_, _) ->
+   Alist = mfilelib:initializeForm(),
+   {ok, [{lost, "lost"}|Alist] }.
+
 % GET /mainarea
 mainarea('POST', []) ->
    {ok, [{filecode, Req:post_param("filecode")},
          {filesern, Req:post_param("filesern")},
          {filekeyw, Req:post_param("filekeyw")},
          {filedesc, Req:post_param("filedesc")}] }.
-
-% error handler (same for 'GET' and 'POST')
-lost(_, []) ->
-   Alist = mfilelib:initializeForm(),
-   {ok, [{lost, "lost"}|Alist] }.
 
 % get user confirmation for update
 confirmupdate('POST', []) ->
@@ -98,7 +99,9 @@ search('POST', []) ->
 insertcode('POST', [])->
    lager:info("Calling icode_insert() with parameter ~p", [Req:post_param("cstr")]),
    I = mfiledb:icode_insert(Req:post_param("cstr")),
-   mfilelib:icode_JSON(I).
+   mfilelib:icode_JSON(I);
+insertcode(A, B) ->
+   lost(A, B).
 
 % search code (AJAX)
 searchcode('POST', []) ->
@@ -119,3 +122,17 @@ deletecode('POST', []) ->
    I = mfiledb:icode_delete(Req:post_param("cstr")),
    mfilelib:icode_JSON(I).
    
+% test ldap (AJAX)
+testldap('GET', []) ->
+   lager:info("Testing LDAP functionality 2"),
+   case eldap:open(["login-internal.suse.de"], [{port, 636}, {timeout, 1000}, {ssl, true}]) of
+      {ok, H1} -> lager:info("Successfully opened SSL connection to LDAP server"),
+                  eldap:close(H1);
+      _ -> lager:info("Failed to open SSL connection to LDAP server")
+   end.
+   %Base = DN,
+   %Scope = {scope, eldap:baseObject()},
+   %Filter = {filter, eldap:present("cn")},
+   %Attribute = {attributes, ["cn"]},
+   %Search = [Base, Scope, Filter, Attribute].
+   %eldap:search(S, Search).

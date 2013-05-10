@@ -16,9 +16,6 @@
 % Front page
 {"/", [{controller, "main"}, {action, "start"}]}.
 
-% Lost
-{"/lost", [{controller, "main"}, {action, "lost"}]}.
-
 % Insert
 {"/insert", [{controller, "main"}, {action, "insert"}]}.
 
@@ -45,6 +42,9 @@
 
 % Delete code
 {"/deletecode", [{controller, "main"}, {action, "deletecode"}]}.
+
+% Test LDAP
+{"/testldap", [{controller, "main"}, {action, "testldap"}]}.
 
 % 404 File Not Found handler
 {404, [{controller, "main"}, {action, "lost"}]}.

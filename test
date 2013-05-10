@@ -1,6 +1,6 @@
 #!/bin/bash
 ./rebar compile
-./rebar eunit suite="mfilelib_tests"
+#./rebar eunit suite="mfilelib_tests"
 echo -n "Make sure init-dev.sh is not running (and press ENTER to continue)"
 read a
 #./rebar boss c=test_eunit 2>/dev/null | less
