@@ -1,0 +1,66 @@
+* 2013-MAY-5 Started migrating the application from ChicagoBoss to
+* Webmachine, with a lot of assistance from OJ Reeves -- thanks, OJ!
+* 2013-MAY-4 Got basic authentication/session functionality working
+* (JavaScript side), also started implementing a "main menu" in
+* JavaScript
+* 2013-MAY-2 Started rewriting the JavaScript portion from scratch, in
+* the light of Crockford's teachings -- finding that there's way more
+* to JavaScript than meets the eye
+* 2013-APR-26 Decided it's time to actually learn some JavaScript.
+* Started reading Douglas Crockford's "JavaScript: the Good Parts"
+* book and watching the "Crockford on JavaScript" lecture series.
+* 2013-APR-21 Delete now asks for confirmation; last remaining feature
+* is search -- thinking about how to implement it
+* 2013-APR-20 Update now asks for confirmation
+* 2013-APR-19 Work begins on user confirmation feature (to be used for
+* update/delete, maybe insert)
+* 2013-APR-18 Added basic update functionality; for now it doesn't ask
+* user for confirmation
+* 2013-APR-17 Ironed out some wrinkles (well, a lot of wrinkles,
+* actually!)
+* 2013-APR-16 Continued refactoring the code, split it into two
+* modules instead of one
+* 2013-APR-15 Expanded unit tests, learned more about ChicagoBoss DB
+* model, began refactoring code to take advantage of its features
+* (e.g. -belongs_to, -has)
+* 2013-APR-14 Finally got unit tests working via EUnit -- *much*
+* better
+* 2013-APR-13 Implemented file delete functionality, fixed 2
+* regressions
+* 2013-APR-12 Implemented code delete functionality; learned more
+* 'git' (basic branching and merging)
+* 2013-APR-12 Made lots of changes to leverage features of Erlang and
+* ChicagoBoss that I was only dimly aware of until now: Erlang's
+* record syntax and ChicagoBoss's validation_tests() function (in the
+* DB model). I knew they might be useful, and it's true - the code is
+* now much cleaner and I'm ready to implement update, delete, and
+* search functionality.
+* 2013-APR-11 Breakthrough! finally finished implementing the "file
+* code insert/fetch" and "file insert/fetch" features; still need to
+* test them more, but they work
+* 2013-APR-11 Got my hands on an Erlang/OTP book; studying it
+* 2013-APR-10 In my eagerness to move the project forward, I managed
+* to get app into non-working state and had to spend the whole
+* afternoon looking for where I made a mistake. The errors ChicagoBoss
+* were producing were of no help at all. In the end, the culprit
+* turned out to be a rogue subdirectory, i.e. my unit test directory
+* ('utest'), which I put in the wrong place, causing poor Boss to get
+* all confused. In the process of diagnosing and fixing the problem, I
+* learned a lot more about 'git'. Went on to fix mfilecode
+* insert/fetch/validate functionality that was working before but is
+* now substantially improved
+* 2013-APR-9 Got ahead of myself in an attempt to rapidly implement
+* features
+* 2013-APR-8 Implemented basic insert, validate and fetch
+* functionality
+* 2013-APR-7 Got pgsql adapter configured, model now uses PostgreSQL
+* as DB backend
+* 2013-APR-6 Reimmersed myself in Erlang, ChicagoBoss; started hacking
+* on the project
+* 2013-MAR-23 Revived the project, put it on Github in preparation for
+* Hackweek 9
+* 2013-AUG-28 Project enters a long hiatus
+* 2012-AUG-27 Basic skeleton in place after a flurry of work
+* 2012-AUG-21 Work on project begins
+
+
